@@ -1,5 +1,11 @@
 # DietSeurat_Cust : a custom version of the DietSeurat() to really do the job
 
+#' @title DietSeurat_Cust 
+#'
+#' @description a custom version of the DietSeurat() to really do the job
+#' @param serobj The seurat object where data will be added.
+#' @param addCITE T/F
+#' @export
 DietSeurat_Cust <- function(serobj = NULL, addCITE = F){
   serobj_temp = CreateSeuratObject(counts = serobj@assays$RNA@counts, 
                                    meta.data = serobj@meta.data)

@@ -1,6 +1,9 @@
 
-# classifier_Seurat : calls seurat fx to classify a query dataset 
-
+#' @title classifier_Seurat 
+#'
+#' @description calls seurat fx to classify a query dataset 
+#' @param seuratObj The seurat object where data will be added.
+#' @export
 classifier_Seurat <- function(){
  
   
