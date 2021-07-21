@@ -1,0 +1,9 @@
+.idea/*
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+..Rcheck*
+.shelf/*
+install.bat
+docs
