@@ -1,21 +1,13 @@
-Package: RIRA_classification
+Package: RIRA
 Type: Package
 Title: A package for RIRA
-Version: 1.0.0
+Version: 0.1.0
 Author: Eisa @ Bimber Lab
-Maintainer: The package maintainer <bimber@ohsu.edu>
-Description: The goal of this package is to provide high-level wrappers and pipelines to process single-cell RNA-seq data.
-License: GPL-3
+Maintainer: The package maintainer <yourself@somewhere.net>
+Description: wrappers and pipelines to process single-cell RNA-seq data for RIRA
 Encoding: UTF-8
 LazyData: true
-Depends:
-    R (>= 4.0.0)
-Imports:
-Suggests:
 RoxygenNote: 7.1.1
-URL: https://github.com/BimberLabInternal/RIRA_classification
-BugReports: https://github.com/BimberLabInternal/RIRA_classification/issues
-Remotes:
 Collate: 
     'Classifier_FXs.R'
     'Classifier_Wrappers.R'
