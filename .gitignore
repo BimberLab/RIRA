@@ -1,5 +1,6 @@
 .idea/*
 .Rproj.user
+.Rproj
 .Rhistory
 .RData
 .Ruserdata
