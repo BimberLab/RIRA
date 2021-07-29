@@ -143,6 +143,13 @@ load in a new data of interest
 
 Query1 =readRDS("./data/serobjs/prime/SingleCell.ds.merge.norm.pca.dr.markers.singler.Pilot_Timpoint_TresRh_DS5000.seurat.rds")
 
+Query1$barcode = colnames(Query1)
+
+Query1 = DietSeurat_Cust(Query1, addCITE = F)
+
+Query1$Testing_epochs = factor(sample(LETTERS[1:5], length(Query1$barcode), replace = T))
+
+table(Query1$Testing_epochs )
 
 ```
 
@@ -151,6 +158,38 @@ Query1 =readRDS("./data/serobjs/prime/SingleCell.ds.merge.norm.pca.dr.markers.si
 
 ## IO
 ```{r}
+RefLS =  SplitObject(RIRA_f1_10, split.by = "Training_epochs")
 
+Query1_f1of5 = subset(Query1, Testing_epochs %in% c("A"))
+
+```
+
+## Seurat CCA
+
+### Training of Ref
+
+```{r}
+table(RIRA_f1_10$Training_epochs)
+if(!file.exists("./data/Ref_IntLS_v1.rds")){
+  IntLs = integrate_reflist_CCA(RefLS = RefLS, dims = 1:30, dims_umap=1:20)
+  saveRDS(IntLs, "./data/Ref_IntLS_v1.rds")
+} else {
+  IntLs = readRDS("./data/Ref_IntLS_v1.rds")
+}
+
+Ref.anchors = IntLs$Ref.anchors
+Ref.integrated = IntLs$Ref.integrated
+
+remove(IntLs)
+```
+
+
+### Training of Query
+
+```{r}
+Query1_f1of5 = classifier_Seurat(Ref.integrated = Ref.integrated, Query.Ser=Query1_f1of5, dims = 1:30, dims_umap=1:20,
+                              Ref.meta= Ref.integrated$Pheno.scope1)
+  
+  
 ```
 
