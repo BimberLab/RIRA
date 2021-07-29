@@ -4,10 +4,24 @@
 \alias{classifier_Seurat}
 \title{classifier_Seurat}
 \usage{
-classifier_Seurat()
+classifier_Seurat(
+  Ref.integrated = NULL,
+  Query.Ser = NULL,
+  dims = 1:30,
+  dims_umap = 1:20,
+  Ref.meta
+)
 }
 \arguments{
-\item{seuratObj}{The seurat object where data will be added.}
+\item{Ref.integrated}{The seurat object of the Ref.integrated}
+
+\item{Query.Ser}{The seurat object of the Query}
+
+\item{dims}{CCA/PCA dims to integrate default 1:30}
+
+\item{dims_umap}{CCA/PCA dims to run UMAP default 1:20}
+
+\item{Ref.meta}{metadata pertaining to Ref}
 }
 \description{
 calls seurat fx to classify a query dataset

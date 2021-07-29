@@ -147,16 +147,17 @@ Query1$barcode = colnames(Query1)
 
 Query1 = DietSeurat_Cust(Query1, addCITE = F)
 
-Query1$Testing_epochs = factor(sample(LETTERS[1:5], length(Query1$barcode), replace = T))
+Query1$Testing_epochs = factor(sample(LETTERS[1:10], length(Query1$barcode), replace = T))
 
 table(Query1$Testing_epochs )
 
 ```
 
 
+
 # Classification / label transfer
 
-## IO
+# I/O for classifiers
 
 ```{r}
 RefLS =  SplitObject(RIRA_f1_10, split.by = "Training_epochs")
@@ -164,6 +165,8 @@ RefLS =  SplitObject(RIRA_f1_10, split.by = "Training_epochs")
 Query1_f1of5 = subset(Query1, Testing_epochs %in% c("A"))
 
 ```
+
+
 
 ## Seurat CCA
 
@@ -200,11 +203,11 @@ Query1_f1of5 = classifier_Seurat(Ref.integrated = Ref.integrated, Query.Ser=Quer
 # devtools::install_github("pengminshi/cFIT")
 library(cFIT)
 
-# RefLS$A@meta.data$B_ID = sample(LETTERS[1:4], nrow(RefLS$A@meta.data), replace = T)
-# table(RefLS$A@meta.data$B_ID )
-# data.list <- format_refdata(RefLS$A, RefLS$A$B_ID, RefLS$A@meta.data)
+RefLS$A@meta.data$B_ID = sample(LETTERS[1:5], nrow(RefLS$A@meta.data), replace = T)
+table(RefLS$A@meta.data$B_ID )
+data.list <- format_refdata(RefLS$A, RefLS$A$B_ID, RefLS$A@meta.data)
 
-data.list <- format_refdata(RIRA_f1_10, RIRA_f1_10$Training_epochs, RIRA_f1_10@meta.data)
+# data.list <- format_refdata(RIRA_f1_10, RIRA_f1_10$Training_epochs, RIRA_f1_10@meta.data)
 
 # select highly variable genes in reference
 cFIT_topVargenes = cFIT::select_genes(data.list$X.list, ngenes=2000, verbose=F)
