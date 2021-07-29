@@ -1,0 +1,195 @@
+---
+title: "Classification Template"
+author: "@eisamahyari"
+date: "`r Sys.Date()`"
+output:
+  rmdformats::html_clean:
+    fig_width: 14
+    fig_height: 10
+    highlight: kate
+    thumbnails: false
+    lightbox: false
+    gallery: false
+    code_folding: hide
+editor_options: 
+  chunk_output_type: console
+---
+
+# Introduction
+
+This is a template to use RIRA for classification of cell types 
+
+# libs
+
+
+```{r setup, include=FALSE}
+DevMode = T
+
+
+library(knitr)
+library(rmdformats)
+
+## Global options
+options(max.print="75")
+
+opts_chunk$set(echo=T,
+	             cache=F,
+               prompt=F,
+               tidy=T,
+               comment=NA,
+               message=F,
+               warning=F)
+
+opts_knit$set(width=75)
+knitr::opts_chunk$set(fig.width=9, fig.height=6)
+knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
+```
+
+
+```{r}
+
+library(Seurat)
+
+library(ggplot2)
+library(dplyr)
+library(Matrix)
+library(viridis)
+library(DT)
+library(patchwork)
+
+library("BiocParallel")
+register(MulticoreParam(6))
+
+
+library(CellMembrane)
+library(scCustFx)
+library(RIRA)
+
+col_vector <- scCustFx::ColorTheme()$col_vector
+ggtheme = scCustFx:::theme_simple
+```
+``
+
+# data input
+
+## RIRA
+
+Load in the entire RIRA and add precomputed Kfolds meta then split and save the needed k-fold. 
+
+piloting on RIRA_f1_10 which is fold 1 of 10 .
+
+once saved its not necessary to load the giant full RIRA. 
+
+```{r}
+# RIRA <- readRDS("../RhesusAtlas/data/serobjs/primeV2/SingleCell.merge.ds.norm.pca.dr.markers.singler.dimplot.phenotype.cite-pca.wnn.featureplot.cite-plots.RhesusAtlas2_7TissueComboV1.seurat.rds")
+# 
+# RIRA$barcode = colnames(RIRA)
+# 
+# Tissue_KfoldLS = readRDS("../RhesusAtlas/data/RIRA_full_KfoldLS.rds")
+# 
+# RIRA$K5fold = 0 
+# for (ifold in 1:length(Tissue_KfoldLS$Tissue_Kfold_LS5)){
+#   print(ifold)
+#   RIRA$K5fold[Tissue_KfoldLS$Tissue_Kfold_LS5[[ifold]]] =paste0("Kfold",ifold)
+# }
+# RIRA$K10fold = 0 
+# for (ifold in 1:length(Tissue_KfoldLS$Tissue_Kfold_LS10)){
+#   print(ifold)
+#   RIRA$K10fold[Tissue_KfoldLS$Tissue_Kfold_LS10[[ifold]]] =paste0("Kfold",ifold)
+# }
+# table(RIRA$K10fold)
+# 
+# RIRA_f1_10 = subset(RIRA, K10fold == "Kfold1")
+# dim(RIRA)
+# dim(RIRA_f1_10)
+# DimPlot(RIRA_f1_10)
+# slot(object = RIRA_f1_10[["RNA"]], name = "scale.data") <- new(Class = "matrix")
+# slot(object = RIRA_f1_10[["ADT"]], name = "scale.data") <- new(Class = "matrix")
+
+# library(SeuratDisk)
+# SaveH5Seurat(RIRA_f1_10, "../RhesusAtlas/data/serobjs/RIRA_f1_10", overwrite = F)
+
+# saveRDS(RIRA_f1_10, "../RhesusAtlas/data/serobjs/RIRA_f1_10.rds")
+# remove(RIRA)
+# remove(Tissue_KfoldLS)
+```
+
+### subsets
+
+piloting on RIRA_f1_10 which is fold 1 of 10 . Custom fx DietSeurat_Cust reduces the object to the needed sub objects. Training_epochs are neeeded sometimes, here we randomize it and keeping the sizes balanced, but it can be based on any metadata. 
+
+```{r}
+# RIRA_f1_10b = LoadH5Seurat("../RhesusAtlas/data/serobjs/RIRA_f1_10.rds.h5seurat")
+RIRA_f1_10 = readRDS("../RhesusAtlas/data/serobjs/RIRA_f1_10.rds")
+# RIRA_f1_10[["ADT"]] = NULL
+DimPlot(RIRA_f1_10)
+
+
+set.seed(1234)
+
+RIRA_f1_10 = DietSeurat_Cust(RIRA_f1_10, addCITE = F)
+
+RIRA_f1_10$Training_epochs = factor(sample(LETTERS[1:5], length(RIRA_f1_10$barcode), replace = T))
+
+```
+
+## Query sets
+
+### SIV pilot 1
+
+load in a new data of interest
+
+```{r}
+
+Query1 =readRDS("./data/serobjs/prime/SingleCell.ds.merge.norm.pca.dr.markers.singler.Pilot_Timpoint_TresRh_DS5000.seurat.rds")
+
+Query1$barcode = colnames(Query1)
+
+Query1 = DietSeurat_Cust(Query1, addCITE = F)
+
+Query1$Testing_epochs = factor(sample(LETTERS[1:5], length(Query1$barcode), replace = T))
+
+table(Query1$Testing_epochs )
+
+```
+
+
+# Classification / label transfer
+
+## IO
+```{r}
+RefLS =  SplitObject(RIRA_f1_10, split.by = "Training_epochs")
+
+Query1_f1of5 = subset(Query1, Testing_epochs %in% c("A"))
+
+```
+
+## Seurat CCA
+
+### Training of Ref
+
+```{r}
+table(RIRA_f1_10$Training_epochs)
+if(!file.exists("./data/Ref_IntLS_v1.rds")){
+  IntLs = integrate_reflist_CCA(RefLS = RefLS, dims = 1:30, dims_umap=1:20)
+  saveRDS(IntLs, "./data/Ref_IntLS_v1.rds")
+} else {
+  IntLs = readRDS("./data/Ref_IntLS_v1.rds")
+}
+
+Ref.anchors = IntLs$Ref.anchors
+Ref.integrated = IntLs$Ref.integrated
+
+remove(IntLs)
+```
+
+
+### Training of Query
+
+```{r}
+Query1_f1of5 = classifier_Seurat(Ref.integrated = Ref.integrated, Query.Ser=Query1_f1of5, dims = 1:30, dims_umap=1:20,
+                              Ref.meta= Ref.integrated$Pheno.scope1)
+  
+  
+```
+
