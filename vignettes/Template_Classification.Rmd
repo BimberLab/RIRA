@@ -141,28 +141,42 @@ load in a new data of interest
 
 ```{r}
 
-Query1 =readRDS("./data/serobjs/prime/SingleCell.ds.merge.norm.pca.dr.markers.singler.Pilot_Timpoint_TresRh_DS5000.seurat.rds")
+Query1 =readRDS("../SIVacute/data/serobjs/prime/SingleCell.ds.merge.norm.pca.dr.markers.singler.Pilot_Timpoint_TresRh_DS5000.seurat.rds")
 
 Query1$barcode = colnames(Query1)
 
 Query1 = DietSeurat_Cust(Query1, addCITE = F)
 
-Query1$Testing_epochs = factor(sample(LETTERS[1:5], length(Query1$barcode), replace = T))
+Query1$Testing_epochs = factor(sample(LETTERS[1:10], length(Query1$barcode), replace = T))
 
 table(Query1$Testing_epochs )
+
+
 
 ```
 
 
+
 # Classification / label transfer
 
-## IO
+# I/O for classifiers
+
 ```{r}
 RefLS =  SplitObject(RIRA_f1_10, split.by = "Training_epochs")
 
 Query1_f1of5 = subset(Query1, Testing_epochs %in% c("A"))
 
+Query1_f1of5 = Query1_f1of5 #%>%  NormalizeData(verbose = T) %>% FindVariableFeatures(selection.method = "vst", nfeatures = 2000, verbose = T)
+
+
+# Query1_f1of5 = Rdiscvr::DownloadAndAppendTcrClonotypes(Query1_f1of5)
+# Query1_f1of5 = Rdiscvr::QueryAndApplyCdnaMetadata(Query1_f1of5)
+# Query1_f1of5 = scCustFx::ReduceSerObj_HTO(Query1_f1of5)
+
+
 ```
+
+
 
 ## Seurat CCA
 
@@ -191,5 +205,61 @@ Query1_f1of5 = classifier_Seurat(Ref.integrated = Ref.integrated, Query.Ser=Quer
                               Ref.meta= Ref.integrated$Pheno.scope1)
   
   
+```
+
+## cFIT
+
+```{r}
+# devtools::install_github("pengminshi/cFIT")
+library(cFIT)
+
+RefLS$A@meta.data$B_ID = sample(LETTERS[1:5], nrow(RefLS$A@meta.data), replace = T)
+table(RefLS$A@meta.data$B_ID )
+
+data.list <- format_refdata(ref_seurat = RefLS$A, ref_meta_batchID = RefLS$A$B_ID, 
+                            ref_meta = RefLS$A@meta.data, 
+                            ref_meta_labels = RefLS$A@meta.data[,c("dice.label")], 
+                            dataset.name = 'RIRA:')
+
+# data.list <- format_refdata(RIRA_f1_10, RIRA_f1_10$Training_epochs, RIRA_f1_10@meta.data)
+
+# select highly variable genes in reference
+cFIT_topVargenes = cFIT::select_genes(data.list$X.list, ngenes=500, verbose=F)
+
+if(!file.exists("./data/Ref_cFITv1.rds")){
+  int.out = integrate_ref(genes=cFIT_topVargenes, data.list=data.list)
+  saveRDS(int.out, "./data/Ref_cFITv1.rds")
+} else {
+  int.out = readRDS("./data/Ref_cFITv1.rds")
+}
+
+if(!file.exists("./data/Query1_f1of5_cFITv1.rds")){
+  tf.out = transfer_sigs(genes=cFIT_topVargenes, target_seurat=Query1_f1of5, int.out=int.out) 
+  saveRDS(tf.out, "./data/Query1_f1of5_cFITv1.rds")
+} else {
+  tf.out = readRDS("./data/Query1_f1of5_cFITv1.rds")
+}
+
+
+
+
+#assign labels from reference to the target data
+est.labels = cFIT::asign_labels(exprs.source=do.call(rbind, int.out$H.list),
+                                exprs.target=tf.out$H,
+                                labels.source=do.call(c, data.list$labels.list))
+
+
+Query1_f1of5$predicted_lab = est.labels
+
+
+
+Query1_f1of5@meta.data$rnaTSNE_1 =  Query1$rnaTSNE_1[rownames(Query1_f1of5@meta.data)]
+Query1_f1of5@meta.data$rnaTSNE_2 =  Query1$rnaTSNE_2[rownames(Query1_f1of5@meta.data)]
+Query1$predicted_lab = "unk"
+Query1$predicted_lab[rownames(Query1_f1of5@meta.data)] =  Query1_f1of5$predicted_lab
+
+FeatureScatter(Query1_f1of5, feature1 = "rnaTSNE_1", feature2 = "rnaTSNE_2", group.by = "predicted_lab")
+FeatureScatter(Query1, feature1 = "rnaTSNE_1", feature2 = "rnaTSNE_2", group.by = "predicted_lab", cols = col_vector)
+
 ```
 

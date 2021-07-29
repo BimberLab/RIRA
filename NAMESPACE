@@ -2,3 +2,7 @@
 
 export(DietSeurat_Cust)
 export(classifier_Seurat)
+export(format_refdata)
+export(integrate_ref)
+export(integrate_reflist_CCA)
+export(transfer_sigs)

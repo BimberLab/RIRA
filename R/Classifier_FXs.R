@@ -83,26 +83,45 @@ classifier_SingleR <- function(){
 
 #### cFIT
 # devtools::install_github("pengminshi/cFIT")
-require(cFIT)
+# require(cFIT)
 
 # =============================================================================
 # classifier_cFIT : calls cFIT fx to classify a query dataset 
 # split reference data by batch (ref_meta_batchID = column in metadata with batch IDs--e.g., experimentID)
 # also can use this function for changing labels for transfer (prior to asign_labels)
-format_refdata <- function(ref_seurat, ref_meta_batchID, ref_meta) {
+
+#' @title classifier_Seurat 
+#'
+#' @description format_refdata takes seurat objects and returns appropriate list format
+#' @param ref_seurat A Seurat object as reference
+#' @param ref_meta_batchID a vector that defines splits/batches in the ref_seurat e.g. ref_seurat$myID
+#' @param ref_meta_labels(optional) charateristic vector of cell labels (default NULL)
+#' @param ref_meta the metadata of the ref object
+#' @param dataset.name A name defaults 'atlas:'
+#' @export
+format_refdata <- function(ref_seurat, ref_meta_batchID, ref_meta = NULL, ref_meta_labels = NULL, dataset.name = 'atlas:') {
+  
+  if(is.null(ref_meta)) ref_meta = ref_seurat@meta.data
+  if(is.null(ref_meta_labels)) stop("Need some labels! ad a list or DF to ref_meta_labels")
+  
   data.list = cFIT::split_dataset_by_batch(X=t(as.matrix(ref_seurat@assays$RNA@counts)),
                                            batch = ref_meta_batchID, 
                                            labels = ref_meta_labels, 
                                            metadata = ref_meta, 
-                                           dataset.name = 'atlas:')
+                                           dataset.name = dataset.name)
   return(data.list)
 }
 
 
-# select highly variable genes in reference
-# genes = cFIT::select_genes(data.list$X.list, ngenes=2000, verbose=F)
 
-# perform integration on reference
+
+
+#' @title integrate_ref  perform integration on reference
+#'
+#' @description perform integration on reference cFIT
+#' @param genes A set of genes usually top variable genes
+#' @param data.list the output of format_refdata()
+#' @export
 integrate_ref <- function(genes, data.list) {
   # reference data preprocessing
   exprs.list = cFIT::preprocess_for_integration(data.list$X.list, genes, scale.factor=10^4, scale=T, center=F)
@@ -111,7 +130,13 @@ integrate_ref <- function(genes, data.list) {
   return(int.out)
 }
 
-
+#' @title transfer_sigs  perform CFITTransfer
+#'
+#' @description perform CFITTransfer
+#' @param genes A set of genes usually top variable genes
+#' @param target_seurat A query seurat object
+#' @param int.out the output of integrate_ref()
+#' @export
 transfer_sigs <- function(genes, target_seurat, int.out) {
   #prepare target data for transfer
   target.X <- t(as.matrix(target_seurat@assays$RNA@counts))
@@ -127,7 +152,3 @@ transfer_sigs <- function(genes, target_seurat, int.out) {
   return(tf.out)
 }
 
-# #assign labels from reference to the target data
-# est.labels = cFIT::asign_labels(exprs.source=do.call(rbind, int.out$H.list), 
-#                                 exprs.target=tf.out$H, 
-#                                 labels.source=do.call(c, data.list$labels.list))
