@@ -1,2 +1,5 @@
-# RIRA_classifiication
-Code for utility of RIRA for classification of cell types/phenotypes
+# RIRA
+
+## The Rhesus Immunome Reference Atlas (RIRA) package for all code related to RIRA
+
+Code for utility of RIRA such as classification of cell types/phenotypes

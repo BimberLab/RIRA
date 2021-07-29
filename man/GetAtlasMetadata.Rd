@@ -4,7 +4,10 @@
 \alias{GetAtlasMetadata}
 \title{Helper function for ConvertAtlasAndApplyMetadata.}
 \usage{
-GetAtlasMetadata()
+GetAtlasMetadata(
+  basepath = "~/Box/Bimber/BimberLab Shared/Experiments/RhesusAtlas/data/meta/",
+  freezeV = "June232021_freeze/"
+)
 }
 \value{
 A data frame with the current atlas metadata.

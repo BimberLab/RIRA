@@ -425,26 +425,27 @@ ConvertAtlasAndApplyMetadata <- function(seuratAtlas = NULL, label.main = "Pheno
 #' @return A data frame with the current atlas metadata. 
 #' @examples
 #' atlasObj <- GetAtlasMetadata()
-GetAtlasMetadata <- function(){
-  metaBcell <- '~/Box/Bimber/BimberLab Shared/Experiments/RhesusAtlas/data/meta/June232021_freeze/RhesusAtlasV2.Meta.Bcell_June232021.rds'
+GetAtlasMetadata <- function(basepath='~/Box/Bimber/BimberLab Shared/Experiments/RhesusAtlas/data/meta/', freezeV='June232021_freeze/'){
+  
+  metaBcell <- paste0(basepath,freezeV,'RhesusAtlasV2.Meta.Bcell_June232021.rds')
   atlasObj.Bcell <- readRDS(file = metaBcell)
-  metaCD8pos <- '~/Box/Bimber/BimberLab Shared/Experiments/RhesusAtlas/data/meta/June232021_freeze/RhesusAtlasV2.Meta.Tcell.CD8pos_June232021.rds'
+  metaCD8pos <- paste0(basepath,freezeV, 'RhesusAtlasV2.Meta.Tcell.CD8pos_June232021.rds')
   atlasObj.CD8pos <- readRDS(file = metaCD8pos)
-  metaMcell <- '~/Box/Bimber/BimberLab Shared/Experiments/RhesusAtlas/data/meta/June232021_freeze/RhesusAtlasV2.Meta.Mcell_June232021.rds'
+  metaMcell <- paste0(basepath,freezeV, 'RhesusAtlasV2.Meta.Mcell_June232021.rds')
   atlasObj.Mcell <- readRDS(file = metaMcell)
-  metaCD4pos <- '~/Box/Bimber/BimberLab Shared/Experiments/RhesusAtlas/data/meta/June232021_freeze/RhesusAtlasV2.Meta.Tcell.CD4pos_June232021.rds'
+  metaCD4pos <- paste0(basepath,freezeV, 'RhesusAtlasV2.Meta.Tcell.CD4pos_June232021.rds')
   atlasObj.CD4pos <- readRDS(file = metaCD4pos)
   
-  metaDblNeg <- '~/Box/Bimber/BimberLab Shared/Experiments/RhesusAtlas/data/meta/June232021_freeze/RhesusAtlasV2.Meta.Tcell.DblNeg_June232021.rds'
+  metaDblNeg <- paste0(basepath,freezeV, 'RhesusAtlasV2.Meta.Tcell.DblNeg_June232021.rds')
   atlasObj.DblNeg <- readRDS(file = metaDblNeg)
   
-  metaDblts <- '~/Box/Bimber/BimberLab Shared/Experiments/RhesusAtlas/data/meta/June232021_freeze/RhesusAtlasV2.Meta.Dblts_June232021.rds'
+  metaDblts <- paste0(basepath,freezeV, 'RhesusAtlasV2.Meta.Dblts_June232021.rds')
   atlasObj.Dblts <- readRDS(file = metaDblts)
   
-  metaDblPos <- '~/Box/Bimber/BimberLab Shared/Experiments/RhesusAtlas/data/meta/June232021_freeze/RhesusAtlasV2.Meta.Tcell.DblPos_June232021.rds'
+  metaDblPos <- paste0(basepath,freezeV, 'RhesusAtlasV2.Meta.Tcell.DblPos_June232021.rds')
   atlasObj.DblPos <- readRDS(file = metaDblPos)
   
-  metaTriNeg <- '~/Box/Bimber/BimberLab Shared/Experiments/RhesusAtlas/data/meta/June232021_freeze/RhesusAtlasV2.Meta.TriNeg_June232021.rds'
+  metaTriNeg <- paste0(basepath,freezeV, 'RhesusAtlasV2.Meta.TriNeg_June232021.rds')
   atlasObj.TriNeg <- readRDS(file = metaTriNeg)
   
   atlasObj.All <- bind_rows(list(atlasObj.Bcell, atlasObj.CD4pos, atlasObj.CD8pos, atlasObj.Mcell,atlasObj.DblNeg ,atlasObj.DblPos,atlasObj.TriNeg, atlasObj.Dblts))
