@@ -141,7 +141,7 @@ load in a new data of interest
 
 ```{r}
 
-Query1 =readRDS("./data/serobjs/prime/SingleCell.ds.merge.norm.pca.dr.markers.singler.Pilot_Timpoint_TresRh_DS5000.seurat.rds")
+Query1 =readRDS("../SIVacute/data/serobjs/prime/SingleCell.ds.merge.norm.pca.dr.markers.singler.Pilot_Timpoint_TresRh_DS5000.seurat.rds")
 
 Query1$barcode = colnames(Query1)
 
@@ -157,6 +157,7 @@ table(Query1$Testing_epochs )
 # Classification / label transfer
 
 ## IO
+
 ```{r}
 RefLS =  SplitObject(RIRA_f1_10, split.by = "Training_epochs")
 
@@ -191,5 +192,48 @@ Query1_f1of5 = classifier_Seurat(Ref.integrated = Ref.integrated, Query.Ser=Quer
                               Ref.meta= Ref.integrated$Pheno.scope1)
   
   
+```
+
+## cFIT
+
+```{r}
+# devtools::install_github("pengminshi/cFIT")
+library(cFIT)
+
+# RefLS$A@meta.data$B_ID = sample(LETTERS[1:4], nrow(RefLS$A@meta.data), replace = T)
+# table(RefLS$A@meta.data$B_ID )
+# data.list <- format_refdata(RefLS$A, RefLS$A$B_ID, RefLS$A@meta.data)
+
+data.list <- format_refdata(RIRA_f1_10, RIRA_f1_10$Training_epochs, RIRA_f1_10@meta.data)
+
+# select highly variable genes in reference
+cFIT_topVargenes = cFIT::select_genes(data.list$X.list, ngenes=2000, verbose=F)
+
+int.out = integrate_ref(genes=cFIT_topVargenes, data.list=data.list)
+
+tf.out = transfer_sigs(genes=cFIT_topVargenes, target_seurat=Query1_f1of5, int.out=int.out) {
+  #prepare target data for transfer
+  target.X <- t(as.matrix(target_seurat@assays$RNA@counts))
+  genes_target = intersect(genes, colnames(target.X))
+  x = target.X[, genes_target]
+  scale.factor=10^4
+  x = log(x/rowSums(x) * scale.factor + 1)
+  x = t(Seurat::ScaleData(t(x), do.center = F, do.scale = T, verbose = F))
+  target.exprs.list <- x
+  names(target.exprs.list) = names(target.X)
+  #transfer learned gene expression signatures from integration onto target dataset 
+  tf.out = cFIT::CFITTransfer(Xtarget=target.exprs.list, Wref=int.out$W, max.niter=100, seed=0, verbose=T)
+  return(tf.out)
+}
+
+
+
+#assign labels from reference to the target data
+est.labels = cFIT::asign_labels(exprs.source=do.call(rbind, int.out$H.list),
+                                exprs.target=tf.out$H,
+                                labels.source=do.call(c, data.list$labels.list))
+
+
+
 ```
 
