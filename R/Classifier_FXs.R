@@ -83,7 +83,7 @@ classifier_SingleR <- function(){
 
 #### cFIT
 # devtools::install_github("pengminshi/cFIT")
-require(cFIT)
+# require(cFIT)
 
 # =============================================================================
 # classifier_cFIT : calls cFIT fx to classify a query dataset 
@@ -100,7 +100,9 @@ require(cFIT)
 #' @param dataset.name A name defaults 'atlas:'
 #' @export
 format_refdata <- function(ref_seurat, ref_meta_batchID, ref_meta = NULL, ref_meta_labels = NULL, dataset.name = 'atlas:') {
+  
   if(is.null(ref_meta)) ref_meta = ref_seurat@meta.data
+  if(is.null(ref_meta_labels)) stop("Need some labels! ad a list or DF to ref_meta_labels")
   
   data.list = cFIT::split_dataset_by_batch(X=t(as.matrix(ref_seurat@assays$RNA@counts)),
                                            batch = ref_meta_batchID, 
