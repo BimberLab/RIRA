@@ -37,26 +37,29 @@ integrate_reflist_CCA <- function(RefLS = NULL, dims = 1:30, dims_umap=1:20){
 #' @param Query.Ser The seurat object of the Query
 #' @param dims CCA/PCA dims to integrate default 1:30 
 #' @param dims_umap CCA/PCA dims to run UMAP default 1:20 
-#' @param Ref.meta metadata pertaining to Ref
+#' @param col.name metadata col name pertaining to Ref to be mapped to Query
 #' @export
 classifier_Seurat <- function(Ref.integrated = NULL, Query.Ser=NULL, dims = 1:30, dims_umap=1:20,
-                              Ref.meta){
+                              #Ref.meta, 
+                              col.name = NULL){
+  if(is.null(col.name)) stop("col.name is NULL, add a col name from ref")
+  
   Query_anchors <- FindTransferAnchors(reference = Ref.integrated, query = Query.Ser, dims = dims)
-  predictions <- TransferData(anchorset = Query_anchors, refdata = Ref.meta, dims = dims)
-  Query.Ser <- AddMetaData(Query.Ser, metadata = predictions)
+  predictions <- TransferData(anchorset = Query_anchors, refdata = Ref.integrated@meta.data[,col.name], dims = dims)
+  Query.Ser <- AddMetaData(Query.Ser, metadata = predictions, col.name = col.name)
   
   Ref.integrated <- RunUMAP(Ref.integrated, dims = dims_umap, reduction = "pca", return.model = TRUE)
   
   Query.Ser <- MapQuery(anchorset = Query_anchors,
                            reference = Ref.integrated,
                            query = Query.Ser,
-                           refdata = Ref.integrated$Pheno.scope1,
+                           refdata = Ref.integrated@meta.data[,col.name],
                            reference.reduction = "pca", 
                           reduction.model = "umap")
   
   
  
-  return(Query.Ser)
+  return(list(Query.Ser = Query.Ser, Query_anchors=Query_anchors))
 }
 
 

@@ -198,13 +198,27 @@ remove(IntLs)
 ```
 
 
-### Training of Query
+### Mapping of Query
 
 ```{r}
-Query1_f1of5 = classifier_Seurat(Ref.integrated = Ref.integrated, Query.Ser=Query1_f1of5, dims = 1:30, dims_umap=1:20,
+QueryLs = classifier_Seurat(Ref.integrated = Ref.integrated, Query.Ser=Query1_f1of5, dims = 1:30, dims_umap=1:20,
                               Ref.meta= Ref.integrated$Pheno.scope1)
   
-  
+Query1_f1of5 = QueryLs$Query.Ser
+Query_anchors = QueryLs$Query_anchors
+remove(QueryLs)
+
+#extra meta feats
+
+predictions <- TransferData(anchorset = Query_anchors,
+                            refdata = Ref.integrated$Pheno.scope2,
+                            dims = 1:20)
+
+# head(predictions)
+# pheatmap::pheatmap(t(predictions[sample(1:nrow(predictions), 100),2:(ncol(predictions)-1)]))
+
+Query1_f1of5 <- AddMetaData(Query1_f1of5, metadata = predictions, col.name = "Pheno.scope2")
+
 ```
 
 ## cFIT
