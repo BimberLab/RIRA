@@ -9,7 +9,7 @@ classifier_Seurat(
   Query.Ser = NULL,
   dims = 1:30,
   dims_umap = 1:20,
-  Ref.meta
+  col.name = NULL
 )
 }
 \arguments{
@@ -21,7 +21,7 @@ classifier_Seurat(
 
 \item{dims_umap}{CCA/PCA dims to run UMAP default 1:20}
 
-\item{Ref.meta}{metadata pertaining to Ref}
+\item{col.name}{metadata col name pertaining to Ref to be mapped to Query}
 }
 \description{
 calls seurat fx to classify a query dataset
