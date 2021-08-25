@@ -1,10 +1,12 @@
+# Intellij files
 .idea/*
 .Rproj.user
-.Rproj
 .Rhistory
-.RData
-.Ruserdata
 ..Rcheck*
+RIRA_.Rcheck*
+RIRA_**.tar.gz
+RIRA_**.zip
+RIRA.Rproj
 .shelf/*
 install.bat
 docs
