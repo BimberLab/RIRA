@@ -6,6 +6,8 @@ Author: Eisa @ Bimber Lab
 Description: Wrappers and pipelines to process single-cell RNA-seq data for RIRA
 Encoding: UTF-8
 LazyData: true
+Maintainer: The package maintainer <bimber@ohsu.edu>
+License: GPL-3
 Imports:
     Seurat,
     tidyr,
@@ -16,15 +18,17 @@ Imports:
     naturalsort,
     SingleCellExperiment,
     ExperimentHub,
+    DropletUtils,
     cFIT
 Suggests:
     devtools,
     testthat (>= 2.1.0)
 Remotes:
-    pengminshi/cFIT
+    pengminshi/cFIT,
+    bioc::SingleCellExperiment,
+    bioc::DropletUtils
 RoxygenNote: 7.1.1
 Collate: 
     'Utils.R'
     'Atlas.R'
-    'SingleR.R'
     'cFIT.R'
