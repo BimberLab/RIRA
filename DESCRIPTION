@@ -1,17 +1,30 @@
 Package: RIRA
 Type: Package
-Title: A package for RIRA
+Title: A package for the Rhesus Immunome Reference Atlas (RIRA): A multi-tissue single-cell landscape of immune cells
 Version: 0.1.0
 Author: Eisa @ Bimber Lab
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: wrappers and pipelines to process single-cell RNA-seq data for RIRA
+Description: Wrappers and pipelines to process single-cell RNA-seq data for RIRA
 Encoding: UTF-8
 LazyData: true
+Imports:
+    Seurat,
+    tidyr,
+    dplyr,
+    Matrix,
+    ggplot2,
+    patchwork,
+    naturalsort,
+    SingleCellExperiment,
+    ExperimentHub,
+    cFIT
+Suggests:
+    devtools,
+    testthat (>= 2.1.0)
+Remotes:
+    pengminshi/cFIT
 RoxygenNote: 7.1.1
 Collate: 
-    'Classifier_FXs.R'
-    'Classifier_Wrappers.R'
-    'Main_FXs.R'
-    'Result_Summary.R'
-    'Seurat_Wrappers.R'
-    'Viz_FXs.R'
+    'Utils.R'
+    'Atlas.R'
+    'SingleR.R'
+    'cFIT.R'
