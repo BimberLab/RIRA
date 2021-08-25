@@ -1,4 +1,4 @@
 library(testthat)
-library(RIRA_classification)
+library(RIRA)
 
-test_check("RIRA_classification", reporter = "progress")
+test_check("RIRA", reporter = "progress")
