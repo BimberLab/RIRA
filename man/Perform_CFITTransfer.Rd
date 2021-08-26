@@ -16,6 +16,12 @@ Perform_CFITTransfer(
 \item{seuratObj}{The input seurat object}
 
 \item{integratedReference}{The integrated reference from cFIT}
+
+\item{verbose}{Controls the verbosity of the output}
+
+\item{seed}{The random reed}
+
+\item{assay}{The name of the assay holding count data}
 }
 \description{
 Perform CFITTransfer

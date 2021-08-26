@@ -1,5 +1,6 @@
 #' @include Utils.R
 
+#' @title Get the integrated cFIT reference object for an atlas version
 #' @description Return the integrated reference for the provided RIRA version
 #' @param version The version string
 #' @export
@@ -20,7 +21,7 @@ GetCFitReference <- function(version = NULL) {
 }
 
 .GenerateIntegratedReference <- function(seuratObj, labelCol, batchIdCol = 'DatasetId', assay = 'RNA', dataset.name = 'atlas:', ngenes = 3000, saveFile = NULL) {
-  countMatrix <- Seurat::GetAssayData(seuratObj, assay = assay, slot = 'counts')
+  countMatrix <- Seurat::GetAssayData(seuratObj, assay = assay, slot = 'counts', seed = 0, verbose = FALSE)
 
   print('Subsetting input')
   data.list <- cFIT::split_dataset_by_batch(X = t(as.matrix(countMatrix)),
@@ -59,7 +60,7 @@ GetCFitReference <- function(version = NULL) {
   exprs.list <- preprocess_for_integration(data.list$X.list, genes, scale.factor=10^4, scale=T, center=F)
 
   print('Running cFIT Integration')
-  int.out <- cFIT::CFITIntegrate(X.list=exprs.list, r = 15, verbose = F, max.niter = 100, seed = 0)
+  int.out <- cFIT::CFITIntegrate(X.list=exprs.list, r = 15, verbose = verbose, max.niter = 100, seed = seed)
   if (!is.null(saveFile)) {
     saveRDS(int.out, file = saveFile)
   }
@@ -71,6 +72,9 @@ GetCFitReference <- function(version = NULL) {
 #' @description Perform CFITTransfer
 #' @param seuratObj The input seurat object
 #' @param integratedReference The integrated reference from cFIT
+#' @param verbose Controls the verbosity of the output
+#' @param seed The random reed
+#' @param assay The name of the assay holding count data
 #' @importFrom dplyr %>%
 #' @export
 Perform_CFITTransfer <- function(seuratObj, integratedReference = GetCFitReference(), verbose = TRUE, seed = 0, assay = 'RNA') {
@@ -91,7 +95,7 @@ Perform_CFITTransfer <- function(seuratObj, integratedReference = GetCFitReferen
   ordered_targ.exp.list <- target.exprs.list[,idx]
 
   #transfer learned gene expression signatures from integration onto target dataset
-  tf.out <- cFIT::CFITTransfer(Xtarget=ordered_targ.exp.list, Wref=W_ref, max.niter=100, seed=0, verbose=F, future.plan='sequential')
+  tf.out <- cFIT::CFITTransfer(Xtarget = ordered_targ.exp.list, Wref = W_ref, max.niter = 100, seed = seed, verbose = verbose, future.plan='sequential')
 
   return(tf.out)
 }
