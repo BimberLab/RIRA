@@ -20,6 +20,20 @@ GetCFitReference <- function(version = NULL) {
   return(fn)
 }
 
+
+#' @title GenerateIntegratedReference
+#' @description This function uses cFIT to create an integrated reference for the provided seurat object
+#' @param seuratObj The seurat object
+#' @param batchIdCol If provided, data will be subset using this metadata field
+#' @param targetBatchSize This is an alternative to batchIdCol. If batchIdCol is not provided, data will be randomly subset
+#' @param assay The seurat assay holding count data
+#' @param ngenes The number of variable genes to select
+#' @param saveFile If provided, the integrated reference object will be saved to this file as RDS
+#' @param seed The random seed
+#' @param verbose Determined output verbosity
+#' @param minBatchSize If any resulting batch has fewer than this many cells, an error is thrown
+#' @param selectVariableFeaturesFromWholeInput If true, the variable genes will be calculated from the intact input object. If false, FindVariableFeatures() will be calculated independently on each subset seurat object, followed by Seurat::SelectIntegrationFeatures
+#' @export
 GenerateIntegratedReference <- function(seuratObj, batchIdCol = NULL, targetBatchSize = 5000, assay = 'RNA', ngenes = 3000, saveFile = NULL, seed = 0, verbose = FALSE, minBatchSize = 100, selectVariableFeaturesFromWholeInput = TRUE) {
   # TODO: should we be able to determine if this already has been done?
   seuratObj <- Seurat::NormalizeData(seuratObj, verbose = verbose)
