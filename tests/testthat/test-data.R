@@ -12,7 +12,7 @@ test_that("Atlas loading works", {
   SetAtlasDir(fn)
 
   version <- '0.0.1'
-  fn <- pasto0(fn, '/', version)
+  fn <- paste0(fn, '/', version)
   dir.create(fn)
 
   DropletUtils::write10xCounts(mat, path = paste0(fn, '/counts'))

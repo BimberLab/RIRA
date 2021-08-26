@@ -1,9 +1,8 @@
-# RIRA
+[![R Build and Checks](https://github.com/bimberlabinternal/RIRA_classification/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/bimberlabinternal/RIRA_classification/actions/workflows/R-CMD-check.yaml)
 
 ## Rhesus Immunome Reference Atlas (RIRA): A multi-tissue single-cell landscape of immune cells
 
 Code for utility of RIRA such as classification of cell types/phenotypes
-
 
 ### Usage:
 
