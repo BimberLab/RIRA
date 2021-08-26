@@ -19,6 +19,7 @@ Imports:
     SingleCellExperiment,
     ExperimentHub,
     DropletUtils,
+    utils,
     cFIT
 Suggests:
     devtools,

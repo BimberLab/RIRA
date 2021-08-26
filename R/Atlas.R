@@ -16,7 +16,7 @@ GetRiraCountMatrix <- function(version = NULL) {
   colnames(countMat2) <- colnames(countMat)
   
   metadata <- paste0(parentFolder, '/meta.csv')
-  metadata <- read.csv(metadata, header = T, row.names = 1)
+  metadata <- utils:::read.csv(metadata, header = T, row.names = 1)
 
   return(Seurat::CreateSeuratObject(counts = countMat2, project = paste0('RIRA-', version), meta.data = metadata))
 }

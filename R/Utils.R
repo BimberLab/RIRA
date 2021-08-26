@@ -20,7 +20,7 @@ SetAtlasDir <- function(folderPath) {
 }
 
 .GetLatestVersion <- function(){
-  return(packageVersion('RIRA'))
+  return(utils:::packageVersion('RIRA'))
 }
 
 .GetAtlasBaseDir <- function(version) {

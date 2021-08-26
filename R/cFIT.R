@@ -59,7 +59,7 @@ GetCFitReference <- function(version = NULL) {
   exprs.list <- preprocess_for_integration(data.list$X.list, genes, scale.factor=10^4, scale=T, center=F)
 
   print('Running cFIT Integration')
-  int.out <- CFITIntegrate(X.list=exprs.list, r = 15, verbose = F, max.niter = 100, seed = 0)
+  int.out <- cFIT::CFITIntegrate(X.list=exprs.list, r = 15, verbose = F, max.niter = 100, seed = 0)
   if (!is.null(saveFile)) {
     saveRDS(int.out, file = saveFile)
   }
