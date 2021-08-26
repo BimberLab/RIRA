@@ -10,12 +10,8 @@ Maintainer: The package maintainer <bimber@ohsu.edu>
 License: GPL-3
 Imports:
     Seurat,
-    tidyr,
     dplyr,
     Matrix,
-    ggplot2,
-    patchwork,
-    naturalsort,
     SingleCellExperiment,
     ExperimentHub,
     DropletUtils,

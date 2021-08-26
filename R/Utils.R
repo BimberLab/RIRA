@@ -3,8 +3,8 @@ pkg.env <- new.env(parent=emptyenv())
 
 #' @title Set the directory where atlas data reside
 #'
-#' @description Sets the directory where atlas data reside. Within the folder, there should be sub-folders by version
-#' @param folderPath
+#' @description Sets the directory where atlas data reside.
+#' @param folderPath The atlas directory. Within the folder, there should be sub-folders by version.
 #' @export
 SetAtlasDir <- function(folderPath) {
   if (!dir.exists(folderPath)) {

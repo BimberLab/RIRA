@@ -6,6 +6,9 @@
 \usage{
 SetAtlasDir(folderPath)
 }
+\arguments{
+\item{folderPath}{The atlas directory. Within the folder, there should be sub-folders by version.}
+}
 \description{
-Sets the directory where atlas data reside. Within the folder, there should be sub-folders by version
+Sets the directory where atlas data reside.
 }
