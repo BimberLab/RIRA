@@ -45,7 +45,7 @@ GetCFitReference <- function(version = NULL) {
     for (i in 1:length(X.list)) {
       genes <- intersect(genes, colnames(X.list[[i]]))
     }
-    X.list <- lapply(1:m, function(j) {
+    X.list <- lapply(1:length(X.list), function(j) {
       x <- Matrix::t(X.list[[j]][, genes])
       x <- Seurat::NormalizeData(x)
       x <- Matrix::t(Seurat::ScaleData(x, do.center = center, do.scale = scale, verbose = verbose))
