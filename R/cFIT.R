@@ -20,44 +20,50 @@ GetCFitReference <- function(version = NULL) {
   return(fn)
 }
 
-.GenerateIntegratedReference <- function(seuratObj, labelCol, batchIdCol = 'DatasetId', assay = 'RNA', dataset.name = 'atlas:', ngenes = 3000, saveFile = NULL) {
-  countMatrix <- Seurat::GetAssayData(seuratObj, assay = assay, slot = 'counts', seed = 0, verbose = FALSE)
+GenerateIntegratedReference <- function(seuratObj, batchIdCol = NULL, targetBatchSize = 5000, assay = 'RNA', ngenes = 3000, saveFile = NULL, seed = 0, verbose = FALSE, minBatchSize = 100, selectVariableFeaturesFromWholeInput = TRUE) {
+  # TODO: should we be able to determine if this already has been done?
+  seuratObj <- Seurat::NormalizeData(seuratObj, verbose = verbose)
 
   print('Subsetting input')
-  data.list <- cFIT::split_dataset_by_batch(X = t(as.matrix(countMatrix)),
-                                            batch = seuratObj@meta.data[[batchIdCol]],
-                                            labels = seuratObj@meta.data[[labelCol]],
-                                            metadata = seuratObj@meta.data,
-                                            dataset.name = dataset.name)
+  if (!is.null(batchIdCol)) {
+    print(paste0('Batching by: ', batchIdCol))
+    seuratObjects <- Seurat::SplitObject(seuratObj, split.by = batchIdCol)
+  } else if (!is.null(targetBatchSize)){
+    nBatches <- floor(ncol(seuratObj) / targetBatchSize)  #this will tend to err on slightly higher number of cells/batch
+    print(paste0('will divide data into ', nBatches))
+
+    seuratObj$BatchCol <- sample(1:nBatches, ncol(seuratObj), replace = TRUE)
+    seuratObjects <- Seurat::SplitObject(seuratObj, split.by = 'BatchCol')
+  } else {
+    stop('Must provide either batchIdCol or targetBatchSize')
+  }
+
+  invisible(lapply(seuratObjects, function(so) {
+    if (ncol(so) < minBatchSize) {
+      stop(paste0('One or more batches was below minBatchSize: ', minBatchSize))
+    }
+  }))
 
   print('Selecting genes')
-  X.list <- data.list$X.list
-  obj.list <- lapply(1:length(X.list), function(j) {
-    obj <- Seurat::CreateSeuratObject(counts = Matrix::t(X.list[[j]]))
-    obj <- Seurat::NormalizeData(obj, verbose=F)
-    obj <- Seurat::FindVariableFeatures(obj, selection.method = "vst", nfeatures = ngenes, verbose=F)
-    return(obj)
-  })
-  genes <- Seurat::SelectIntegrationFeatures(object.list = obj.list, nfeatures = ngenes, verbose = TRUE)
-
-  print("Preparing inputs")
-  preprocess_for_integration <- function(X.list, genes, scale = T, center = F, verbose = F) {
-    datasets <- names(X.list)
-    for (i in 1:length(X.list)) {
-      genes <- intersect(genes, colnames(X.list[[i]]))
-    }
-    X.list <- lapply(1:length(X.list), function(j) {
-      x <- Matrix::t(X.list[[j]][, genes])
-      x <- Seurat::NormalizeData(x)
-      x <- Matrix::t(Seurat::ScaleData(x, do.center = center, do.scale = scale, verbose = verbose))
-
-      return(x)
+  if (selectVariableFeaturesFromWholeInput) {
+    seuratObj <- Seurat::FindVariableFeatures(seuratObj, selection.method = "vst", nfeatures = ngenes, verbose = verbose)
+    genes <- Seurat::VariableFeatures(seuratObj)
+  } else {
+    seuratObjects <- lapply(seuratObjects, function(obj){
+      obj <- Seurat::FindVariableFeatures(obj, selection.method = "vst", nfeatures = ngenes, verbose = verbose)
+      return(obj)
     })
 
-    names(X.list) <- datasets
-    return(X.list)
+    genes <- Seurat::SelectIntegrationFeatures(object.list = seuratObjects, nfeatures = ngenes, verbose = TRUE)
   }
-  exprs.list <- preprocess_for_integration(data.list$X.list, genes, scale.factor=10^4, scale=T, center=F)
+
+  print("Preparing inputs")
+  exprs.list <- lapply(seuratObjects, function(so){
+    x <- Seurat::GetAssayData(so, assay = assay, slot = 'data')
+    x <- x[genes,]
+    x <- Seurat::ScaleData(x, do.center = F, do.scale = T, verbose = verbose)
+    return(Matrix::t(x))
+  })
 
   print('Running cFIT Integration')
   int.out <- cFIT::CFITIntegrate(X.list=exprs.list, r = 15, verbose = verbose, max.niter = 100, seed = seed)
