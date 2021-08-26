@@ -2,9 +2,9 @@
 ^\.Rproj\.user$
 ^\.git*
 ^\.idea*
-^RIRA_classification.iml$
-^RIRA_classification.*\.tar\.gz$
-^RIRA_classification.*\.zip$
+^RIRA_.iml$
+^RIRA_.*\.tar\.gz$
+^RIRA_.*\.zip$
 ^\.github$
 .dockerignore
 ^_pkgdown\.yml$
