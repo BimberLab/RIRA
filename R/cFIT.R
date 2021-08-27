@@ -24,7 +24,7 @@ GetCFitReference <- function(version = NULL) {
   countMatrix <- Seurat::GetAssayData(seuratObj, assay = assay, slot = 'counts', seed = 0, verbose = FALSE)
 
   print('Subsetting input')
-  data.list <- cFIT::split_dataset_by_batch(X = t(as.matrix(countMatrix)),
+  data.list <- cFIT::split_dataset_by_batch(X = Matrix::t(countMatrix),
                                             batch = seuratObj@meta.data[[batchIdCol]],
                                             labels = seuratObj@meta.data[[labelCol]],
                                             metadata = seuratObj@meta.data,
@@ -57,7 +57,7 @@ GetCFitReference <- function(version = NULL) {
     names(X.list) <- datasets
     return(X.list)
   }
-  exprs.list <- preprocess_for_integration(data.list$X.list, genes, scale.factor=10^4, scale=T, center=F)
+  exprs.list <- preprocess_for_integration(data.list$X.list, genes, scale=T, center=F)
 
   print('Running cFIT Integration')
   int.out <- cFIT::CFITIntegrate(X.list=exprs.list, r = 15, verbose = verbose, max.niter = 100, seed = seed)
@@ -79,15 +79,15 @@ GetCFitReference <- function(version = NULL) {
 #' @export
 Perform_CFITTransfer <- function(seuratObj, integratedReference = GetCFitReference(), verbose = TRUE, seed = 0, assay = 'RNA') {
   #prepare target data for transfer
-  target.X <- Matrix::t(Seurat::GetAssayData(seuratObj, slot = 'counts', assay = assay))
-  genes_target <- intersect(rownames(integratedReference$W), colnames(target.X))
+  target.X <- Seurat::GetAssayData(seuratObj, slot = 'counts', assay = assay)
+  genes_target <- intersect(rownames(integratedReference$W), rownames(target.X))
   if (length(genes_target) != length(rownames(integratedReference$W))) {
     stop('The genes on the input seurat object and integrated reference do not match')
   }
 
-  x <- target.X[, genes_target]
+  x <- target.X[genes_target, ]
   x <- Seurat::NormalizeData(x)
-  x <- Matrix::t(Seurat::ScaleData(Matrix::t(x), do.center = F, do.scale = T, verbose = F))
+  x <- Matrix::t(Seurat::ScaleData(x, do.center = F, do.scale = T, verbose = F))
   target.exprs.list <- x
   names(target.exprs.list) <- names(target.X)
   W_ref <- integratedReference$W[rownames(integratedReference$W) %in% genes_target,]
