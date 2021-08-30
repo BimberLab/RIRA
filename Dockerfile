@@ -1,4 +1,4 @@
-FROM ghcr.io/bimberlab/cellmembrane:latest
+FROM ghcr.io/bimberlabinternal/cellmembrane:latest
 
 ADD . /RIRA_classification
 
