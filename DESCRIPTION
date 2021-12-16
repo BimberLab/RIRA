@@ -16,16 +16,26 @@ Imports:
     ExperimentHub,
     DropletUtils,
     utils,
-    cFIT
+    cFIT,
+    UCell,
+    scGate,
+    DALEX,
+    DALEXtra,
+    mlr3learners,
+    knitr
 Suggests:
     devtools,
     testthat (>= 2.1.0)
 Remotes:
     pengminshi/cFIT,
+    carmonalab/UCell,
+    carmonalab/scGate,
     bioc::SingleCellExperiment,
     bioc::DropletUtils
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 Collate: 
     'Utils.R'
     'Atlas.R'
+    'Classification.R'
     'cFIT.R'
+    'scGate.R'

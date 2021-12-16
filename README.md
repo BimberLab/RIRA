@@ -9,7 +9,7 @@ Code for utility of RIRA such as classification of cell types/phenotypes
 RIRA currently requires you to specify a local folder holding RIRA data. This is accomplished using:
 
 ```
-SetAtlasDir('/path/to/RIRA)
+SetAtlasDir('/path/to/RIRA')
 ```
 
 Within this folder, there should be top-level folders corresponding to each version. Within each of these, it expects the following:
