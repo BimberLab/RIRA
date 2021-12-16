@@ -18,7 +18,7 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          - {os: ubuntu-20.04, r: '4.1', bioc: 'devel', rspm: "https://packagemanager.rstudio.com/cran/__linux__/focal/latest"}
+          - {os: ubuntu-20.04, r: 'devel', bioc: 'devel', rspm: "https://packagemanager.rstudio.com/cran/__linux__/focal/latest"}
           - {os: ubuntu-20.04, r: 'release', bioc: '3.13', rspm: "https://packagemanager.rstudio.com/cran/__linux__/focal/latest", pkgdown: "true"}
           - {os: ubuntu-20.04, r: '4.0', bioc: '3.12', rspm: "https://packagemanager.rstudio.com/cran/__linux__/focal/latest"}
           - {os: windows-latest, r: '4.1', bioc: '3.13'}
@@ -44,16 +44,21 @@ jobs:
         run: |
           sudo apt-get update && sudo apt-get install -yq libharfbuzz-dev libfribidi-dev python3 python3-pip
           python3 -m pip install --upgrade pip
-          python3 -m pip install --user GMM_Demux
 
-      - name: Query dependencies
+      # Note: the environment variable R_BIOC_VERSION is set to force remotes::install_bioc to follow the proper version
+      - name: Setup Bioconductor
         run: |
-          print(R.version)
+          install.packages('devtools')
           if (!requireNamespace("BiocManager", quietly=TRUE))  install.packages("BiocManager");
           BiocManager::install(version = "${{ matrix.config.bioc }}", ask = FALSE);
           cat(append = TRUE, file = "~/.Rprofile", "options(repos = BiocManager::repositories());")
           cat(append = TRUE, file = "~/.Rprofile", "Sys.setenv(R_BIOC_VERSION=as.character(BiocManager::version()));");
+        shell: Rscript {0}
+
+      - name: Query dependencies
+        run: |
           install.packages('remotes')
+          print(paste0("R_BIOC_VERSION: ", Sys.getenv("R_BIOC_VERSION")));
           saveRDS(remotes::dev_package_deps(dependencies = TRUE), ".github/depends.Rds", version = 2)
           writeLines(sprintf("R-%i.%i", getRversion()$major, getRversion()$minor), ".github/R-version")
         shell: Rscript {0}
@@ -74,17 +79,6 @@ jobs:
             eval sudo $cmd
           done < <(Rscript -e 'writeLines(remotes::system_requirements("ubuntu", "20.04"))')
 
-      # NOTE: this is a temporary fix to manually install a patched remotes to allow it to properly install bioconductor-devel packages
-      - name: Install Custom Remotes
-        if: matrix.config.bioc == 'devel'
-        run: |
-          git clone -b git_head https://github.com/bbimber/remotes.git
-          cd remotes
-          R CMD build --no-build-vignettes .
-          R CMD INSTALL --build remotes_2.3.0.9000.tar.gz
-          cd ../
-          rm -Rf remotes
-
       - name: Install dependencies
         run: |
           remotes::install_deps(dependencies = TRUE, upgrade = "always")
@@ -102,7 +96,6 @@ jobs:
       - name: Check
         env:
           _R_CHECK_CRAN_INCOMING_: false
-        # TODO: consider adding: "--as-cran",
         run: rcmdcheck::rcmdcheck(args = c("--no-manual", "-no-build-vignettes"), error_on = "warning", check_dir = "check")
         shell: Rscript {0}
 
@@ -122,9 +115,9 @@ jobs:
         if: github.ref == 'refs/heads/master' && matrix.config.pkgdown == 'true'
         run: R CMD INSTALL .
 
-      - name: Deploy package
-        if: github.ref == 'refs/heads/master' && matrix.config.pkgdown == 'true'
-        run: |
-          git config --local user.email "actions@github.com"
-          git config --local user.name "GitHub Actions"
-          Rscript -e 'pkgdown::deploy_to_branch(new_process = FALSE, clean = TRUE)'
+#      - name: Deploy package
+#        if: github.ref == 'refs/heads/master' && matrix.config.pkgdown == 'true'
+#        run: |
+#          git config --local user.email "actions@github.com"
+#          git config --local user.name "GitHub Actions"
+#          Rscript -e 'pkgdown::deploy_to_branch(new_process = FALSE, clean = TRUE)'
