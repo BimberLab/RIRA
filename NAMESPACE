@@ -3,6 +3,8 @@
 export(GenerateIntegratedReference)
 export(GetCFitReference)
 export(GetRiraCountMatrix)
+export(GetSeed)
 export(Perform_CFITTransfer)
 export(SetAtlasDir)
+export(SetSeed)
 importFrom(dplyr,"%>%")
