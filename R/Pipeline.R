@@ -1,5 +1,6 @@
 library(mlr3verse)
-
+library(DALEX)
+library(DALEXtra)
 get_info_from_scGate <- function(model){
   info <- unique(no_antpres[, c("name", "signature")])
   celltypes <- info[, "name"]
@@ -41,26 +42,54 @@ train_model <- function(training_matrix, label, numlabels, seedval=0){
   set_threads(learner)
   train_set = sample(task$nrow, 0.8 * task$nrow)
   test_set = setdiff(seq_len(task$nrow), train_set)
+  dalex_data <- markers_exp[train_set,1:(ncol(markers_exp)-numlabels)]
+  dalex_y <- as.numeric(classification.data[train_set, label])
   
   pred = learner$train(task, row_ids = train_set)$predict(task, row_ids=test_set)
   confusion <- caret::confusionMatrix(factor(pred$response), factor(pred$truth))
   print(confusion$table)
   print(confusion$overall["Accuracy"])
-  return(list(learner= learner, pred=pred))
+  return(list(learner= learner, pred=pred, dalex_data=dalex_data, dalex_y=dalex_y))
 }
 
-train_all_models <- function(training_matrix, numlabels, seedval=0){
+train_all_models <- function(training_matrix, numlabels, seedval=0, print_dalex=T){
   markers_exp <- training_matrix
   labels_mat <- markers_exp[,(ncol(markers_exp)-numlabels+2):ncol(markers_exp)]
   models <- list()
   pred <- list()
-  for (label in colnames(labels_mat)){
-    print(label)
-    temp <- train_model(training_matrix, label, numlabels, seedval)
-    models[[label]] <- temp$learner
-    pred[[label]] <- temp$pred
+  if (print_dalex==T) {
+    dalex_res <- list()
+    for (label in colnames(labels_mat)){
+      print(label)
+      temp <- train_model(training_matrix, label, numlabels, seedval)
+      models[[label]] <- temp$learner
+      pred[[label]] <- temp$pred
+      dalex_res[[label]] <- produce_Dalex_results(temp$learner, temp$dalex_data, temp$dalex_y, label)
+    }
+    return(list(models=models, pred=pred, dalex_res=dalex_res))
+  } else {
+    for (label in colnames(labels_mat)){
+      print(label)
+      temp <- train_model(training_matrix, label, numlabels, seedval)
+      models[[label]] <- temp$learner
+      pred[[label]] <- temp$pred
+    }
   }
   return(list(models=models, pred=pred))
+}
+
+produce_Dalex_results <- function(learner, dalex_data, dalex_y, label) {
+  ranger_exp = explain_mlr3(learner,
+                            data     = dalex_data,
+                            y        = dalex_y,
+                            B        = 1000,
+                            label    = label,
+                            colorize = FALSE)
+  
+  parts = model_parts(ranger_exp)
+  print(plot(parts, max_vars=20, show_boxplots = FALSE))
+  
+  return(list(parts= parts, ranger_exp=ranger_exp))
 }
 
 genemat_from_seurat <- function(seuratObj, genelist){
