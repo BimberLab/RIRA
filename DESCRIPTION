@@ -22,6 +22,7 @@ Imports:
     DALEX,
     DALEXtra,
     mlr3learners,
+    mlr3verse,
     knitr
 Suggests:
     devtools,
