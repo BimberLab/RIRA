@@ -23,7 +23,8 @@ Imports:
     DALEXtra,
     mlr3learners,
     mlr3verse,
-    knitr
+    knitr,
+    caret
 Suggests:
     devtools,
     testthat (>= 2.1.0)
