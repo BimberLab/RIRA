@@ -6,6 +6,9 @@
 \usage{
 .ParseMetricsFile(metrics_file)
 }
+\arguments{
+\item{metrics_file}{Path to a metrics file written by TrainAllModels()}
+}
 \description{
 Parses the .rds file saved during TrainAllModels and prints accuracy information
 }

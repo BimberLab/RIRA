@@ -225,6 +225,7 @@ TrainAllModels <- function(seuratObj, celltype_column, assay = "RNA", slot = 'da
 #' @title Helper function for printing information about the metrics files
 #'
 #' @description Parses the .rds file saved during TrainAllModels and prints accuracy information
+#' @param metrics_file Path to a metrics file written by TrainAllModels()
 #' @export
 
 .ParseMetricsFile<- function(metrics_file){
