@@ -82,9 +82,8 @@ test_that("Cell type classification works", {
   for (cellType in names(expected)) {
     testthat::expect_equal(sum(seuratObj$Classifier_Consensus_Celltype == cellType), expected[[cellType]])
   }
-  
-  RIRA::InterpretModels()
 
-  
+  # Note: this is incredibly slow, so omit from the test:
+  #RIRA::InterpretModels()
 })
 
