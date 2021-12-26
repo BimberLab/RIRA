@@ -26,7 +26,8 @@ Imports:
     mlr3,
     ranger,
     knitr,
-    caret
+    caret,
+    Seurat
 Suggests:
     devtools,
     testthat (>= 2.1.0),
