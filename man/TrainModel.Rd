@@ -16,7 +16,7 @@ TrainModel(
   outer_folds = 3,
   outer_ratio = 0.8,
   n_models = 20,
-  parallel = F
+  n_cores = NULL
 )
 }
 \arguments{
@@ -42,7 +42,7 @@ TrainModel(
 
 \item{n_models}{The number of models to be trained during hyperparameter tuning. The model with the highest accuracy will be selected and returned.}
 
-\item{parallel}{Logical determining if futures should be used or not for parallelization}
+\item{n_cores}{If non-null, this number of workers will be used with future::plan}
 }
 \description{
 Creates a binary classifier to classify cells via TrainAllModels to iterate over all cell types.

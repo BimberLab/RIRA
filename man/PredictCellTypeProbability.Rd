@@ -7,7 +7,7 @@
 PredictCellTypeProbability(
   seuratObj,
   models_dir = "./classifiers/models/",
-  iterative = F,
+  iterative = FALSE,
   iterations = 100
 )
 }

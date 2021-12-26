@@ -1,6 +1,7 @@
-library(mlr3verse)
-
-
+#' @import mlr3verse
+#' @import mlr3
+#' @import ranger
+#'
 
 #' @title Creates a binary classifier to classify cells within a Seurat object
 #'
@@ -16,21 +17,28 @@ library(mlr3verse)
 #' @param inner_ratio The ratio of training to testing data to be used for inner_resampling if holdout resampling is performed.
 #' @param outer_ratio The ratio of training to testing data to be used for inner_resampling if holdout resampling is performed.
 #' @param n_models The number of models to be trained during hyperparameter tuning. The model with the highest accuracy will be selected and returned.
-#' @param parallel Logical determining if futures should be used or not for parallelization
+#' @param n_cores If non-null, this number of workers will be used with future::plan
 #' @export
 
-TrainModel <- function(training_matrix, celltype, hyperparameter_tuning = F, learner = "classif.ranger", inner_resampling = "cv", outer_resampling = "cv", inner_folds = 4, inner_ratio = 0.8,  outer_folds = 3, outer_ratio = 0.8, n_models = 20, parallel = F){
-  GetSeed()
-  if (parallel){
-    future::plan("multiprocess")
+TrainModel <- function(training_matrix, celltype, hyperparameter_tuning = F, learner = "classif.ranger", inner_resampling = "cv", outer_resampling = "cv", inner_folds = 4, inner_ratio = 0.8,  outer_folds = 3, outer_ratio = 0.8, n_models = 20, n_cores = NULL){
+  # TODO: shold this set.seed(GetSeed())??
+  #GetSeed()
+
+  if (!is.null(n_cores)){
+    future::plan("multisession", workers = n_cores)
   }
+
   #fix gene names to conform with Seurat Object processing
+  #TODO: should we retain this mapping in case we need to translate back?
   colnames(training_matrix) <- gsub("-", ".", names(training_matrix))
+
   #create classification matrix 
   classification.data <- training_matrix
+
   #Trim the celltype_column containing all of the ground truth celltypes 
   #Note, this column is named "celltype" and is not the same as the column named by the passed celltype argument, which changes according to the celltype being predicted
   classification.data <- subset(classification.data, select = -celltype)
+
   #trim the binarized label/celltype/truth column (should be the last column)
   classification.data <- classification.data[,1:(ncol(classification.data)-1)]
   
@@ -38,50 +46,54 @@ TrainModel <- function(training_matrix, celltype, hyperparameter_tuning = F, lea
   classification.data[,"celltype_binary"] <- as.factor(celltype_binary)
   colnames(classification.data) <- make.names(colnames(classification.data),unique = T)
   
-  task <- TaskClassif$new(classification.data, id = "CellTypeBinaryClassifier", target = "celltype_binary")
+  task <- mlr3::TaskClassif$new(classification.data, id = "CellTypeBinaryClassifier", target = "celltype_binary")
   
   if (!hyperparameter_tuning){
     #Use a ranger random forest tree with default parameters and holdout (80% train, 20% test) resampling
     #classification.data has column number = number_of_genes + 1, so the mtry argument uses the full gene matrix
-    learner <- lrn("classif.ranger", importance = "permutation", num.trees=500, mtry=(ncol(classification.data)-1), predict_type = "prob")
+    learner <- mlr3::lrn("classif.ranger", importance = "permutation", num.trees=500, mtry=(ncol(classification.data)-1), predict_type = "prob")
     set_threads(learner)
-    train_set = sample(task$nrow, 0.8 * task$nrow)
-    test_set = setdiff(seq_len(task$nrow), train_set)
+    train_set <- sample(task$nrow, 0.8 * task$nrow)
+    test_set <- setdiff(seq_len(task$nrow), train_set)
     model <- learner$train(task, row_ids = train_set)$predict(task, row_ids=test_set)
     confusion <- caret::confusionMatrix(factor(model$response), factor(model$truth))
-    return(list(model= learner, metrics=confusion))
+
+    return(list(model = learner, metrics = confusion))
     
-  } else if (hyperparameter_tuning){
+  } else {
     #Set model-independent values for the autotuner
     measure <- msr("classif.ce")
     terminator <- trm("evals", n_evals = n_models)
+
     #Define a tuning space 25% as large as the number of models 
     #In the case of sensitive hyperparameters, resolution = 5 allows for a low/medium-low/medium/medium-high/high type parameter space
     tuner <- tnr("grid_search", resolution = 5)
     
     #Define resampling method used for hyperparameter tuning
-    if (inner_resampling == "cv" | inner_resampling == "cross-validation"){
+    if (inner_resampling == "cv" || inner_resampling == "cross-validation"){
       inner_resample <- rsmp("cv", folds = inner_folds)
-    } else if (inner_resampling == "hout" | inner_resampling == "holdout"){
+    } else if (inner_resampling == "hout" || inner_resampling == "holdout"){
       inner_resample <- rsmp("holdout", ratio = inner_ratio)
     } else {
-      print("Unknown inner_resampling method provided. Please select one of cross-validation, cv, hout, or holdout")
+      stop("Unknown inner_resampling method provided. Please select one of cross-validation, cv, hout, or holdout")
     }
+
     #Define resampling method used to determine overfitting
-    if (outer_resampling == "cv" | outer_resampling == "cross-validation"){
+    if (outer_resampling == "cv" || outer_resampling == "cross-validation"){
       outer_resample <- rsmp("cv", folds = outer_folds)
-    } else if (outer_resampling == "hout" | outer_resampling == "holdout"){
+    } else if (outer_resampling == "hout" || outer_resampling == "holdout"){
       outer_resample <- rsmp("holdout", ratio = outer_ratio)
     } else {
-      print("Unknown outer_resampling method provided. Please select one of cross-validation, cv, hout, or holdout")
+      stop("Unknown outer_resampling method provided. Please select one of cross-validation, cv, hout, or holdout")
     }
     
     #Set learner and define parameter space
-    if(learner == "classif.ranger"){
+    if (learner == "classif.ranger"){
       #Define learner
-      learner <- lrn("classif.ranger", importance = "permutation", predict_type = "prob")
+      learner <- mlr3::lrn("classif.ranger", importance = "permutation", predict_type = "prob")
+
       #Define Ranger Hyperparameter Space (RandomBotv2)
-      tune_ps = ps(
+      tune_ps <- ps(
         num.trees = p_int(lower = 10, upper = 2000),
         sample.fraction = p_dbl(lower = 0.1, upper = 1),
         respect.unordered.factors = p_fct(levels = c("ignore", "order", "partition")), 
@@ -91,11 +103,11 @@ TrainModel <- function(training_matrix, celltype, hyperparameter_tuning = F, lea
         )
     } else if (learner == "classif.xgboost"){
       #Update task
-      task <- TaskClassif$new(classification.data, id = "CellTypeBinaryClassifier", target = "celltype_binary")
+      task <- mlr3::TaskClassif$new(classification.data, id = "CellTypeBinaryClassifier", target = "celltype_binary")
       #Define learner
-      learner <- lrn("classif.xgboost", predict_type = "prob")
+      learner <- mlr3::lrn("classif.xgboost", predict_type = "prob")
       #Define XGBoost model's Hyperparameter Space (RandomBotv2)
-      tune_ps = ps(
+      tune_ps <- ps(
         booster = p_fct(levels = c("gblinear", "gbtree", "dart")),
         nrounds = p_int(lower = 2, upper = 8, trafo = function(x) as.integer(round(exp(x)))),
         eta = p_dbl(lower = -4, upper = 0, trafo = function(x) 10^x), 
@@ -110,30 +122,29 @@ TrainModel <- function(training_matrix, celltype, hyperparameter_tuning = F, lea
         rate_drop = p_int(lower = 0, upper = 1, depends = booster == 'dart'),
         skip_drop = p_int(lower = 0, upper = 1, depends = booster == 'dart')
       )
-      
-      }
     }
-    
-    #Define the autotuner using the parameter spaces and conditions defined above
-    at <- AutoTuner$new(
-      learner = learner,
-      resampling = inner_resample,
-      measure = measure,
-      search_space = tune_ps,
-      terminator = terminator,
-      tuner = tuner
-    )
-    
-    #Train the initial model to optimize hyperparameters
-    at$train(task)
-    
-    #instantiate outer resampling
-    outer_resample$instantiate(task)
-    #score model using outer resampling strategy & output full resampling to be mined for metrics
-    full_resampling <- resample(task, at, outer_resample, store_models = TRUE)
-    
-    return(list(model = at, metrics = full_resampling))
   }
+    
+  #Define the autotuner using the parameter spaces and conditions defined above
+  at <- AutoTuner$new(
+    learner = learner,
+    resampling = inner_resample,
+    measure = measure,
+    search_space = tune_ps,
+    terminator = terminator,
+    tuner = tuner
+  )
+    
+  #Train the initial model to optimize hyperparameters
+  at$train(task)
+
+  #instantiate outer resampling
+  outer_resample$instantiate(task)
+  #score model using outer resampling strategy & output full resampling to be mined for metrics
+  full_resampling <- resample(task, at, outer_resample, store_models = TRUE)
+
+  return(list(model = at, metrics = full_resampling))
+}
 
 
 #' @title Wrapper function for TrainModel to train a suite of binary classifiers for each cell type present in the data
@@ -153,16 +164,20 @@ TrainModel <- function(training_matrix, celltype, hyperparameter_tuning = F, lea
 #' @param inner_ratio The ratio of training to testing data to be used for inner_resampling if holdout resampling is performed.
 #' @param outer_ratio The ratio of training to testing data to be used for inner_resampling if holdout resampling is performed.
 #' @param n_models The number of models to be trained during hyperparameter tuning. The model with the highest accuracy will be selected and returned.
-#' @param parallel Logical determining if futures should be used or not for parallelization
+#' @param n_cores If non-null, this number of workers will be used with future::plan
 #' @param verbose Whether or not to print the metrics data for each model after training. 
 #' @export
+TrainAllModels <- function(seuratObj, celltype_column, assay = "RNA", slot = "data", output_dir = "./classifiers", hyperparameter_tuning = F, learner = "classif.ranger", inner_resampling = "cv", outer_resampling = "cv", inner_folds = 4, inner_ratio = 0.8,  outer_folds = 3, outer_ratio = 0.8, n_models = 20, n_cores = NULL, verbose = TRUE){
+  if (missingArg(celltype_column)) {
+    stop('Must provide the celltype_column argument')
+  }
 
+  if (!celltype_column %in% names(seuratObj@meta.data)) {
+    stop(paste0('The column: ', celltype_column, ' is not present in the seurat object'))
+  }
 
-TrainAllModels <- function(seuratObj, celltype_column, assay = "RNA", slot = 'data', output_dir = "./classifiers", hyperparameter_tuning = F, learner = "classif.ranger", inner_resampling = "cv", outer_resampling = "cv", inner_folds = 4, inner_ratio = 0.8,  outer_folds = 3, outer_ratio = 0.8, n_models = 20, parallel = F, verbose = T){
-  GetSeed()
   if (endsWith(output_dir, "/")){
-    print("Please remove the trailing slash in output_dir")
-    stop()
+    output_dir <- gsub(output_dir, "/$", "")
   }
   
   #Read the raw data from a seurat object and parse into an mlr3-compatible labeled matrix
@@ -176,43 +191,44 @@ TrainAllModels <- function(seuratObj, celltype_column, assay = "RNA", slot = 'da
   #Trained binary classifiers will be saved to /models
   #Parseable metrics .rds files will be saved to /metrics
   #Training data .rds files will be saved to /training_data
-  if (!dir.exists(output_dir)){
-    dir.create(output_dir)
-    dir.create(paste0(output_dir,"/models"))
-    dir.create(paste0(output_dir,"/metrics"))
-    dir.create(paste0(output_dir, "/training_data"))
-    print(paste0("Output directory: ", output_dir))
-  } else {
-    print(paste0("Output directory: ", output_dir))
+  for (fn in c(output_dir, paste0(output_dir,"/models"), paste0(output_dir,"/metrics"), paste0(output_dir, "/training_data"))) {
+    if (!dir.exists(fn)){
+      dir.create(fn)
+    }
   }
-  
 
+  print(paste0("Output directory: ", output_dir))
+
+  # TODO: rather than use cell types directly as file names, we should use make.names() or something to ensure they are valid and sane (i.e. 'CD8+ T cells')
+  # TODO: rather than saving one RDS per classifier, would it make more sense to save a list of cellType -> classifier? This bundles everything into one file on disk?
   
   #Iterate over celltypes and train a binary classifier for each celltype present in the celltype_column
+  print(paste0("Total cell types: ", length(celltypes)))
   for (celltype in celltypes){
+    print(paste0("Training: ", celltype))
     temp_training_matrix <- training_matrix
     temp_training_matrix[,celltype] <- ifelse(training_matrix[,"celltype"]==celltype,1,0)
     names(temp_training_matrix) <- make.names(names(temp_training_matrix),unique = T)
-    temp_model <- TrainModel(temp_training_matrix, celltype, hyperparameter_tuning = hyperparameter_tuning, learner = learner, inner_resampling = inner_resampling, outer_resampling = outer_resampling, inner_folds = inner_folds,inner_ratio = inner_ratio,  outer_folds = outer_folds, outer_ratio = outer_ratio, n_models = n_models, parallel = parallel)
+    temp_model <- TrainModel(temp_training_matrix, celltype, hyperparameter_tuning = hyperparameter_tuning, learner = learner, inner_resampling = inner_resampling, outer_resampling = outer_resampling, inner_folds = inner_folds,inner_ratio = inner_ratio,  outer_folds = outer_folds, outer_ratio = outer_ratio, n_models = n_models, n_cores = n_cores)
     
     #trim the "celltype" column (leaving just the labeled varible celltype column as truth) and save the training matrix
     temp_training_matrix <- subset(temp_training_matrix, select = -celltype)
-    saveRDS(temp_training_matrix, file = paste0(output_dir, "/training_data/", celltype, "_Training_Matrix.rds"))
+    saveRDS(temp_training_matrix, file = paste0(output_dir, "/training_data/", make.names(celltype), "_Training_Matrix.rds"))
    
-    if(hyperparameter_tuning){
+    if (hyperparameter_tuning){
       #Save the trained model to the output directory
-      saveRDS(temp_model$model, file = paste0(output_dir, "/models/", celltype, "_BinaryClassifier.rds"))
-      saveRDS(temp_model$metrics, file = paste0(output_dir, "/metrics/", celltype, "_BinaryClassifier_Resampled.rds"))
+      saveRDS(temp_model$model, file = paste0(output_dir, "/models/", make.names(celltype), "_BinaryClassifier.rds"))
+      saveRDS(temp_model$metrics, file = paste0(output_dir, "/metrics/", make.names(celltype), "_BinaryClassifier_Resampled.rds"))
     } else if (!hyperparameter_tuning){
       #Save the trained model to the output directory
-      saveRDS(temp_model$model, file = paste0(output_dir, "/models/", celltype, "_BinaryClassifier.rds"))
-      saveRDS(temp_model$metrics, file = paste0(output_dir, "/metrics/", celltype, "_BinaryClassifier_ConfusionMatrix.rds"))
+      saveRDS(temp_model$model, file = paste0(output_dir, "/models/", make.names(celltype), "_BinaryClassifier.rds"))
+      saveRDS(temp_model$metrics, file = paste0(output_dir, "/metrics/", make.names(celltype), "_BinaryClassifier_ConfusionMatrix.rds"))
     }
   }
   print("All models trained!")
   
   #Parse and print accuracy metrics from metrics rds files
-  if(verbose){
+  if (verbose){
     #Grab model names from model directory
     metrics_files <- list.files(paste0(output_dir, "/metrics"))
     for (metrics_file in metrics_files){
@@ -226,8 +242,6 @@ TrainAllModels <- function(seuratObj, celltype_column, assay = "RNA", slot = 'da
 #'
 #' @description Parses the .rds file saved during TrainAllModels and prints accuracy information
 #' @param metrics_file Path to a metrics file written by TrainAllModels()
-#' @export
-
 .ParseMetricsFile<- function(metrics_file){
   if (grepl("ConfusionMatrix", metrics_file)){
     confusion <- readRDS(metrics_file)
@@ -250,20 +264,20 @@ TrainAllModels <- function(seuratObj, celltype_column, assay = "RNA", slot = 'da
 #' @param seuratObj The Seurat Object to be updated
 #' @param models_dir the directory containing the models produced by TrainAllModels
 #' @param iterative Logical determining whether or not the data should be chunked to save memory or not. 
-#' @param iterations Integer determing how many chunks the data should be split into. 
+#' @param iterations Integer determing how many chunks the data should be split into.
+#' @param assayName The assay holding gene expression data
 #' @export
-
-PredictCellTypeProbability <- function(seuratObj, models_dir = "./classifiers/models/", iterative = F, iterations = 100){
+PredictCellTypeProbability <- function(seuratObj, models_dir = "./classifiers/models/", iterative = FALSE, iterations = 100, assayName= "RNA"){
   #Grab model names from model directory
   model_names <- list.files(models_dir)
   for (model_name in model_names){
     #Grab celltype name from the name of the model
     celltype <- strsplit(model_name,"_")[[1]][[1]]
     #load trained model
-    print(paste("Classifying using",model_name))
+    print(paste("Classifying using", model_name))
     classifier <- readRDS(file = paste0(models_dir,model_name))
     #De-sparse and transpose seuratObj normalized data & make names unique
-    gene_expression_matrix <- as.data.frame(Matrix::t(as.matrix(seuratObj@assays$RNA@data))) 
+    gene_expression_matrix <- as.data.frame(Matrix::t(as.matrix(Seurat::GetAssayData(seuratObj, assay = assayName, slot = "data"))))
     names(gene_expression_matrix) <- make.names(names(gene_expression_matrix),unique = T)
     
     if (!iterative){
@@ -276,27 +290,31 @@ PredictCellTypeProbability <- function(seuratObj, models_dir = "./classifiers/mo
       intervals <- split(1:ncol(geneExpressionMatrix), sort(1:ncol(gene_expression_matrix) %% iterations))
       #instantiate a list to hold all of the probability vector
       probability_vector_list <- vector(mode = "list", length = iterations)
-      i<-1
+      i <- 1
       for (interval in intervals){
         #Define interval/chunk limits
         start <- head(interval,1)
         end <- tail(interval,1)
         
         #report current iteration
-        print(paste("Iteration", i , "of", iterations))
+        print(paste("Iteration ", i , " of ", iterations))
         #add vector of probabilities to list
         probability_vector_list[[i]] <- classifier$predict_newdata(model, gene_expression_matrix[,start:end])$prob[,1]
-        i<-i+1
+        i <- i + 1
       }
       #convert from list of probabilities to vector
       probability_vector <- unlist(probability_vector_list)
+
       #append probabilities to seurat metadata
       seuratObj@meta.data[[,paste0(celltype,"_probability")]] <- probability_vector
     }
-    
   }
+
   print("Classification finished!")
-  return(seuratObj)   
+
+  # TODO: some kind of summary or visualization??
+
+  return(seuratObj)
 }
 
 
@@ -307,7 +325,6 @@ PredictCellTypeProbability <- function(seuratObj, models_dir = "./classifiers/mo
 #' @param minimum_probability The minimum probability for a confident cell type assignment
 #' @param minimum_delta The minimum difference in probabilities necessary to call one celltype over another.
 #' @export
-
 AssignCellType <- function(seuratObj, minimum_probability = 0.5, minimum_delta = 0.25){
   #This grabs each column in the metadata with the suffix "_probability"
   probabilities_matrix <- seuratObj@meta.data[,grep("_probability",names(seuratObj@meta.data))]
@@ -329,6 +346,7 @@ AssignCellType <- function(seuratObj, minimum_probability = 0.5, minimum_delta =
     seuratObj@meta.data[cell,"Classifier_Consensus_Celltype"] <- ifelse( ((max_probability >= minimum_probability) & ((max_probability - second_highest_probability) > minimum_delta)), yes =  top_label , no = "Unknown")
     
   }
+
   return(seuratObj)
 }
 
@@ -360,7 +378,7 @@ InterpretModels <- function(output_dir= "./classifiers", plot_type = "ratio"){
     y <- training_data[, ncol(training_data)]
 
     #create explainer
-    explainer <-DALEXtra::explain_mlr3(model    = model,
+    explainer <- DALEXtra::explain_mlr3(model    = model,
                              data     = data,
                              y        = y,
                              label    = celltype,

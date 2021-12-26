@@ -23,17 +23,20 @@ Imports:
     DALEXtra,
     mlr3learners,
     mlr3verse,
+    ranger,
     knitr,
     caret
 Suggests:
     devtools,
-    testthat (>= 2.1.0)
+    testthat (>= 2.1.0),
+    SeuratData
 Remotes:
     pengminshi/cFIT,
     carmonalab/UCell,
     carmonalab/scGate,
     bioc::SingleCellExperiment,
-    bioc::DropletUtils
+    bioc::DropletUtils,
+    satijalab/seurat-data
 RoxygenNote: 7.1.2
 Collate: 
     'Utils.R'

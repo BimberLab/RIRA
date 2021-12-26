@@ -19,8 +19,8 @@ TrainAllModels(
   outer_folds = 3,
   outer_ratio = 0.8,
   n_models = 20,
-  parallel = F,
-  verbose = T
+  n_cores = NULL,
+  verbose = TRUE
 )
 }
 \arguments{
@@ -52,7 +52,7 @@ TrainAllModels(
 
 \item{n_models}{The number of models to be trained during hyperparameter tuning. The model with the highest accuracy will be selected and returned.}
 
-\item{parallel}{Logical determining if futures should be used or not for parallelization}
+\item{n_cores}{If non-null, this number of workers will be used with future::plan}
 
 \item{verbose}{Whether or not to print the metrics data for each model after training.}
 }
