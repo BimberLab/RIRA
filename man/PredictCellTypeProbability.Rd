@@ -8,7 +8,8 @@ PredictCellTypeProbability(
   seuratObj,
   models_dir = "./classifiers/models/",
   iterative = FALSE,
-  iterations = 100
+  iterations = 100,
+  assayName = "RNA"
 )
 }
 \arguments{
@@ -19,6 +20,8 @@ PredictCellTypeProbability(
 \item{iterative}{Logical determining whether or not the data should be chunked to save memory or not.}
 
 \item{iterations}{Integer determing how many chunks the data should be split into.}
+
+\item{assayName}{The assay holding gene expression data}
 }
 \description{
 Applies trained models to get celltype probabilities.

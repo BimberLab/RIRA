@@ -22,7 +22,7 @@
 
 TrainModel <- function(training_matrix, celltype, hyperparameter_tuning = F, learner = "classif.ranger", inner_resampling = "cv", outer_resampling = "cv", inner_folds = 4, inner_ratio = 0.8,  outer_folds = 3, outer_ratio = 0.8, n_models = 20, n_cores = NULL){
   # TODO: shold this set.seed(GetSeed())??
-  #GetSeed()
+  set.seed(GetSeed())
 
   if (!is.null(n_cores)){
     future::plan("multisession", workers = n_cores)

@@ -9,6 +9,10 @@ prepareExampleData <- function(){
   data("pbmc3k")
   seuratObj <- pbmc3k
   
+  set.seed(RIRA::GetSeed())
+  toKeep <- sample(1:ncol(seuratObj), size = 1000)
+  seuratObj <- subset(seuratObj, cells = colnames(seuratObj)[toKeep])
+  
   seuratObj <- Seurat::NormalizeData(seuratObj)
   seuratObj <- Seurat::FindVariableFeatures(seuratObj, nfeatures = 2000)
   seuratObj <- Seurat::ScaleData(seuratObj)
@@ -16,9 +20,9 @@ prepareExampleData <- function(){
   seuratObj <- Seurat::FindNeighbors(seuratObj, dims = 1:10)
   seuratObj <- Seurat::FindClusters(seuratObj, resolution = 0.5)
   
-  #seuratObj <- Seurat::RunUMAP(seuratObj, dims = 1:10)
-  #Seurat::DimPlot(seuratObj, reduction = "umap")
-  #Seurat::FeaturePlot(seuratObj, features = c("MS4A1", "GNLY", "CD3E", "CD14", "FCER1A", "FCGR3A", "LYZ", "PPBP","CD8A"), label = T)
+  seuratObj <- Seurat::RunUMAP(seuratObj, dims = 1:10)
+  Seurat::DimPlot(seuratObj, reduction = "umap")
+  Seurat::FeaturePlot(seuratObj, features = c("MS4A1", "GNLY", "CD3E", "CD14", "FCER1A", "FCGR3A", "LYZ", "PPBP","CD8A"), label = T)
   
   seuratObj$CellType <- NA
   seuratObj$CellType[seuratObj$RNA_snn_res.0.5 == 0] <- 'Naive CD4+ T'
@@ -27,9 +31,11 @@ prepareExampleData <- function(){
   seuratObj$CellType[seuratObj$RNA_snn_res.0.5 == 3] <- 'B'
   seuratObj$CellType[seuratObj$RNA_snn_res.0.5 == 4] <- 'CD8+ T'
   seuratObj$CellType[seuratObj$RNA_snn_res.0.5 == 5] <- 'FCGR3A+ Mono'
-  seuratObj$CellType[seuratObj$RNA_snn_res.0.5 == 6] <- 'NK'
-  seuratObj$CellType[seuratObj$RNA_snn_res.0.5 == 7] <- 'DC'
-  seuratObj$CellType[seuratObj$RNA_snn_res.0.5 == 8] <- 'Platelet'
+  
+  # These no longer form clusters after downsample:
+  #seuratObj$CellType[seuratObj$RNA_snn_res.0.5 == 6] <- 'NK'
+  #seuratObj$CellType[seuratObj$RNA_snn_res.0.5 == 7] <- 'DC'
+  #seuratObj$CellType[seuratObj$RNA_snn_res.0.5 == 8] <- 'Platelet'
   
   return(seuratObj)
 }
@@ -43,7 +49,7 @@ test_that("Cell type classification works", {
     saveRDS(seuratObj, file = fn)
   }
   
-  trainedModels <- RIRA::TrainAllModels(seuratObj = seuratObj, celltype_column = 'CellType')
+  trainedModels <- RIRA::TrainAllModels(seuratObj = seuratObj, celltype_column = 'CellType', n_cores = 2)
   
   # PredictCellTypeProbability()
   # AssignCellType()
