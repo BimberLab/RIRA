@@ -4,13 +4,18 @@ library(SeuratData)
 
 testthat::context("Classification")
 
-prepareExampleData <- function(){
+getBaseSeuratData <- function(){
   suppressWarnings(SeuratData::InstallData("pbmc3k"))
   suppressWarnings(data("pbmc3k"))
   seuratObj <- suppressWarnings(pbmc3k)
-  
+
+  return(seuratObj)
+}
+
+prepareTrainingData <- function(){
+  seuratObj <- getBaseSeuratData()
   set.seed(RIRA::GetSeed())
-  toKeep <- sample(1:ncol(seuratObj), size = 1000)
+  toKeep <- sample(1:ncol(seuratObj), size = 2000)[1:1000]
   seuratObj <- subset(seuratObj, cells = colnames(seuratObj)[toKeep])
   
   seuratObj <- Seurat::NormalizeData(seuratObj)
@@ -41,20 +46,43 @@ prepareExampleData <- function(){
   return(seuratObj)
 }
 
+prepareTestData <- function(){
+  seuratObj <- getBaseSeuratData()
+  set.seed(RIRA::GetSeed())
+  toKeep <- sample(1:ncol(seuratObj), size = 2000)[1001:2000]
+  seuratObj <- subset(seuratObj, cells = colnames(seuratObj)[toKeep])
+  
+  return(seuratObj)
+}
+
+
 test_that("Cell type classification works", {
   fn <- 'seurat3k.rds'
   if (file.exists(fn)) {
     seuratObj <- readRDS(fn)
   } else {
-    seuratObj <- prepareExampleData()  
+    seuratObj <- prepareTrainingData()  
     saveRDS(seuratObj, file = fn)
   }
   
   RIRA::TrainAllModels(seuratObj = seuratObj, celltype_column = 'CellType', n_cores = 2)
+  
+  # Use new data:
+  seuratObj <- prepareTestData()
   seuratObj <- PredictCellTypeProbability(seuratObj = seuratObj)
   seuratObj <- AssignCellType(seuratObj = seuratObj)
   
   table(seuratObj$Classifier_Consensus_Celltype)
+  expected <- list(
+    'B' = 743,
+    'TorNK' = 61,
+    'Unknown' = 196
+  )
+  
+  for (cellType in names(expected)) {
+    testthat::expect_equal(sum(seuratObj$Classifier_Consensus_Celltype == cellType), expected[[cellType]])
+  }
+
   
 })
 
