@@ -23,6 +23,7 @@ Imports:
     DALEXtra,
     mlr3learners,
     mlr3verse,
+    mlr3,
     ranger,
     knitr,
     caret
