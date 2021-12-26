@@ -308,7 +308,10 @@ PredictCellTypeProbability <- function(seuratObj, models_dir = "./classifiers/mo
       probability_vector <- unlist(probability_vector_list)
 
       #append probabilities to seurat metadata
-      seuratObj@meta.data[[,paste0(celltype,"_probability")]] <- probability_vector
+      fieldName <- paste0(celltype,"_probability")
+      seuratObj@meta.data[[,fieldName]] <- probability_vector
+
+      print(Seurat::FeaturePlot(seuratObj, features = fieldName))
     }
   }
 

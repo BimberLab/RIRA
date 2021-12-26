@@ -1,7 +1,8 @@
 library(RIRA)
+library(Seurat)
 library(SeuratData)
 
-context("Classification")
+testthat::context("Classification")
 
 prepareExampleData <- function(){
   suppressWarnings(SeuratData::InstallData("pbmc3k"))
@@ -20,16 +21,17 @@ prepareExampleData <- function(){
   seuratObj <- Seurat::FindClusters(seuratObj, resolution = 0.5)
   
   seuratObj <- Seurat::RunUMAP(seuratObj, dims = 1:10)
-  Seurat::DimPlot(seuratObj, reduction = "umap")
+  Seurat::DimPlot(seuratObj, reduction = "umap", label = T)
   Seurat::FeaturePlot(seuratObj, features = c("MS4A1", "GNLY", "CD3E", "CD14", "FCER1A", "FCGR3A", "LYZ", "PPBP","CD8A"), label = T)
   
   seuratObj$CellType <- NA
-  seuratObj$CellType[seuratObj$RNA_snn_res.0.5 == 0] <- 'Naive CD4+ T'
-  seuratObj$CellType[seuratObj$RNA_snn_res.0.5 == 1] <- 'CD14+ Mono'
-  seuratObj$CellType[seuratObj$RNA_snn_res.0.5 == 2] <- 'Memory CD4+'
+  seuratObj$CellType[seuratObj$RNA_snn_res.0.5 == 0] <- 'TorNK' #Naive CD4+ T'
+  seuratObj$CellType[seuratObj$RNA_snn_res.0.5 == 1] <- 'Myeloid' #'CD14 Mono'
+  seuratObj$CellType[seuratObj$RNA_snn_res.0.5 == 2] <- 'TorNK' #Memory CD4+'
   seuratObj$CellType[seuratObj$RNA_snn_res.0.5 == 3] <- 'B'
-  seuratObj$CellType[seuratObj$RNA_snn_res.0.5 == 4] <- 'CD8+ T'
-  seuratObj$CellType[seuratObj$RNA_snn_res.0.5 == 5] <- 'FCGR3A+ Mono'
+  seuratObj$CellType[seuratObj$RNA_snn_res.0.5 == 4] <- 'TorNK' #CD8+ T'
+  seuratObj$CellType[seuratObj$RNA_snn_res.0.5 == 5] <- 'Myeloid' #'FCGR3A Mono'
+  seuratObj$CellType[seuratObj$RNA_snn_res.0.5 == 6] <- 'TorNK'
   
   # These no longer form clusters after downsample:
   #seuratObj$CellType[seuratObj$RNA_snn_res.0.5 == 6] <- 'NK'
@@ -52,7 +54,7 @@ test_that("Cell type classification works", {
   seuratObj <- PredictCellTypeProbability(seuratObj = seuratObj)
   seuratObj <- AssignCellType(seuratObj = seuratObj)
   
-  table(table(seuratObj$Classifier_Consensus_Celltype))
+  table(seuratObj$Classifier_Consensus_Celltype)
   
 })
 
