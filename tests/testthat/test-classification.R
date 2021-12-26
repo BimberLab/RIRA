@@ -1,5 +1,4 @@
 library(RIRA)
-library(testthat)
 library(SeuratData)
 
 context("Classification")

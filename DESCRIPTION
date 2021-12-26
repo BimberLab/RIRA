@@ -27,9 +27,7 @@ Imports:
     ranger,
     knitr,
     caret,
-    Seurat,
     future,
-    utils,
     methods,
     stats
 Suggests:
