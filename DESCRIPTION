@@ -27,7 +27,11 @@ Imports:
     ranger,
     knitr,
     caret,
-    Seurat
+    Seurat,
+    future,
+    utils,
+    methods,
+    stats
 Suggests:
     devtools,
     testthat (>= 2.1.0),

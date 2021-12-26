@@ -6,8 +6,8 @@ context("Classification")
 
 prepareExampleData <- function(){
   suppressWarnings(SeuratData::InstallData("pbmc3k"))
-  data("pbmc3k")
-  seuratObj <- pbmc3k
+  suppressWarnings(data("pbmc3k"))
+  seuratObj <- suppressWarnings(pbmc3k)
   
   set.seed(RIRA::GetSeed())
   toKeep <- sample(1:ncol(seuratObj), size = 1000)
@@ -49,10 +49,11 @@ test_that("Cell type classification works", {
     saveRDS(seuratObj, file = fn)
   }
   
-  trainedModels <- RIRA::TrainAllModels(seuratObj = seuratObj, celltype_column = 'CellType', n_cores = 2)
+  RIRA::TrainAllModels(seuratObj = seuratObj, celltype_column = 'CellType', n_cores = 2)
+  seuratObj <- PredictCellTypeProbability(seuratObj = seuratObj)
+  seuratObj <- AssignCellType(seuratObj = seuratObj)
   
-  # PredictCellTypeProbability()
-  # AssignCellType()
+  table(table(seuratObj$Classifier_Consensus_Celltype))
   
 })
 

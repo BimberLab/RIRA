@@ -96,7 +96,7 @@ TrainModel <- function(training_matrix, celltype, hyperparameter_tuning = F, lea
       tune_ps <- ps(
         num.trees = p_int(lower = 10, upper = 2000),
         sample.fraction = p_dbl(lower = 0.1, upper = 1),
-        respect.unordered.factors = p_fct(levels = c("ignore", "order", "partition")), 
+        respect.unordered.factors = p_fct(levels = c("ignore", "order", "partition")),
         min.node.size = p_int(lower = 1, upper = 100), 
         splitrule = p_fct(levels = c("gini", "extratrees")),
         num.random.splits = p_int(lower = 1, upper = 100, depends = splitrule == "extratrees")
@@ -168,7 +168,7 @@ TrainModel <- function(training_matrix, celltype, hyperparameter_tuning = F, lea
 #' @param verbose Whether or not to print the metrics data for each model after training. 
 #' @export
 TrainAllModels <- function(seuratObj, celltype_column, assay = "RNA", slot = "data", output_dir = "./classifiers", hyperparameter_tuning = F, learner = "classif.ranger", inner_resampling = "cv", outer_resampling = "cv", inner_folds = 4, inner_ratio = 0.8,  outer_folds = 3, outer_ratio = 0.8, n_models = 20, n_cores = NULL, verbose = TRUE){
-  if (missingArg(celltype_column)) {
+  if (methods::missingArg(celltype_column)) {
     stop('Must provide the celltype_column argument')
   }
 
@@ -282,23 +282,25 @@ PredictCellTypeProbability <- function(seuratObj, models_dir = "./classifiers/mo
     
     if (!iterative){
       #predict probabilities for current celltype
-      probability_vector <- predict(classifier, newdata= gene_expression_matrix, predict_type = "prob")
+      probability_vector <- stats::predict(classifier, newdata= gene_expression_matrix, predict_type = "prob")
       #append probabilities to seurat metadata
       seuratObj@meta.data[[paste0(celltype,"_probability")]] <- probability_vector[,1]
     } else if (iterative){
       #find intervals/chunks that split the data in the specified number of iterations
-      intervals <- split(1:ncol(geneExpressionMatrix), sort(1:ncol(gene_expression_matrix) %% iterations))
+      intervals <- split(1:ncol(gene_expression_matrix), sort(1:ncol(gene_expression_matrix) %% iterations))
       #instantiate a list to hold all of the probability vector
       probability_vector_list <- vector(mode = "list", length = iterations)
       i <- 1
       for (interval in intervals){
         #Define interval/chunk limits
-        start <- head(interval,1)
-        end <- tail(interval,1)
+        start <- utils::head(interval,1)
+        end <- utils::tail(interval,1)
         
         #report current iteration
         print(paste("Iteration ", i , " of ", iterations))
         #add vector of probabilities to list
+
+        #TODO: model not defined??
         probability_vector_list[[i]] <- classifier$predict_newdata(model, gene_expression_matrix[,start:end])$prob[,1]
         i <- i + 1
       }
