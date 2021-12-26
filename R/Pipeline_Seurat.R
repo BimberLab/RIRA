@@ -361,12 +361,9 @@ AssignCellType <- function(seuratObj, minimum_probability = 0.5, minimum_delta =
 #' @param output_dir The output directory that TrainAllModels saved training data and models into
 #' @param plot_type Argument to pass to model_parts(). Ratio or difference is recommended for large feature sets where the base model's AUC loss will be outside the plotting range.
 #' @export
-
 InterpretModels <- function(output_dir= "./classifiers", plot_type = "ratio"){
-  #Sanitize output_dir
   if (endsWith(output_dir, "/")){
-    print("Please remove the trailing slash in output_dir")
-    stop()
+    output_dir <- gsub(output_dir, "/$", "")
   }
   
   #Iterate through models in the models directory
