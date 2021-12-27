@@ -300,8 +300,7 @@ PredictCellTypeProbability <- function(seuratObj, models_dir = "./classifiers/mo
         print(paste("Iteration ", i , " of ", iterations))
         #add vector of probabilities to list
 
-        #TODO: model not defined??
-        probability_vector_list[[i]] <- classifier$predict_newdata(model, gene_expression_matrix[,start:end])$prob[,1]
+        probability_vector_list[[i]] <- stats::predict(classifier, newdata = gene_expression_matrix[,start:end], predict_type = 'prob')
         i <- i + 1
       }
       #convert from list of probabilities to vector
