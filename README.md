@@ -4,7 +4,15 @@
 
 Code for utility of RIRA such as classification of cell types/phenotypes
 
-### Usage:
+## Table of Contents
+* [Overview](#overview)
+* [Example Usage](#usage)
+* [Installation](#installation)
+
+
+### <a name = "overview">Overview</a>
+
+### <a name = "usage">Usage</a>
 
 RIRA currently requires you to specify a local folder holding RIRA data. This is accomplished using:
 
@@ -28,3 +36,19 @@ RIRA_Data/
 ```
 
 The counts folder is passed to DropletUtils::read10xCounts to create the raw count data. meta.csv is the meta.data data frame. The file ref.rds in ./cFIT is the integrated cFIT reference.
+
+### <a name="installation">Installation</a>
+
+```{r}
+# Make sure to update your Rprofile to include Bioconductor repos, such as adding this line to ~/.Rprofile:
+local({options(repos = BiocManager::repositories())})
+
+#Latest version:
+devtools::install_github(repo = 'bimberlabinternal/RIRA_classification', ref = 'master', dependencies = TRUE, upgrade = 'always')
+```
+
+Pre-packaged Docker images with all needed dependencies installed can be found on our [GitHub Packages page](https://github.com/orgs/BimberLabInternal/RIRA_classification/pkgs/container/rira). We recommend using a specific release, which you can do using tags:
+
+```
+docker pull ghcr.io/bimberlabinternal/rira:latest
+```
