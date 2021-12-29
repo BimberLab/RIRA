@@ -29,7 +29,8 @@ Imports:
     caret,
     future,
     methods,
-    stats
+    stats,
+    ggplot2
 Suggests:
     devtools,
     testthat (>= 2.1.0),

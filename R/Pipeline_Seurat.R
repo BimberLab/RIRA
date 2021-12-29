@@ -1,6 +1,7 @@
 #' @import mlr3verse
 #' @import mlr3
 #' @import ranger
+#' @import ggplot2
 #'
 
 #' @title Creates a binary classifier to classify cells within a Seurat object
