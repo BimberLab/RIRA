@@ -30,7 +30,8 @@ Imports:
     future,
     methods,
     stats,
-    ggplot2
+    ggplot2,
+    egg
 Suggests:
     devtools,
     testthat (>= 2.1.0),
