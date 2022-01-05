@@ -4,7 +4,12 @@
 \alias{AssignCellType}
 \title{Assigns celltype label based on probabilities in the metadata}
 \usage{
-AssignCellType(seuratObj, minimum_probability = 0.5, minimum_delta = 0.25)
+AssignCellType(
+  seuratObj,
+  minimum_probability = 0.5,
+  minimum_delta = 0.25,
+  columnSuffix = "_probability"
+)
 }
 \arguments{
 \item{seuratObj}{The Seurat Object to be updated}
@@ -12,6 +17,8 @@ AssignCellType(seuratObj, minimum_probability = 0.5, minimum_delta = 0.25)
 \item{minimum_probability}{The minimum probability for a confident cell type assignment}
 
 \item{minimum_delta}{The minimum difference in probabilities necessary to call one celltype over another.}
+
+\item{columnSuffix}{Any column ending with this value will be assumed to be a cell type probability column}
 }
 \description{
 Assigns celltype label based on probabilities in the metadata

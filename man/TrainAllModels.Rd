@@ -20,6 +20,7 @@ TrainAllModels(
   outer_ratio = 0.8,
   n_models = 20,
   n_cores = NULL,
+  gene_list = NULL,
   verbose = TRUE
 )
 }
@@ -53,6 +54,8 @@ TrainAllModels(
 \item{n_models}{The number of models to be trained during hyperparameter tuning. The model with the highest accuracy will be selected and returned.}
 
 \item{n_cores}{If non-null, this number of workers will be used with future::plan}
+
+\item{gene_list}{If non-null, the input count matrix will be subset to these features}
 
 \item{verbose}{Whether or not to print the metrics data for each model after training.}
 }

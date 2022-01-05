@@ -22,15 +22,13 @@
 #' @export
 
 TrainModel <- function(training_matrix, celltype, hyperparameter_tuning = F, learner = "classif.ranger", inner_resampling = "cv", outer_resampling = "cv", inner_folds = 4, inner_ratio = 0.8,  outer_folds = 3, outer_ratio = 0.8, n_models = 20, n_cores = NULL){
-  # TODO: shold this set.seed(GetSeed())??
   set.seed(GetSeed())
 
   if (!is.null(n_cores)){
     future::plan("multisession", workers = n_cores)
   }
 
-  #fix gene names to conform with Seurat Object processing
-  #TODO: should we retain this mapping in case we need to translate back?
+  #Fix gene names to conform with Seurat Object processing
   colnames(training_matrix) <- gsub("-", ".", names(training_matrix))
 
   #create classification matrix 
@@ -166,9 +164,10 @@ TrainModel <- function(training_matrix, celltype, hyperparameter_tuning = F, lea
 #' @param outer_ratio The ratio of training to testing data to be used for inner_resampling if holdout resampling is performed.
 #' @param n_models The number of models to be trained during hyperparameter tuning. The model with the highest accuracy will be selected and returned.
 #' @param n_cores If non-null, this number of workers will be used with future::plan
+#' @param gene_list If non-null, the input count matrix will be subset to these features
 #' @param verbose Whether or not to print the metrics data for each model after training. 
 #' @export
-TrainAllModels <- function(seuratObj, celltype_column, assay = "RNA", slot = "data", output_dir = "./classifiers", hyperparameter_tuning = F, learner = "classif.ranger", inner_resampling = "cv", outer_resampling = "cv", inner_folds = 4, inner_ratio = 0.8,  outer_folds = 3, outer_ratio = 0.8, n_models = 20, n_cores = NULL, verbose = TRUE){
+TrainAllModels <- function(seuratObj, celltype_column, assay = "RNA", slot = "data", output_dir = "./classifiers", hyperparameter_tuning = F, learner = "classif.ranger", inner_resampling = "cv", outer_resampling = "cv", inner_folds = 4, inner_ratio = 0.8,  outer_folds = 3, outer_ratio = 0.8, n_models = 20, n_cores = NULL, gene_list = NULL, verbose = TRUE){
   if (methods::missingArg(celltype_column)) {
     stop('Must provide the celltype_column argument')
   }
@@ -183,6 +182,15 @@ TrainAllModels <- function(seuratObj, celltype_column, assay = "RNA", slot = "da
   
   #Read the raw data from a seurat object and parse into an mlr3-compatible labeled matrix
   raw_data_matrix <- attr(x = seuratObj@assays[[assay]], which = slot)
+  if (!all(is.null(gene_list))) {
+    if (!all(gene_list %in% rownames(raw_data_matrix))) {
+      missing <- gene_list[!gene_list %in% rownames(raw_data_matrix)]
+      stop(paste0('All features in gene_list must be present in the Seurat object features. Missing: ', paste0(missing, collapse = ',')))
+    }
+
+    raw_data_matrix <- raw_data_matrix[gene_list,]
+  }
+
   training_matrix <- as.data.frame(Matrix::t(as.matrix(raw_data_matrix)))
   training_matrix$celltype <- seuratObj@meta.data[,celltype_column]
   
@@ -209,7 +217,11 @@ TrainAllModels <- function(seuratObj, celltype_column, assay = "RNA", slot = "da
     print(paste0("Training: ", celltype))
     temp_training_matrix <- training_matrix
     temp_training_matrix[,celltype] <- ifelse(training_matrix[,"celltype"]==celltype,1,0)
-    names(temp_training_matrix) <- make.names(names(temp_training_matrix),unique = T)
+
+    if (sum(duplicated(names(temp_training_matrix))) > 0) {
+      stop(paste0('Found duplicate names in the input matrix: ', paste0(names(temp_training_matrix)[duplicated(names(temp_training_matrix))], collapse = ',')))
+    }
+    names(temp_training_matrix) <- make.names(names(temp_training_matrix), unique = T)
     temp_model <- TrainModel(temp_training_matrix, celltype, hyperparameter_tuning = hyperparameter_tuning, learner = learner, inner_resampling = inner_resampling, outer_resampling = outer_resampling, inner_folds = inner_folds,inner_ratio = inner_ratio,  outer_folds = outer_folds, outer_ratio = outer_ratio, n_models = n_models, n_cores = n_cores)
     
     #trim the "celltype" column (leaving just the labeled varible celltype column as truth) and save the training matrix
@@ -380,12 +392,15 @@ PredictCellTypeProbability <- function(seuratObj, models_dir = "./classifiers/mo
 #' @param seuratObj The Seurat Object to be updated
 #' @param minimum_probability The minimum probability for a confident cell type assignment
 #' @param minimum_delta The minimum difference in probabilities necessary to call one celltype over another.
+#' @param columnSuffix Any column ending with this value will be assumed to be a cell type probability column
 #' @export
-AssignCellType <- function(seuratObj, minimum_probability = 0.5, minimum_delta = 0.25){
+AssignCellType <- function(seuratObj, minimum_probability = 0.5, minimum_delta = 0.25, columnSuffix = "_probability"){
   #This grabs each column in the metadata with the suffix "_probability"
-  probabilities_matrix <- seuratObj@meta.data[,grep("_probability",names(seuratObj@meta.data))]
+  probabilities_matrix <- seuratObj@meta.data[,grep(columnSuffix,names(seuratObj@meta.data))]
   seuratObj@meta.data[,"Classifier_Consensus_Celltype"] <- "Unassigned"
   #Iterate over the cells in the seurat object
+
+  toPlot <- NULL
   for (cell in 1:nrow(probabilities_matrix)){
     #Find the name of the column with maximum probability and grab the celltype and store it as "top_label"
     max_probability_column <- which.max(probabilities_matrix[cell,])
@@ -394,14 +409,31 @@ AssignCellType <- function(seuratObj, minimum_probability = 0.5, minimum_delta =
     
     #Grab the second highest probability to compare with the max probability
     #the frustrating negated grepl expressions in these lines bypass the inability to evaluate a variable name as a column identifier in r (e.g. top_label would be parsed as literally the column name "top_label")
-    second_highest_probability_column <- which.max(probabilities_matrix[cell, !grepl(top_label, names(probabilities_matrix))])
     second_highest_probability <- max(probabilities_matrix[cell, !grepl(top_label, names(probabilities_matrix))])
  
     #Check if the cell's highest probability classification exceeds the minimum probabilty set for a confident call.
     #Additionally check if the highest probability and second highest probability are at least minimum_delta apart. If not, assign Unknown.
     seuratObj@meta.data[cell,"Classifier_Consensus_Celltype"] <- ifelse( ((max_probability >= minimum_probability) & ((max_probability - second_highest_probability) > minimum_delta)), yes =  top_label , no = "Unknown")
-    
+
+    passed <- seuratObj@meta.data[cell,"Classifier_Consensus_Celltype"] == top_label
+    toAdd <- data.frame(CellBarcode = colnames(seuratObj)[cell], Top = max_probability, TopLabel = top_label, Second = second_highest_probability, Passed = passed)
+    if (all(is.null(toPlot))) {
+      toPlot <- toAdd
+    } else {
+      toPlot <- rbind(toPlot, toAdd)
+    }
   }
+
+  minVal <- min(c(toPlot$Top, toPlot$Second)) * 0.9  # provide consistent x/y limits
+  P1 <- ggplot2::ggplot(toPlot, aes(x = Top, y = Second, color = TopLabel, shape = Passed)) +
+    geom_point() +
+    ggtitle("Cell Type Probabilities") +
+    egg::theme_presentation(base_size = 10) +
+    ylim(minVal, 1) +
+    xlim(minVal, 1) +
+    labs(x = 'Highest Probability', y = 'Second Highest Probability', color = 'Top Label', shape = 'Passed?')
+
+  print(P1)
 
   return(seuratObj)
 }
@@ -443,4 +475,30 @@ InterpretModels <- function(output_dir= "./classifiers", plot_type = "ratio"){
     
   }
 }
-  
+
+.GetTop2Labels <- function(probdata) {
+  df <- data.frame(probdata, check.names = FALSE)
+  top <- c()
+  toplabel <- c()
+  secondlabel <- c()
+  topval <- c()
+  second <- c()
+  for (i in 1:nrow(df)) {
+    top[i] <- which.max(df[i, ])
+    toplabel[i] <- colnames(df)[top[i]]
+    topval[i] <- df[i, top[i]]
+    df[i,top[i]] <- -1000
+    second[i] <- max(df[i, ])
+    secondlabel[i] <- colnames(df)[which.max(df[i, ])]
+  }
+  outdf <- data.frame("CellID" = rownames(df), check.names = FALSE)
+  outdf$TopLabel <- toplabel
+  outdf$Label2 <- secondlabel
+  outdf$Highest <- topval
+  outdf$Second <- second
+  return(outdf)
+}
+
+.PlotTopTwoLabels <- function() {
+
+}

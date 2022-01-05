@@ -59,13 +59,13 @@ prepareTestData <- function(){
 test_that("Cell type classification works", {
   fn <- 'seurat3k.rds'
   if (file.exists(fn)) {
-    seuratObj <- readRDS(fn)
+    seuratObjTrain <- readRDS(fn)
   } else {
-    seuratObj <- prepareTrainingData()  
-    saveRDS(seuratObj, file = fn)
+    seuratObjTrain <- prepareTrainingData()  
+    saveRDS(seuratObjTrain, file = fn)
   }
   
-  RIRA::TrainAllModels(seuratObj = seuratObj, celltype_column = 'CellType', n_cores = 2)
+  RIRA::TrainAllModels(seuratObj = seuratObjTrain, celltype_column = 'CellType', n_cores = 2)
   
   # Use new data:
   seuratObj <- prepareTestData()
@@ -83,7 +83,11 @@ test_that("Cell type classification works", {
     testthat::expect_equal(sum(seuratObj$Classifier_Consensus_Celltype == cellType), expected[[cellType]])
   }
 
-  # Note: this is incredibly slow, so omit from the test:
-  #RIRA::InterpretModels()
+  
+  feats <- c("IFI30", "CD7", "CD3E",   "MS4A1", "CD79A",   "VCAN", "MNDA",   "C1QB", "C1QA")
+  RIRA::TrainAllModels(seuratObj = seuratObjTrain, celltype_column = 'CellType', n_cores = 2, output_dir = './classifiers2', gene_list = feats)
+  
+  # Note: this is incredibly slow, so use the feature-limited version:
+  RIRA::InterpretModels(output_dir = './classifiers2')
 })
 

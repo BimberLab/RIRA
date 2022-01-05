@@ -47,6 +47,5 @@ RoxygenNote: 7.1.2
 Collate: 
     'Utils.R'
     'Atlas.R'
-    'Pipeline.R'
     'Pipeline_Seurat.R'
     'cFIT.R'
