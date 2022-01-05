@@ -46,7 +46,7 @@ RunScGate <- function(seuratObj, model, min.cells = 10, assay = 'RNA', pos.thr =
 
     colNames <- names(seuratObj@meta.data)[grepl(names(seuratObj@meta.data), pattern = paste0('UCell$'))]
     for (col in colNames) {
-      print(Seurat::FeaturePlot(seuratObj, features = col, min.cutoff = 'q05', max.cutoff = 'q95'))
+      suppressWarnings(print(Seurat::FeaturePlot(seuratObj, features = col, min.cutoff = 'q05', max.cutoff = 'q95')))
     }
   } else {
     print('There are no reductions in this seurat object, cannot create dimplots')
