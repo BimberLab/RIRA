@@ -22,18 +22,30 @@ Imports:
     DALEX,
     DALEXtra,
     mlr3learners,
-    knitr
+    mlr3verse,
+    mlr3,
+    ranger,
+    knitr,
+    caret,
+    future,
+    methods,
+    stats,
+    ggplot2,
+    egg
 Suggests:
     devtools,
-    testthat (>= 2.1.0)
+    testthat (>= 2.1.0),
+    SeuratData
 Remotes:
     pengminshi/cFIT,
     carmonalab/UCell,
     carmonalab/scGate,
     bioc::SingleCellExperiment,
-    bioc::DropletUtils
+    bioc::DropletUtils,
+    satijalab/seurat-data
 RoxygenNote: 7.1.2
 Collate: 
     'Utils.R'
     'Atlas.R'
+    'Pipeline_Seurat.R'
     'cFIT.R'
