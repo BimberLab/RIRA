@@ -1,0 +1,71 @@
+#' @include Utils.R
+
+# See: https://github.com/carmonalab/scGate/pull/1
+#' @importFrom UCell AddModuleScore_UCell
+#'
+#' @title Run scGate
+#'
+#' @description Helper function to run scGate
+#' @param seuratObj The seurat object
+#' @param model Either an scGate model, or a character that will be passed to GetScGateModel()
+#' @param min.cells Passed directly to scGate::scGate. Stop iterating if fewer than this number of cells is left
+#' @param assay Passed directly to scGate::scGate. Seurat assay to use
+#' @param pos.thr Passed directly to scGate::scGate. Minimum UCell score value for positive signatures
+#' @param neg.thr Passed directly to scGate::scGate. Maximum UCell score value for negative signatures
+#' @param ncores Passed directly to scGate::scGate. Number of processors for parallel processing (requires future.apply)
+#' @param output.col.name Passed directly to scGate::scGate. Column name with 'pure/impure' annotation
+#' @param genes.blacklist Passed directly to scGate::scGate. Genes blacklisted from variable features. The default loads the list of genes in scGate::genes.blacklist.default; you may deactivate blacklisting by setting genes.blacklist=NULL
+#'
+#' @export
+RunScGate <- function(seuratObj, model, min.cells = 10, assay = 'RNA', pos.thr = 0.13, neg.thr = 0.13, ncores = 1, output.col.name = "is.pure", genes.blacklist = 'default') {
+  if (is.character(model)) {
+    model <- GetScGateModel(model)
+    if (is.null(model)) {
+      stop(paste0('Unknown gate model: ', model))
+    }
+  }
+
+  seuratObj <- scGate::scGate(data = seuratObj,
+                        model = model,
+                        min.cells = min.cells,
+                        assay = assay,
+                        pos.thr = pos.thr,
+                        neg.thr = neg.thr,
+                        seed = GetSeed(),
+                        ncores = ncores,
+                        output.col.name = output.col.name,
+                        genes.blacklist = genes.blacklist
+  )
+
+  return(seuratObj)
+}
+
+#' @title GetAvailableScGates
+#'
+#' @description Return a list of available scGate models
+#' @export
+GetAvailableScGates <- function() {
+  dir <- system.file("gates", package = "RIRA")
+  files <- list.files(dir, recursive = FALSE, full.names = FALSE)
+  files <- files[files != 'master_table.tsv']
+  files <- sapply(files, function(x){
+    return(gsub(x, pattern = '.tsv', replacement = ''))
+  })
+
+  return(files)
+}
+
+#' @title GetScGateModel
+#'
+#' @description Returns the selected scGate model
+#' @param gateName The name of the gate to return. See GetAvailableScGates() for a list of known gates
+#' @export
+GetScGateModel <- function(gateName) {
+  gateFile <- system.file(paste0("gates/", gateName, ".tsv"), package = "RIRA")
+  if (!file.exists(gateFile)) {
+    stop(paste0('Unable to find file: ', gateFile))
+  }
+
+  masterFile <- system.file("gates/master_table.tsv", package = "RIRA")
+  return(scGate::load_scGate_model(gateFile, master.table = masterFile))
+}
