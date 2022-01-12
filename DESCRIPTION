@@ -8,6 +8,9 @@ Encoding: UTF-8
 LazyData: true
 Maintainer: The package maintainer <bimber@ohsu.edu>
 License: GPL-3
+Depends:
+    scGate,
+    UCell
 Imports:
     Seurat,
     dplyr,
@@ -17,8 +20,6 @@ Imports:
     DropletUtils,
     utils,
     cFIT,
-    UCell,
-    scGate,
     DALEX,
     DALEXtra,
     mlr3learners,
@@ -49,3 +50,4 @@ Collate:
     'Atlas.R'
     'Pipeline_Seurat.R'
     'cFIT.R'
+    'scGate.R'
