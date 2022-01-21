@@ -62,3 +62,13 @@ SetAtlasDir <- function(folderPath) {
 
   return(parentFolder)
 }
+
+SeuratToAnnData <- function(seuratObj, outFileBaseName) {
+  tmpFile <- outFileBaseName
+  SeuratDisk::SaveH5Seurat(seuratObj, filename = tmpFile)
+  h5seurat <- paste0(tmpFile, ".h5seurat")
+  SeuratDisk::Convert(source = h5seurat, dest = "h5ad", overwrite = T)
+  unlink(h5seurat)
+
+  return(paste0(outFileBaseName, ".h5ad"))
+}

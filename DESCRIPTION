@@ -32,7 +32,9 @@ Imports:
     methods,
     stats,
     ggplot2,
-    egg
+    egg,
+    reticulate,
+    SeuratDisk
 Suggests:
     devtools,
     testthat (>= 2.1.0),
@@ -43,11 +45,13 @@ Remotes:
     carmonalab/scGate,
     bioc::SingleCellExperiment,
     bioc::DropletUtils,
-    satijalab/seurat-data
+    satijalab/seurat-data,
+    mojaveazure/seurat-disk
 RoxygenNote: 7.1.2
 Collate: 
     'Utils.R'
     'Atlas.R'
+    'CellTypist.R'
     'Pipeline_Seurat.R'
     'cFIT.R'
     'scGate.R'

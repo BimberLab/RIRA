@@ -43,6 +43,7 @@ jobs:
         run: |
           sudo apt-get update && sudo apt-get install -yq libharfbuzz-dev libfribidi-dev python3 python3-pip
           python3 -m pip install --upgrade pip
+          python3 -m pip install --user celltypist
 
       # Note: the environment variable R_BIOC_VERSION is set to force remotes::install_bioc to follow the proper version
       - name: Setup Bioconductor
