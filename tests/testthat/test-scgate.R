@@ -43,7 +43,7 @@ test_that("scGate works with build-in gates", {
   suppressWarnings(data("pbmc3k"))
   seuratObj <- suppressWarnings(pbmc3k)
   seuratObj <- RunScGate(seuratObj, model = 'Bcell')
-  expect_equal(sum(seuratObj$is.pure.level4 == 'Pure'), 239)
+  expect_equal(sum(seuratObj$is.pure.level4 == 'Pure'), 245)
   
 })
 
@@ -54,5 +54,12 @@ test_that("scGates runs on all", {
   seuratObj <- suppressWarnings(pbmc3k)
   
   seuratObj <- RunScGateWithDefaultModels(seuratObj)
-  expect_equal(sum(seuratObj$Bcell.is.pure == 'Pure'), 245)
+  expect_false('Bcell.is.pure.level4' %in% names(seuratObj@meta.data))
+  meta <- seuratObj@meta.data
+  dat <- table(seuratObj$scGateConsensus)
+  dat
+  
+  expect_equal(unname(dat[['Bcell,PanBcell']]), 238)
+  expect_equal(unname(dat[['NK']]), 151)
 })
+

@@ -110,9 +110,38 @@ GetScGateModel <- function(modelName, allowSCGateDB = TRUE) {
 #' @export
 RunScGateWithDefaultModels <- function(seuratObj, min.cells = 10, assay = 'RNA', pos.thr = 0.13, neg.thr = 0.13, ncores = 1, genes.blacklist = 'default') {
   models.DB <- scGate::get_scGateDB()
-  for (modelName in names(models.DB$human$generic)){
-    print(paste0('Running model: ', modelName))
+  modelNames <- names(models.DB$human$generic)
 
+  return(RunScGateForModels(seuratObj,
+                            modelNames = modelNames,
+                            min.cells = min.cells,
+                            assay = assay,
+                            pos.thr = pos.thr,
+                            neg.thr = neg.thr,
+                            ncores = ncores,
+                            genes.blacklist = genes.blacklist
+  ))
+}
+
+#' @title Run scGate for models
+#'
+#' @description Helper function to run scGate, iterating the provided models and generating a consensus field
+#' @param seuratObj The seurat object
+#' @param modelNames A vector of model names to run. They are assumed to be non-overlapping populations
+#' @param min.cells Passed directly to scGate::scGate. Stop iterating if fewer than this number of cells is left
+#' @param assay Passed directly to scGate::scGate. Seurat assay to use
+#' @param pos.thr Passed directly to scGate::scGate. Minimum UCell score value for positive signatures
+#' @param neg.thr Passed directly to scGate::scGate. Maximum UCell score value for negative signatures
+#' @param ncores Passed directly to scGate::scGate. Number of processors for parallel processing (requires future.apply)
+#' @param output.col.name Passed directly to scGate::scGate. Column name with 'pure/impure' annotation
+#' @param genes.blacklist Passed directly to scGate::scGate. Genes blacklisted from variable features. The default loads the list of genes in scGate::genes.blacklist.default; you may deactivate blacklisting by setting genes.blacklist=NULL
+#'
+#' @export
+RunScGateForModels <- function(seuratObj, modelNames, min.cells = 10, assay = 'RNA', pos.thr = 0.13, neg.thr = 0.13, ncores = 1, genes.blacklist = 'default') {
+  fieldsToConsider <- c()
+  for (modelName in modelNames){
+    print(paste0('Running model: ', modelName))
+    fn <- paste0(modelName, '.is.pure')
     seuratObj <- RunScGate(seuratObj = seuratObj,
               model = modelName,
               min.cells = min.cells,
@@ -120,10 +149,45 @@ RunScGateWithDefaultModels <- function(seuratObj, min.cells = 10, assay = 'RNA',
               pos.thr = pos.thr,
               neg.thr = neg.thr,
               ncores = ncores,
-              output.col.name = paste0(modelName, '.is.pure'),
+              output.col.name = fn,
               genes.blacklist = genes.blacklist
-          )
+    )
+
+    fieldsToConsider <- c(fieldsToConsider, fn)
+    seuratObj@meta.data[[fn]] <- as.character(seuratObj@meta.data[[fn]])
+    print(unique(seuratObj@meta.data[[fn]]))
+    seuratObj@meta.data[[fn]] <- ifelse(seuratObj@meta.data[[fn]] == 'Pure', yes = modelName, no = NA)
+    seuratObj@meta.data[[fn]][seuratObj@meta.data[[fn]] == 'NA'] <- NA
+    print(unique(seuratObj@meta.data[[fn]]))
   }
+
+  # Remove intermediate fields:
+  toDrop <- names(seuratObj@meta.data)[grepl(names(seuratObj@meta.data), pattern = 'is.pure.level')]
+  seuratObj@meta.data[toDrop] <- NULL
+
+  # TODO: should we consider UCell thresholds or the delta between the top two calls?
+  dat <- seuratObj@meta.data[,fieldsToConsider, drop = FALSE]
+  dat$scGateConsensus <- sapply(1:nrow(dat), function(idx) {
+    vals <- unlist(dat[idx, fieldsToConsider, drop = T])
+    vals <- unique(vals[!is.na(vals)])
+    if (length(vals) == 0) {
+      return(NA)
+    }
+
+    return(paste0(sort(unique(vals)), collapse = ','))
+  })
+  seuratObj$scGateConsensus <- naturalsort::naturalfactor(seuratObj$scGateConsensus)
+
+  print(ggplot(seuratObj@meta.data, aes(x = scGateConsensus, fill = scGateConsensus)) +
+    geom_bar(color = 'black') +
+    egg::theme_presentation(base_size = 12) +
+    ggtitle('scGate Consensus') +
+    labs(x = 'scGate Call', y = '# Cells') +
+    theme(
+      legend.position = 'none',
+      axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)
+    )
+  )
 
   return(seuratObj)
 }
