@@ -4,6 +4,12 @@
 #' @import ggplot2
 #'
 
+utils::globalVariables(
+  names = c('Freq', 'Passed', 'Reference', 'Second', 'Top', 'TopLabel', 'booster', 'type', 'value', 'splitrule'),
+  package = 'RIRA',
+  add = TRUE
+)
+
 #' @title Creates a binary classifier to classify cells within a Seurat object
 #'
 #' @description Creates a binary classifier to classify cells via TrainAllModels to iterate over all cell types.

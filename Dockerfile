@@ -4,6 +4,8 @@ ADD . /RIRA_classification
 
 ENV RETICULATE_PYTHON=/usr/bin/python3
 
+RUN pip3 install celltypist
+
 RUN cd /RIRA_classification \
 	&& R CMD build . \
 	&& Rscript -e "BiocManager::install(ask = F, upgrade = 'always');" \
