@@ -31,8 +31,6 @@ RunScGateForModels(
 \item{ncores}{Passed directly to scGate::scGate. Number of processors for parallel processing (requires future.apply)}
 
 \item{genes.blacklist}{Passed directly to scGate::scGate. Genes blacklisted from variable features. The default loads the list of genes in scGate::genes.blacklist.default; you may deactivate blacklisting by setting genes.blacklist=NULL}
-
-\item{output.col.name}{Passed directly to scGate::scGate. Column name with 'pure/impure' annotation}
 }
 \description{
 Helper function to run scGate, iterating the provided models and generating a consensus field
