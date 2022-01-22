@@ -21,7 +21,7 @@ test_that("scGate Runs", {
   
   # Try without reductions present:
   seuratObj <- RunScGate(seuratObj, gate)
-  expect_equal(sum(seuratObj$is.pure.level1 == 'Pure'), 2343, info = 'Before DimRedux')
+  expect_equal(sum(seuratObj$is.pure.level1 == 'Pure'), 2336, info = 'Before DimRedux')
   
   # Add reductions so plotting will work:
   seuratObj <- suppressWarnings(pbmc3k)
