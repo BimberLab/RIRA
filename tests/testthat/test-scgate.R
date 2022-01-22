@@ -1,3 +1,4 @@
+library(Seurat)
 library(SeuratData)
 library(testthat)
 
