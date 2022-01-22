@@ -34,7 +34,8 @@ Imports:
     ggplot2,
     egg,
     reticulate,
-    SeuratDisk
+    SeuratDisk,
+    naturalsort
 Suggests:
     devtools,
     testthat (>= 2.1.0),
