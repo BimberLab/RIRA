@@ -21,19 +21,19 @@ test_that("scGate Runs", {
   
   # Try without reductions present:
   seuratObj <- RunScGate(seuratObj, gate)
-  expect_equal(sum(seuratObj$is.pure.level1 == 'Pure'), 2336)
+  expect_equal(sum(seuratObj$is.pure.level1 == 'Pure'), 2343, info = 'Before DimRedux')
   
   # Add reductions so plotting will work:
   seuratObj <- suppressWarnings(pbmc3k)
   seuratObj <- Seurat::NormalizeData(seuratObj)
-  seuratObj <- Seurat::FindVariableFeatures(seuratObj, nfeatures = 2000)
+  seuratObj <- Seurat::FindVariableFeatures(seuratObj, nfeatures = 2000, seed.use = GetSeed())
   seuratObj <- Seurat::ScaleData(seuratObj)
   seuratObj <- Seurat::RunPCA(seuratObj, features = Seurat::VariableFeatures(object = seuratObj))
   seuratObj <- Seurat::FindNeighbors(seuratObj, dims = 1:10)
-  seuratObj <- Seurat::FindClusters(seuratObj, resolution = 0.5)
+  seuratObj <- Seurat::FindClusters(seuratObj, resolution = 0.5, random.seed = GetSeed())
   
   seuratObj <- RunScGate(seuratObj, gate)
-  expect_equal(sum(seuratObj$is.pure.level1 == 'Pure'), 2336)
+  expect_equal(sum(seuratObj$is.pure.level1 == 'Pure'), 2343, info = 'After DimRedux')
 })
 
 
@@ -58,7 +58,7 @@ test_that("scGates runs on all", {
   dat <- table(seuratObj$scGateConsensus)
   dat
   
-  expect_equal(unname(dat[['Bcell,PanBcell']]), 245)
-  expect_equal(unname(dat[['NK']]), 151)
+  expect_equal(unname(dat[['Bcell,PanBcell']]), 244)
+  expect_equal(unname(dat[['NK']]), 161)
 })
 
