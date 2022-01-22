@@ -1,5 +1,11 @@
 #' @include Utils.R
 
+utils::globalVariables(
+  names = c('scGateConsensus'),
+  package = 'RIRA',
+  add = TRUE
+)
+
 # See: https://github.com/carmonalab/scGate/pull/1
 #' @importFrom UCell AddModuleScore_UCell
 #'

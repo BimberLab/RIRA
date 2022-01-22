@@ -40,7 +40,7 @@ RunCellTypist <- function(seuratObj) {
     stop(paste0('Missing file: ', labels))
   }
 
-  labels <- read.csv(labels, header = T, row.names = 1)
+  labels <- utils::read.csv(labels, header = T, row.names = 1)
   seuratObj <- Seurat::AddMetaData(seuratObj, labels)
 
   unlink(seuratAnnData)
