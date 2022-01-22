@@ -155,10 +155,7 @@ RunScGateForModels <- function(seuratObj, modelNames, min.cells = 10, assay = 'R
 
     fieldsToConsider <- c(fieldsToConsider, fn)
     seuratObj@meta.data[[fn]] <- as.character(seuratObj@meta.data[[fn]])
-    print(unique(seuratObj@meta.data[[fn]]))
     seuratObj@meta.data[[fn]] <- ifelse(seuratObj@meta.data[[fn]] == 'Pure', yes = modelName, no = NA)
-    seuratObj@meta.data[[fn]][seuratObj@meta.data[[fn]] == 'NA'] <- NA
-    print(unique(seuratObj@meta.data[[fn]]))
   }
 
   # Remove intermediate fields:

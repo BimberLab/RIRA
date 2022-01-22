@@ -55,7 +55,6 @@ test_that("scGates runs on all", {
   
   seuratObj <- RunScGateWithDefaultModels(seuratObj)
   expect_false('Bcell.is.pure.level4' %in% names(seuratObj@meta.data))
-  meta <- seuratObj@meta.data
   dat <- table(seuratObj$scGateConsensus)
   dat
   
