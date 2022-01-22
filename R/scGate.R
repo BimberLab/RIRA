@@ -167,7 +167,7 @@ RunScGateForModels <- function(seuratObj, modelNames, min.cells = 10, assay = 'R
 
   # TODO: should we consider UCell thresholds or the delta between the top two calls?
   dat <- seuratObj@meta.data[,fieldsToConsider, drop = FALSE]
-  dat$scGateConsensus <- sapply(1:nrow(dat), function(idx) {
+  seuratObj$scGateConsensus <- sapply(1:nrow(dat), function(idx) {
     vals <- unlist(dat[idx, fieldsToConsider, drop = T])
     vals <- unique(vals[!is.na(vals)])
     if (length(vals) == 0) {
