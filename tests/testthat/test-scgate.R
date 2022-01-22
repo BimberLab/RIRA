@@ -54,5 +54,5 @@ test_that("scGates runs on all", {
   seuratObj <- suppressWarnings(pbmc3k)
   
   seuratObj <- RunScGateWithDefaultModels(seuratObj)
-  expect_equal(sum(seuratObj$Bcell.is.pure == 'Pure'), 239)
+  expect_equal(sum(seuratObj$Bcell.is.pure == 'Pure'), 245)
 })

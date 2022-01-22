@@ -25,7 +25,7 @@ RunScGate <- function(seuratObj, model, min.cells = 10, assay = 'RNA', pos.thr =
     }
   }
 
-  seuratObj <- scGate::scGate(data = seuratObj,
+  seuratObj <- suppressWarnings(scGate::scGate(data = seuratObj,
                         model = model,
                         min.cells = min.cells,
                         assay = assay,
@@ -35,7 +35,7 @@ RunScGate <- function(seuratObj, model, min.cells = 10, assay = 'RNA', pos.thr =
                         ncores = ncores,
                         output.col.name = output.col.name,
                         genes.blacklist = genes.blacklist
-  )
+  ))
 
   if (length(names(seuratObj@reductions)) > 0) {
     print(Seurat::DimPlot(seuratObj, group.by = output.col.name))
