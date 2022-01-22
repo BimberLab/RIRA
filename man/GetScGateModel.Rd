@@ -4,10 +4,10 @@
 \alias{GetScGateModel}
 \title{GetScGateModel}
 \usage{
-GetScGateModel(gateName)
+GetScGateModel(modelName, allowSCGateDB = TRUE)
 }
 \arguments{
-\item{gateName}{The name of the gate to return. See GetAvailableScGates() for a list of known gates}
+\item{modelName}{The name of the gate to return. See GetAvailableScGates() for a list of known gates}
 }
 \description{
 Returns the selected scGate model

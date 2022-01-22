@@ -73,14 +73,57 @@ GetAvailableScGates <- function() {
 #' @title GetScGateModel
 #'
 #' @description Returns the selected scGate model
-#' @param gateName The name of the gate to return. See GetAvailableScGates() for a list of known gates
+#' @param modelName The name of the gate to return. See GetAvailableScGates() for a list of known gates
 #' @export
-GetScGateModel <- function(gateName) {
-  gateFile <- system.file(paste0("gates/", gateName, ".tsv"), package = "RIRA")
-  if (!file.exists(gateFile)) {
-    stop(paste0('Unable to find file: ', gateFile))
+GetScGateModel <- function(modelName, allowSCGateDB = TRUE) {
+  gateFile <- system.file(paste0("gates/", modelName, ".tsv"), package = "RIRA")
+  if (file.exists(gateFile)) {
+    masterFile <- system.file("gates/master_table.tsv", package = "RIRA")
+    return(scGate::load_scGate_model(gateFile, master.table = masterFile))
   }
 
-  masterFile <- system.file("gates/master_table.tsv", package = "RIRA")
-  return(scGate::load_scGate_model(gateFile, master.table = masterFile))
+  if (!allowSCGateDB) {
+    stop(paste0('Unable to find gate: ', modelName))
+  }
+
+  models.DB <- scGate::get_scGateDB()
+  if (!modelName %in% names(models.DB$human$generic)){
+    stop(paste0('Unable to find model: ', modelName))
+  }
+
+  print(paste0('Using build-in model: ', modelName))
+  return(models.DB$human$generic[[modelName]])
+}
+
+#' @title Run scGate With DefaultModels
+#'
+#' @description Helper function to run scGate, running all human models in scGate::get_sc()
+#' @param seuratObj The seurat object
+#' @param min.cells Passed directly to scGate::scGate. Stop iterating if fewer than this number of cells is left
+#' @param assay Passed directly to scGate::scGate. Seurat assay to use
+#' @param pos.thr Passed directly to scGate::scGate. Minimum UCell score value for positive signatures
+#' @param neg.thr Passed directly to scGate::scGate. Maximum UCell score value for negative signatures
+#' @param ncores Passed directly to scGate::scGate. Number of processors for parallel processing (requires future.apply)
+#' @param output.col.name Passed directly to scGate::scGate. Column name with 'pure/impure' annotation
+#' @param genes.blacklist Passed directly to scGate::scGate. Genes blacklisted from variable features. The default loads the list of genes in scGate::genes.blacklist.default; you may deactivate blacklisting by setting genes.blacklist=NULL
+#'
+#' @export
+RunScGateWithDefaultModels <- function(seuratObj, min.cells = 10, assay = 'RNA', pos.thr = 0.13, neg.thr = 0.13, ncores = 1, genes.blacklist = 'default') {
+  models.DB <- scGate::get_scGateDB()
+  for (modelName in names(models.DB$human$generic)){
+    print(paste0('Running model: ', modelName))
+
+    seuratObj <- RunScGate(seuratObj = seuratObj,
+              model = modelName,
+              min.cells = min.cells,
+              assay = assay,
+              pos.thr = pos.thr,
+              neg.thr = neg.thr,
+              ncores = ncores,
+              output.col.name = paste0(modelName, '.is.pure'),
+              genes.blacklist = genes.blacklist
+          )
+  }
+
+  return(seuratObj)
 }

@@ -35,3 +35,24 @@ test_that("scGate Runs", {
   seuratObj <- RunScGate(seuratObj, gate)
   expect_equal(sum(seuratObj$is.pure.level1 == 'Pure'), 2343)
 })
+
+
+test_that("scGate works with build-in gates", {
+  # Use with built-in gate:
+  suppressWarnings(SeuratData::InstallData("pbmc3k"))
+  suppressWarnings(data("pbmc3k"))
+  seuratObj <- suppressWarnings(pbmc3k)
+  seuratObj <- RunScGate(seuratObj, model = 'Bcell')
+  expect_equal(sum(seuratObj$is.pure.level4 == 'Pure'), 239)
+  
+})
+
+
+test_that("scGates runs on all", {
+  suppressWarnings(SeuratData::InstallData("pbmc3k"))
+  suppressWarnings(data("pbmc3k"))
+  seuratObj <- suppressWarnings(pbmc3k)
+  
+  seuratObj <- RunScGateWithDefaultModels(seuratObj)
+  expect_equal(sum(seuratObj$Bcell.is.pure == 'Pure'), 239)
+})
