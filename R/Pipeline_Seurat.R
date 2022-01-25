@@ -337,7 +337,11 @@ TrainAllModels <- function(seuratObj, celltype_column, assay = "RNA", slot = "da
 #' @param iterations Integer determing how many chunks the data should be split into.
 #' @param assayName The assay holding gene expression data
 #' @export
-PredictCellTypeProbability <- function(seuratObj, models_dir = "./classifiers/models/", iterative = FALSE, iterations = 100, assayName= "RNA"){
+PredictCellTypeProbability <- function(seuratObj, models_dir = "./classifiers/models", iterative = FALSE, iterations = 100, assayName= "RNA"){
+  if (endsWith(models_dir, "/")){
+    models_dir <- gsub(models_dir, "/$", "")
+  }
+
   #Grab model names from model directory
   model_names <- list.files(models_dir)
   for (model_name in model_names){
@@ -345,7 +349,7 @@ PredictCellTypeProbability <- function(seuratObj, models_dir = "./classifiers/mo
     celltype <- strsplit(model_name,"_")[[1]][[1]]
     #load trained model
     print(paste("Classifying using", model_name))
-    classifier <- readRDS(file = paste0(models_dir,model_name))
+    classifier <- readRDS(file = paste0(models_dir, '/', model_name))
     #De-sparse and transpose seuratObj normalized data & make names unique
     gene_expression_matrix <- as.data.frame(Matrix::t(as.matrix(Seurat::GetAssayData(seuratObj, assay = assayName, slot = "data"))))
     names(gene_expression_matrix) <- make.names(names(gene_expression_matrix),unique = T)
@@ -380,7 +384,9 @@ PredictCellTypeProbability <- function(seuratObj, models_dir = "./classifiers/mo
       fieldName <- paste0(celltype,"_probability")
       seuratObj@meta.data[[,fieldName]] <- probability_vector
 
-      print(Seurat::FeaturePlot(seuratObj, features = fieldName))
+      if (length(names(seuratObj@reductions)) > 0) {
+        print(Seurat::FeaturePlot(seuratObj, features = fieldName))
+      }
     }
   }
 

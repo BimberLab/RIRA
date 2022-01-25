@@ -6,7 +6,7 @@
 \usage{
 PredictCellTypeProbability(
   seuratObj,
-  models_dir = "./classifiers/models/",
+  models_dir = "./classifiers/models",
   iterative = FALSE,
   iterations = 100,
   assayName = "RNA"
