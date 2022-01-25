@@ -4,10 +4,12 @@
 \alias{RunCellTypist}
 \title{Run Celltypist}
 \usage{
-RunCellTypist(seuratObj)
+RunCellTypist(seuratObj, modelName = "Immune_All_Low.pkl")
 }
 \arguments{
 \item{seuratObj}{The seurat object}
+
+\item{modelName}{The model name or path to celltypist model}
 }
 \description{
 Runs celltypist on a seurat object and stores the calls as metadata

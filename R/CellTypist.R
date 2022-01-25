@@ -5,9 +5,10 @@
 #'
 #' @description Runs celltypist on a seurat object and stores the calls as metadata
 #' @param seuratObj The seurat object
+#' @param modelName The model name or path to celltypist model
 #'
 #' @export
-RunCellTypist <- function(seuratObj) {
+RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl") {
   if (!reticulate::py_available(initialize = TRUE)) {
     stop(paste0('Python/reticulate not configured. Run "reticulate::py_config()" to initialize python'))
   }
@@ -30,7 +31,7 @@ RunCellTypist <- function(seuratObj) {
 
   # "-m", "celltypist.command_line",
   # "--plot-results"
-  args <- c("-i", seuratAnnData, "-m", "Immune_All_Low.pkl", "--outdir", outDir, "--majority-voting", "--prefix", "celltypist.", "--quiet")
+  args <- c("-i", seuratAnnData, "-m", modelName, "--outdir", outDir, "--majority-voting", "--prefix", "celltypist.", "--quiet")
   print(args)
   pyOut <- system2(exe, args, stdout = TRUE, stderr = TRUE)
   print(pyOut)
@@ -44,6 +45,7 @@ RunCellTypist <- function(seuratObj) {
   seuratObj <- Seurat::AddMetaData(seuratObj, labels)
 
   unlink(seuratAnnData)
+  unlink(labels)
 
   return(seuratObj)
 }
