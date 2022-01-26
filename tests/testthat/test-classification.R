@@ -26,13 +26,13 @@ prepareTrainingData <- function(){
   seuratObj <- Seurat::FindClusters(seuratObj, resolution = 0.5)
   
   seuratObj <- Seurat::RunUMAP(seuratObj, dims = 1:10)
-  Seurat::DimPlot(seuratObj, reduction = "umap", label = T)
-  Seurat::FeaturePlot(seuratObj, features = c("MS4A1", "GNLY", "CD3E", "CD14", "FCER1A", "FCGR3A", "LYZ", "PPBP","CD8A"), label = T)
+  print(Seurat::DimPlot(seuratObj, reduction = "umap", label = T))
+  print(Seurat::FeaturePlot(seuratObj, features = c("MS4A1", "GNLY", "CD3E", "CD14", "FCER1A", "FCGR3A", "LYZ", "PPBP","CD8A"), label = T))
   
   seuratObj$CellType <- NA
   seuratObj$CellType[seuratObj$RNA_snn_res.0.5 == 0] <- 'TorNK' #Naive CD4+ T'
-  seuratObj$CellType[seuratObj$RNA_snn_res.0.5 == 1] <- 'Myeloid' #'CD14 Mono'
-  seuratObj$CellType[seuratObj$RNA_snn_res.0.5 == 2] <- 'TorNK' #Memory CD4+'
+  seuratObj$CellType[seuratObj$RNA_snn_res.0.5 == 1] <- 'TorNK' #Memory CD4+'
+  seuratObj$CellType[seuratObj$RNA_snn_res.0.5 == 2] <- 'Myeloid' #'CD14 Mono'
   seuratObj$CellType[seuratObj$RNA_snn_res.0.5 == 3] <- 'B'
   seuratObj$CellType[seuratObj$RNA_snn_res.0.5 == 4] <- 'TorNK' #CD8+ T'
   seuratObj$CellType[seuratObj$RNA_snn_res.0.5 == 5] <- 'Myeloid' #'FCGR3A Mono'
@@ -74,9 +74,10 @@ test_that("Cell type classification works", {
   
   table(seuratObj$Classifier_Consensus_Celltype)
   expected <- list(
-    'B' = 743,
-    'TorNK' = 61,
-    'Unknown' = 196
+    'B' = 104,
+    'TorNK' = 609,
+    'Myeloid' = 231,
+    'Unknown' = 56
   )
   
   for (cellType in names(expected)) {
