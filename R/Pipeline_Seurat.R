@@ -35,7 +35,7 @@ TrainModel <- function(training_matrix, celltype, hyperparameter_tuning = F, lea
   }
 
   #Fix gene names to conform with Seurat Object processing
-  colnames(training_matrix) <- gsub("-", ".", names(training_matrix))
+  colnames(training_matrix) <- gsub(names(training_matrix), pattern = "-", replacement = ".")
 
   #create classification matrix 
   classification.data <- training_matrix
@@ -183,7 +183,7 @@ TrainAllModels <- function(seuratObj, celltype_column, assay = "RNA", slot = "da
   }
 
   if (endsWith(output_dir, "/")){
-    output_dir <- gsub(output_dir, "/$", "")
+    output_dir <- gsub(output_dir, pattern = "/$", replacement = "")
   }
   
   #Read the raw data from a seurat object and parse into an mlr3-compatible labeled matrix
@@ -337,7 +337,7 @@ TrainAllModels <- function(seuratObj, celltype_column, assay = "RNA", slot = "da
 #' @export
 PredictCellTypeProbability <- function(seuratObj, models_dir = "./classifiers/models", batchSize = 20000, assayName= "RNA"){
   if (endsWith(models_dir, "/")){
-    models_dir <- gsub(models_dir, "/$", "")
+    models_dir <- gsub(models_dir, pattern = "/$", replacement = "")
   }
 
   #Grab model names from model directory
@@ -462,7 +462,7 @@ AssignCellType <- function(seuratObj, minimum_probability = 0.5, minimum_delta =
 #' @export
 InterpretModels <- function(output_dir= "./classifiers", plot_type = "ratio"){
   if (endsWith(output_dir, "/")){
-    output_dir <- gsub(output_dir, "/$", "")
+    output_dir <- gsub(output_dir, pattern = "/$", replacement = "")
   }
   
   #Iterate through models in the models directory
