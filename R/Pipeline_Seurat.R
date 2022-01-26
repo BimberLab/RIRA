@@ -366,7 +366,7 @@ PredictCellTypeProbability <- function(seuratObj, models_dir = "./classifiers/mo
       start <- 1 + ((batchIdx-1) * batchSize)
       end <- min((batchIdx * batchSize), nrow(gene_expression_matrix))
       print(paste0("Iteration ", batchIdx, " of ", nBatches, ", (", start, "-", end, ")"))
-      dat <- stats::predict(classifier, newdata = data.frame(gene_expression_matrix[start:end,]), predict_type = 'prob')[,1]
+      dat <- stats::predict(classifier, newdata = data.frame(gene_expression_matrix[start:end,]), predict_type = 'prob')[,2] #columns are named '0','1', so second column is '1'
       if (batchIdx == 1) {
         probability_vector <- dat
       } else {
