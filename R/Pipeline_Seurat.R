@@ -355,13 +355,10 @@ PredictCellTypeProbability <- function(seuratObj, models_dir = "./classifiers/mo
     classifier <- readRDS(file = paste0(models_dir, '/', model_name))
 
     #De-sparse and transpose seuratObj normalized data & make names unique
-    gene_expression_matrix <- as.data.frame(Matrix::t(as.matrix(Seurat::GetAssayData(seuratObj, assay = assayName, slot = "data"))))
-    if (sum(duplicated(names(gene_expression_matrix))) > 0) {
-      stop(paste0('There were duplicated names: ', names(gene_expression_matrix)[duplicated(names(gene_expression_matrix))]))
-    }
+    gene_expression_matrix <- Matrix::t(Seurat::GetAssayData(seuratObj, assay = assayName, slot = "data"))
 
     # NOTE: makeNames() will convert hyphen to period, and also prefix genes with numeric starts, like 7SK.2 -> X7SK.2
-    names(gene_expression_matrix) <- make.names(names(gene_expression_matrix))
+    colnames(gene_expression_matrix) <- make.names(colnames(gene_expression_matrix))
 
     nBatches <- ifelse(is.na(batchSize), yes = 1, no = ceiling(nrow(gene_expression_matrix) / batchSize))
     probability_vector <- NULL
@@ -369,7 +366,7 @@ PredictCellTypeProbability <- function(seuratObj, models_dir = "./classifiers/mo
       start <- 1 + ((batchIdx-1) * batchSize)
       end <- min((batchIdx * batchSize), nrow(gene_expression_matrix))
       print(paste0("Iteration ", batchIdx, " of ", nBatches, ", (", start, "-", end, ")"))
-      dat <- stats::predict(classifier, newdata = gene_expression_matrix[start:end,], predict_type = 'prob')[,1]
+      dat <- stats::predict(classifier, newdata = data.frame(gene_expression_matrix[start:end,]), predict_type = 'prob')[,1]
       if (batchIdx == 1) {
         probability_vector <- dat
       } else {
