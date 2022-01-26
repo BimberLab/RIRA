@@ -333,60 +333,56 @@ TrainAllModels <- function(seuratObj, celltype_column, assay = "RNA", slot = "da
 #' @description Applies trained models to get celltype probabilities.
 #' @param seuratObj The Seurat Object to be updated
 #' @param models_dir the directory containing the models produced by TrainAllModels
-#' @param iterative Logical determining whether or not the data should be chunked to save memory or not. 
-#' @param iterations Integer determing how many chunks the data should be split into.
+#' @param batchSize To conserve memory, data will be chunked into batches of at most this many cells
 #' @param assayName The assay holding gene expression data
 #' @export
-PredictCellTypeProbability <- function(seuratObj, models_dir = "./classifiers/models", iterative = FALSE, iterations = 100, assayName= "RNA"){
+PredictCellTypeProbability <- function(seuratObj, models_dir = "./classifiers/models", batchSize = 20000, assayName= "RNA"){
   if (endsWith(models_dir, "/")){
     models_dir <- gsub(models_dir, "/$", "")
   }
 
   #Grab model names from model directory
   model_names <- list.files(models_dir)
+  if (length(model_names) == 0) {
+    stop(paste0('No models found in: ', models_dir))
+  }
+
   for (model_name in model_names){
     #Grab celltype name from the name of the model
-    celltype <- strsplit(model_name,"_")[[1]][[1]]
+    celltype <- unlist(strsplit(model_name,"_"))[[1]]
+
     #load trained model
-    print(paste("Classifying using", model_name))
+    print(paste("Classifying: ", celltype))
     classifier <- readRDS(file = paste0(models_dir, '/', model_name))
+
     #De-sparse and transpose seuratObj normalized data & make names unique
     gene_expression_matrix <- as.data.frame(Matrix::t(as.matrix(Seurat::GetAssayData(seuratObj, assay = assayName, slot = "data"))))
-    names(gene_expression_matrix) <- make.names(names(gene_expression_matrix),unique = T)
-    
-    if (!iterative){
-      #predict probabilities for current celltype
-      probability_vector <- stats::predict(classifier, newdata= gene_expression_matrix, predict_type = "prob")
-      #append probabilities to seurat metadata
-      seuratObj@meta.data[[paste0(celltype,"_probability")]] <- probability_vector[,1]
-    } else if (iterative){
-      #find intervals/chunks that split the data in the specified number of iterations
-      intervals <- split(1:ncol(gene_expression_matrix), sort(1:ncol(gene_expression_matrix) %% iterations))
-      #instantiate a list to hold all of the probability vector
-      probability_vector_list <- vector(mode = "list", length = iterations)
-      i <- 1
-      for (interval in intervals){
-        #Define interval/chunk limits
-        start <- utils::head(interval,1)
-        end <- utils::tail(interval,1)
-        
-        #report current iteration
-        print(paste("Iteration ", i , " of ", iterations))
-        #add vector of probabilities to list
+    if (sum(duplicated(names(gene_expression_matrix))) > 0) {
+      stop(paste0('There were duplicated names: ', names(gene_expression_matrix)[duplicated(names(gene_expression_matrix))]))
+    }
 
-        probability_vector_list[[i]] <- stats::predict(classifier, newdata = gene_expression_matrix[,start:end], predict_type = 'prob')
-        i <- i + 1
-      }
-      #convert from list of probabilities to vector
-      probability_vector <- unlist(probability_vector_list)
+    nBatches <- ifelse(is.na(batchSize), yes = 1, no = ceiling(ncol(gene_expression_matrix) / batchSize))
+    probability_vector <- NULL
+    for (batchIdx in 1:nBatches){
+      print(paste("Iteration ", batchIdx, " of ", nBatches))
 
-      #append probabilities to seurat metadata
-      fieldName <- paste0(celltype,"_probability")
-      seuratObj@meta.data[[,fieldName]] <- probability_vector
+      start <- 1 + ((batchIdx-1) * batchSize)
+      end <- min((batchIdx * batchSize), ncol(gene_expression_matrix))
 
-      if (length(names(seuratObj@reductions)) > 0) {
-        print(Seurat::FeaturePlot(seuratObj, features = fieldName))
-      }
+      dat <- stats::predict(classifier, newdata = gene_expression_matrix[,start:end], predict_type = 'prob')
+      probability_vector <- ifelse(batchIdx == 1, yes = dat, no = c(probability_vector, dat))
+    }
+
+    if (length(probability_vector) != ncol(seuratObj)) {
+      stop(paste0('Error calculating probability_vector. Length was: ', length(probability_vector)))
+    }
+
+    #append probabilities to seurat metadata
+    fieldName <- paste0(celltype,"_probability")
+    seuratObj@meta.data[[,fieldName]] <- probability_vector
+
+    if (length(names(seuratObj@reductions)) > 0) {
+      print(Seurat::FeaturePlot(seuratObj, features = fieldName))
     }
   }
 
@@ -408,7 +404,11 @@ PredictCellTypeProbability <- function(seuratObj, models_dir = "./classifiers/mo
 #' @export
 AssignCellType <- function(seuratObj, minimum_probability = 0.5, minimum_delta = 0.25, columnSuffix = "_probability"){
   #This grabs each column in the metadata with the suffix "_probability"
-  probabilities_matrix <- seuratObj@meta.data[,grep(columnSuffix,names(seuratObj@meta.data))]
+  probabilities_matrix <- seuratObj@meta.data[,grep(columnSuffix,names(seuratObj@meta.data)), drop = F]
+  if (ncol(probabilities_matrix) == 0) {
+    stop('Unable to find cell type probability columns!')
+  }
+
   seuratObj@meta.data[,"Classifier_Consensus_Celltype"] <- "Unassigned"
   #Iterate over the cells in the seurat object
 
