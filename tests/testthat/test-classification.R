@@ -83,6 +83,11 @@ test_that("Cell type classification works", {
     testthat::expect_equal(sum(seuratObj$Classifier_Consensus_Celltype == cellType), expected[[cellType]])
   }
 
+  # Test batchSize:
+  seuratObj2 <- prepareTestData()
+  seuratObj2 <- PredictCellTypeProbability(seuratObj = seuratObj2, batchSize = 38)
+  seuratObj2 <- AssignCellType(seuratObj = seuratObj2)
+  testthat::expect_equal(0, sum(seuratObj$Classifier_Consensus_Celltype != seuratObj2$Classifier_Consensus_Celltype))
   
   feats <- c("IFI30", "CD7", "CD3E",   "MS4A1", "CD79A",   "VCAN", "MNDA",   "C1QB", "C1QA")
   RIRA::TrainAllModels(seuratObj = seuratObjTrain, celltype_column = 'CellType', n_cores = 2, output_dir = './classifiers2', gene_list = feats)

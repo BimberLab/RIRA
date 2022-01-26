@@ -283,8 +283,7 @@ TrainAllModels <- function(seuratObj, celltype_column, assay = "RNA", slot = "da
   if (grepl("ConfusionMatrix", metrics_file)){
     confusion <- readRDS(metrics_file)
 
-    label <- gsub(basename(metrics_file), pattern = '.rds', replacement = '')
-    label <- unlist(strsplit(label, split = '_'))[1]
+    label <- gsub(basename(metrics_file), pattern = '_BinaryClassifier.rds', replacement = '')
     dat <- as.data.frame(confusion$table)
     dat2 <- as.data.frame(prop.table(confusion$table))
 
@@ -361,16 +360,21 @@ PredictCellTypeProbability <- function(seuratObj, models_dir = "./classifiers/mo
       stop(paste0('There were duplicated names: ', names(gene_expression_matrix)[duplicated(names(gene_expression_matrix))]))
     }
 
-    nBatches <- ifelse(is.na(batchSize), yes = 1, no = ceiling(ncol(gene_expression_matrix) / batchSize))
+    # NOTE: makeNames() will convert hyphen to period, and also prefix genes with numeric starts, like 7SK.2 -> X7SK.2
+    names(gene_expression_matrix) <- make.names(names(gene_expression_matrix))
+
+    nBatches <- ifelse(is.na(batchSize), yes = 1, no = ceiling(nrow(gene_expression_matrix) / batchSize))
     probability_vector <- NULL
     for (batchIdx in 1:nBatches){
-      print(paste("Iteration ", batchIdx, " of ", nBatches))
-
       start <- 1 + ((batchIdx-1) * batchSize)
-      end <- min((batchIdx * batchSize), ncol(gene_expression_matrix))
-
-      dat <- stats::predict(classifier, newdata = gene_expression_matrix[,start:end], predict_type = 'prob')
-      probability_vector <- ifelse(batchIdx == 1, yes = dat, no = c(probability_vector, dat))
+      end <- min((batchIdx * batchSize), nrow(gene_expression_matrix))
+      print(paste0("Iteration ", batchIdx, " of ", nBatches, ", (", start, "-", end, ")"))
+      dat <- stats::predict(classifier, newdata = gene_expression_matrix[start:end,], predict_type = 'prob')[,1]
+      if (batchIdx == 1) {
+        probability_vector <- dat
+      } else {
+        probability_vector <- c(probability_vector, dat)
+      }
     }
 
     if (length(probability_vector) != ncol(seuratObj)) {
@@ -379,7 +383,7 @@ PredictCellTypeProbability <- function(seuratObj, models_dir = "./classifiers/mo
 
     #append probabilities to seurat metadata
     fieldName <- paste0(celltype,"_probability")
-    seuratObj@meta.data[[,fieldName]] <- probability_vector
+    seuratObj@meta.data[[fieldName]] <- probability_vector
 
     if (length(names(seuratObj@reductions)) > 0) {
       print(Seurat::FeaturePlot(seuratObj, features = fieldName))
