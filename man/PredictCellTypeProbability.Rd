@@ -7,8 +7,7 @@
 PredictCellTypeProbability(
   seuratObj,
   models_dir = "./classifiers/models",
-  iterative = FALSE,
-  iterations = 100,
+  batchSize = 20000,
   assayName = "RNA"
 )
 }
@@ -17,9 +16,7 @@ PredictCellTypeProbability(
 
 \item{models_dir}{the directory containing the models produced by TrainAllModels}
 
-\item{iterative}{Logical determining whether or not the data should be chunked to save memory or not.}
-
-\item{iterations}{Integer determing how many chunks the data should be split into.}
+\item{batchSize}{To conserve memory, data will be chunked into batches of at most this many cells}
 
 \item{assayName}{The assay holding gene expression data}
 }
