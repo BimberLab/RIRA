@@ -29,5 +29,5 @@ test_that("celltypist runs", {
   print(table(seuratObj$predicted_labels))
   expect_equal(7, length(unique(seuratObj$majority_voting)))
   expect_equal(9, length(unique(seuratObj$predicted_labels)))
-  expect_equal(358, unname(table(seuratObj$predicted_labels)['B cells']))
+  expect_equal(356, unname(table(seuratObj$predicted_labels)['B cells']))
 })

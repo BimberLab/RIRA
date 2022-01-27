@@ -27,7 +27,7 @@ test_that("scGate Runs", {
   # Add reductions so plotting will work:
   seuratObj <- suppressWarnings(pbmc3k)
   seuratObj <- Seurat::NormalizeData(seuratObj)
-  seuratObj <- Seurat::FindVariableFeatures(seuratObj, nfeatures = 2000, seed.use = GetSeed())
+  seuratObj <- Seurat::FindVariableFeatures(seuratObj, nfeatures = 2000)
   seuratObj <- Seurat::ScaleData(seuratObj)
   seuratObj <- Seurat::RunPCA(seuratObj, features = Seurat::VariableFeatures(object = seuratObj))
   seuratObj <- Seurat::FindNeighbors(seuratObj, dims = 1:10)
