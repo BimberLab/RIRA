@@ -21,19 +21,17 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl") {
   outFile <- tempfile()
   outDir <- dirname(outFile)
   seuratObj <- Seurat::DietSeurat(seuratObj)
-  seuratAnnData <- SeuratToAnnData(seuratObj, paste0(outFile, '.seurat.annData'))
+  seuratAnnData <- SeuratToAnnData(seuratObj, paste0(outFile, '-seurat-annData'))
 
   #exe <- reticulate::py_exe()
   exe <- "celltypist"
   #"-m", "celltypist.command_line",
-  pyOut <- system2(exe, c("--update-models", "--quiet"), stdout = TRUE, stderr = TRUE)
-  print(pyOut)
+  system2(exe, c("--update-models", "--quiet"))
 
   # "-m", "celltypist.command_line",
   # "--plot-results"
   args <- c("-i", seuratAnnData, "-m", modelName, "--outdir", outDir, "--majority-voting", "--prefix", "celltypist.", "--quiet")
-  pyOut <- system2(exe, args, stdout = TRUE, stderr = TRUE)
-  print(pyOut)
+  system2(exe, args)
 
   labels <- paste0(outDir, '/celltypist.predicted_labels.csv')
   if (!file.exists(labels)) {
@@ -71,10 +69,15 @@ TrainCellTypist <- function(seuratObj, labelField, modelFile) {
   }
 
   modelFile <- gsub(modelFile, pattern = '\\\\', replacement = '/')
-  outFile <- gsub(tempfile(), pattern = '\\\\', replacement = '/')
+  outFile <- tempfile()
   outDir <- dirname(outFile)
   seuratObj <- Seurat::DietSeurat(seuratObj)
   trainData <- SeuratToAnnData(seuratObj, paste0(outFile, '-seurat-annData'))
+
+  # potentially replace windows slashes with forward slash
+  trainData <- gsub(trainData, pattern = '\\\\', replacement = '/')
+  outDir <- gsub(outDir, pattern = '\\\\', replacement = '/')
+
   labelFile <- paste0(outDir, '.seurat.labels.txt')
   scriptFile <- paste0(outDir, '.seurat.train.py')
 
@@ -88,11 +91,11 @@ TrainCellTypist <- function(seuratObj, labelField, modelFile) {
 
   write(typistCommand, file = scriptFile)
 
-  pyOut <- system2(reticulate::py_exe(), c(scriptFile), stdout = TRUE, stderr = TRUE)
-  print(pyOut)
+  print('Running celltypist')
+  system2(reticulate::py_exe(), c(scriptFile))
 
-  #unlink(labelFile)
-  #unlink(scriptFile)
-  #unlink(trainData)
+  unlink(labelFile)
+  unlink(scriptFile)
+  unlink(trainData)
 }
 

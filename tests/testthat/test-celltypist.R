@@ -16,10 +16,9 @@ test_that("celltypist runs", {
   expect_equal(323, unname(table(seuratObj$predicted_labels)['B cells']))
 
   modelFile <- 'myModel.pkl'
-  TrainCellTypist(seuratObj, 'majority_voting', paste0(getwd(), '/', modelFile))
+  seuratObjForTraining <- subset(seuratObj, cells = rownames(seuratObj@meta.data)[1:500])
+  TrainCellTypist(seuratObjForTraining, 'majority_voting', paste0(getwd(), '/', modelFile))
 
-  stop()
-  
   # A bit circular, but this is just a test case:
   seuratObj <- suppressWarnings(pbmc3k)
   seuratObj <- Seurat::NormalizeData(seuratObj, verbose = FALSE)
