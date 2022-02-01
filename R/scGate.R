@@ -93,7 +93,7 @@ GetScGateModel <- function(modelName, allowSCGateDB = TRUE) {
     stop(paste0('Unable to find gate: ', modelName))
   }
 
-  models.DB <- scGate::get_scGateDB()
+  models.DB <- scGate::get_scGateDB(force_update = T)
   if (!modelName %in% names(models.DB$human$generic)){
     stop(paste0('Unable to find model: ', modelName))
   }
@@ -112,10 +112,11 @@ GetScGateModel <- function(modelName, allowSCGateDB = TRUE) {
 #' @param neg.thr Passed directly to scGate::scGate. Maximum UCell score value for negative signatures
 #' @param ncores Passed directly to scGate::scGate. Number of processors for parallel processing (requires future.apply)
 #' @param genes.blacklist Passed directly to scGate::scGate. Genes blacklisted from variable features. The default loads the list of genes in scGate::genes.blacklist.default; you may deactivate blacklisting by setting genes.blacklist=NULL
+#' @param labelRename An optional list that maps the model name to the final label that should be used in the seurat object. for exmaple: list(Tcell = 'T_NK', NK = 'T_NK'), would re-label cells classified as either 'Tcell' or 'NK' by those models to one common label of T_NK
 #'
 #' @export
-RunScGateWithDefaultModels <- function(seuratObj, min.cells = 10, assay = 'RNA', pos.thr = 0.13, neg.thr = 0.13, ncores = 1, genes.blacklist = 'default') {
-  models.DB <- scGate::get_scGateDB()
+RunScGateWithDefaultModels <- function(seuratObj, min.cells = 10, assay = 'RNA', pos.thr = 0.13, neg.thr = 0.13, ncores = 1, genes.blacklist = 'default', labelRename = NULL) {
+  models.DB <- scGate::get_scGateDB(force_update = T)
   modelNames <- names(models.DB$human$generic)
 
   return(RunScGateForModels(seuratObj,
@@ -125,7 +126,8 @@ RunScGateWithDefaultModels <- function(seuratObj, min.cells = 10, assay = 'RNA',
                             pos.thr = pos.thr,
                             neg.thr = neg.thr,
                             ncores = ncores,
-                            genes.blacklist = genes.blacklist
+                            genes.blacklist = genes.blacklist,
+                            labelRename = labelRename
   ))
 }
 
@@ -140,12 +142,19 @@ RunScGateWithDefaultModels <- function(seuratObj, min.cells = 10, assay = 'RNA',
 #' @param neg.thr Passed directly to scGate::scGate. Maximum UCell score value for negative signatures
 #' @param ncores Passed directly to scGate::scGate. Number of processors for parallel processing (requires future.apply)
 #' @param genes.blacklist Passed directly to scGate::scGate. Genes blacklisted from variable features. The default loads the list of genes in scGate::genes.blacklist.default; you may deactivate blacklisting by setting genes.blacklist=NULL
+#' @param labelRename An optional list that maps the model name to the final label that should be used in the seurat object. for exmaple: list(Tcell = 'T_NK', NK = 'T_NK'), would re-label cells classified as either 'Tcell' or 'NK' by those models to one common label of T_NK
 #'
 #' @export
-RunScGateForModels <- function(seuratObj, modelNames, min.cells = 10, assay = 'RNA', pos.thr = 0.13, neg.thr = 0.13, ncores = 1, genes.blacklist = 'default') {
+RunScGateForModels <- function(seuratObj, modelNames, min.cells = 10, assay = 'RNA', pos.thr = 0.13, neg.thr = 0.13, ncores = 1, genes.blacklist = 'default', labelRename = NULL) {
   fieldsToConsider <- c()
   for (modelName in modelNames){
     print(paste0('Running model: ', modelName))
+    cellLabel <- modelName
+    if (!all(is.null(labelRename)) && modelName %in% names(labelRename)) {
+      cellLabel <- labelRename[[modelName]]
+      print(paste0('cells will be labeled as: ', cellLabel))
+    }
+
     fn <- paste0(modelName, '.is.pure')
     seuratObj <- RunScGate(seuratObj = seuratObj,
               model = modelName,
@@ -160,7 +169,7 @@ RunScGateForModels <- function(seuratObj, modelNames, min.cells = 10, assay = 'R
 
     fieldsToConsider <- c(fieldsToConsider, fn)
     seuratObj@meta.data[[fn]] <- as.character(seuratObj@meta.data[[fn]])
-    seuratObj@meta.data[[fn]] <- ifelse(seuratObj@meta.data[[fn]] == 'Pure', yes = modelName, no = NA)
+    seuratObj@meta.data[[fn]] <- ifelse(seuratObj@meta.data[[fn]] == 'Pure', yes = cellLabel, no = NA)
   }
 
   # Remove intermediate fields:
@@ -178,6 +187,7 @@ RunScGateForModels <- function(seuratObj, modelNames, min.cells = 10, assay = 'R
 
     return(paste0(sort(unique(vals)), collapse = ','))
   })
+
   seuratObj$scGateConsensus <- naturalsort::naturalfactor(seuratObj$scGateConsensus)
 
   print(ggplot(seuratObj@meta.data, aes(x = scGateConsensus, fill = scGateConsensus)) +

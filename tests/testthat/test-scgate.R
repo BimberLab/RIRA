@@ -23,7 +23,15 @@ test_that("scGate Runs", {
   # Try without reductions present:
   seuratObj <- RunScGate(seuratObj, gate)
   expect_equal(sum(seuratObj$is.pure.level1 == 'Pure'), 2336, info = 'Before DimRedux')
-  
+
+  # Try with aliasing of models:
+  seuratObj <- RIRA::RunScGateForModels(seuratObj, modelNames = c('Bcell', 'Tcell', 'NK', 'Myeloid'), labelRename = list(Tcell = 'T_NK', NK = 'T_NK'))
+  print(table(seuratObj$scGateConsensus))
+  expect_equal(sum(seuratObj$scGateConsensus == 'Bcell'), 238, info = 'With aliasing')
+  expect_equal(sum(seuratObj$scGateConsensus == 'Tcell'), 0, info = 'With aliasing')
+  expect_equal(sum(seuratObj$scGateConsensus == 'NK'), 0, info = 'With aliasing')
+  expect_equal(sum(seuratObj$scGateConsensus == 'T_NK'), 1612, info = 'With aliasing')
+
   # Add reductions so plotting will work:
   seuratObj <- suppressWarnings(pbmc3k)
   seuratObj <- Seurat::NormalizeData(seuratObj)
