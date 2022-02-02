@@ -20,7 +20,7 @@ test_that("Atlas loading works", {
 
   meta <- data.frame(Col1 = 1:ncol(mat))
   rownames(meta) <- colnames(mat)
-  write.table(meta, paste0(fn, '/meta.csv'), sep = ',')
+  utils::write.table(meta, paste0(fn, '/meta.csv'), sep = ',')
 
   seuratObj <- GetRiraCountMatrix(version)
   expect_equal(mat, Seurat::GetAssayData(seuratObj, slot = 'counts'))
