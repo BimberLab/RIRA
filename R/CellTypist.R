@@ -81,7 +81,7 @@ TrainCellTypist <- function(seuratObj, labelField, modelFile) {
   labelFile <- paste0(outDir, '.seurat.labels.txt')
   scriptFile <- paste0(outDir, '.seurat.train.py')
 
-  write.table(seuratObj@meta.data[[labelField]], row.names = F, sep = '\t', quote = F, col.names = F, file = labelFile)
+  utils::write.table(seuratObj@meta.data[[labelField]], row.names = F, sep = '\t', quote = F, col.names = F, file = labelFile)
 
   typistCommand <- c(
     "import celltypist;",
