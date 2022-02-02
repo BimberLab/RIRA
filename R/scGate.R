@@ -21,9 +21,10 @@ utils::globalVariables(
 #' @param ncores Passed directly to scGate::scGate. Number of processors for parallel processing (requires future.apply)
 #' @param output.col.name Passed directly to scGate::scGate. Column name with 'pure/impure' annotation
 #' @param genes.blacklist Passed directly to scGate::scGate. Genes blacklisted from variable features. The default loads the list of genes in scGate::genes.blacklist.default; you may deactivate blacklisting by setting genes.blacklist=NULL
+#' @param doPlotUCellScores If true, FeaturePlots will be created for each UCell score used in classification
 #'
 #' @export
-RunScGate <- function(seuratObj, model, min.cells = 10, assay = 'RNA', pos.thr = 0.13, neg.thr = 0.13, ncores = 1, output.col.name = "is.pure", genes.blacklist = 'default') {
+RunScGate <- function(seuratObj, model, min.cells = 10, assay = 'RNA', pos.thr = 0.13, neg.thr = 0.13, ncores = 1, output.col.name = "is.pure", genes.blacklist = 'default', doPlotUCellScores = TRUE) {
   if (is.character(model)) {
     model <- GetScGateModel(model)
     if (is.null(model)) {
@@ -49,16 +50,26 @@ RunScGate <- function(seuratObj, model, min.cells = 10, assay = 'RNA', pos.thr =
     for (col in colNames) {
       print(Seurat::DimPlot(seuratObj, group.by = col))
     }
+  } else {
+    print('There are no reductions in this seurat object, cannot create dimplots')
+  }
 
+  if (doPlotUCellScores) {
+    .PlotUCellScores(seuratObj)
+  }
+
+  return(seuratObj)
+}
+
+.PlotUCellScores <- function(seuratObj) {
+  if (length(names(seuratObj@reductions)) > 0) {
     colNames <- names(seuratObj@meta.data)[grepl(names(seuratObj@meta.data), pattern = paste0('UCell$'))]
     for (col in colNames) {
       suppressWarnings(print(Seurat::FeaturePlot(seuratObj, features = col, min.cutoff = 'q05', max.cutoff = 'q95')))
     }
   } else {
-    print('There are no reductions in this seurat object, cannot create dimplots')
+    print('There are no reductions in this seurat object, cannot create UCell FeaturePlots')
   }
-
-  return(seuratObj)
 }
 
 #' @title GetAvailableScGates
@@ -164,7 +175,8 @@ RunScGateForModels <- function(seuratObj, modelNames, min.cells = 10, assay = 'R
               neg.thr = neg.thr,
               ncores = ncores,
               output.col.name = fn,
-              genes.blacklist = genes.blacklist
+              genes.blacklist = genes.blacklist,
+              doPlotUCellScores = FALSE
     )
 
     fieldsToConsider <- c(fieldsToConsider, fn)
@@ -174,7 +186,11 @@ RunScGateForModels <- function(seuratObj, modelNames, min.cells = 10, assay = 'R
 
   # Remove intermediate fields:
   toDrop <- names(seuratObj@meta.data)[grepl(names(seuratObj@meta.data), pattern = 'is.pure.level')]
-  seuratObj@meta.data[toDrop] <- NULL
+  for (fn in toDrop) {
+    seuratObj@meta.data[fn] <- NULL
+  }
+
+  .PlotUCellScores(seuratObj)
 
   # TODO: should we consider UCell thresholds or the delta between the top two calls?
   dat <- seuratObj@meta.data[,fieldsToConsider, drop = FALSE]
@@ -189,6 +205,10 @@ RunScGateForModels <- function(seuratObj, modelNames, min.cells = 10, assay = 'R
   })
 
   seuratObj$scGateConsensus <- naturalsort::naturalfactor(seuratObj$scGateConsensus)
+
+  if (length(names(seuratObj@reductions)) > 0) {
+    print(Seurat::DimPlot(seuratObj, group.by = 'scGateConsensus'))
+  }
 
   print(ggplot(seuratObj@meta.data, aes(x = scGateConsensus, fill = scGateConsensus)) +
     geom_bar(color = 'black') +
