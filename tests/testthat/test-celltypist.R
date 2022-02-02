@@ -17,7 +17,7 @@ test_that("celltypist runs", {
 
   # NOTE: this is very slow, so skip in automated testing for now
   modelFile <- 'myModel.pkl'
-  seuratObjForTraining <- subset(seuratObj, cells = rownames(seuratObj@meta.data)[1:500])
+  seuratObjForTraining <- subset(seuratObj, cells = sort(rownames(seuratObj@meta.data))[1:500])
   TrainCellTypist(seuratObjForTraining, 'majority_voting', paste0(getwd(), '/', modelFile))
 
   # A bit circular, but this is just a test case:
