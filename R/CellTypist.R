@@ -6,9 +6,10 @@
 #' @description Runs celltypist on a seurat object and stores the calls as metadata
 #' @param seuratObj The seurat object
 #' @param modelName The model name or path to celltypist model
+#' @param extraArgs An optional list of additional arguments passed directly on the command line to cell typist
 #'
 #' @export
-RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl") {
+RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", extraArgs = c("--majority-voting", "--mode", "prob_match", "--p-thres", 0.5)) {
   if (!reticulate::py_available(initialize = TRUE)) {
     stop(paste0('Python/reticulate not configured. Run "reticulate::py_config()" to initialize python'))
   }
@@ -30,7 +31,11 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl") {
 
   # "-m", "celltypist.command_line",
   # "--plot-results"
-  args <- c("-i", seuratAnnData, "-m", modelName, "--outdir", outDir, "--majority-voting", "--prefix", "celltypist.", "--quiet")
+  args <- c("-i", seuratAnnData, "-m", modelName, "--outdir", outDir, "--prefix", "celltypist.", "--quiet")
+  if (!all(is.na(extraArgs))) {
+    args <- c(args, extraArgs)
+  }
+
   system2(exe, args)
 
   labels <- paste0(outDir, '/celltypist.predicted_labels.csv')
@@ -39,6 +44,7 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl") {
   }
 
   labels <- utils::read.csv(labels, header = T, row.names = 1)
+  labels$majority_voting[labels$majority_voting == 'Unassigned'] <- NA
   seuratObj <- Seurat::AddMetaData(seuratObj, labels)
 
   unlink(seuratAnnData)

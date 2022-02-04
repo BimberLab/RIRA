@@ -9,6 +9,7 @@ LazyData: true
 Maintainer: The package maintainer <bimber@ohsu.edu>
 License: GPL-3
 Depends:
+    R (>= 4.1.0),
     scGate,
     UCell
 Imports:

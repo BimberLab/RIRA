@@ -4,12 +4,18 @@
 \alias{RunCellTypist}
 \title{Run Celltypist}
 \usage{
-RunCellTypist(seuratObj, modelName = "Immune_All_Low.pkl")
+RunCellTypist(
+  seuratObj,
+  modelName = "Immune_All_Low.pkl",
+  extraArgs = c("--majority-voting", "--mode", "prob_match", "--p-thres", 0.5)
+)
 }
 \arguments{
 \item{seuratObj}{The seurat object}
 
 \item{modelName}{The model name or path to celltypist model}
+
+\item{extraArgs}{An optional list of additional arguments passed directly on the command line to cell typist}
 }
 \description{
 Runs celltypist on a seurat object and stores the calls as metadata

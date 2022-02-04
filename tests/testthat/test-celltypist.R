@@ -11,13 +11,16 @@ test_that("celltypist runs", {
   
   seuratObj <- RIRA::RunCellTypist(seuratObj)
   
-  expect_equal(9, length(unique(seuratObj$majority_voting)))
-  expect_equal(30, length(unique(seuratObj$predicted_labels)))
-  expect_equal(323, unname(table(seuratObj$predicted_labels)['B cells']))
+  expect_equal(8, length(unique(seuratObj$majority_voting)), info = 'using default model')
+  expect_equal(82, length(unique(seuratObj$predicted_labels)))
+  expect_equal(254, unname(table(seuratObj$predicted_labels)['B cells']))
 
   # NOTE: this is very slow, so skip in automated testing for now
   modelFile <- 'myModel.pkl'
-  seuratObjForTraining <- subset(seuratObj, cells = sort(rownames(seuratObj@meta.data))[1:500])
+  cells <- rownames(seuratObj@meta.data)[!is.na(seuratObj$majority_voting)]
+  seuratObjForTraining <- subset(seuratObj, cells = cells)
+  seuratObjForTraining <- subset(seuratObjForTraining, cells = sort(rownames(seuratObjForTraining@meta.data))[1:500])
+  print(paste0('cells for training: ', ncol(seuratObjForTraining)))
   TrainCellTypist(seuratObjForTraining, 'majority_voting', paste0(getwd(), '/', modelFile))
 
   # A bit circular, but this is just a test case:
@@ -27,7 +30,7 @@ test_that("celltypist runs", {
 
   print(table(seuratObj$majority_voting))
   print(table(seuratObj$predicted_labels))
-  expect_equal(7, length(unique(seuratObj$majority_voting)))
-  expect_equal(9, length(unique(seuratObj$predicted_labels)))
+  expect_equal(10, length(unique(seuratObj$majority_voting)), info = 'using custom model', tolerance = 1)
+  expect_equal(54, length(unique(seuratObj$predicted_labels)), tolerance = 3)
   expect_equal(356, unname(table(seuratObj$predicted_labels)['B cells']), tolerance = 2)
 })
