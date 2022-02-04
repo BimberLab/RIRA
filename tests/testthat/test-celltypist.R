@@ -11,9 +11,9 @@ test_that("celltypist runs", {
   
   seuratObj <- RIRA::RunCellTypist(seuratObj)
   
-  expect_equal(9, length(unique(seuratObj$majority_voting)))
-  expect_equal(30, length(unique(seuratObj$predicted_labels)))
-  expect_equal(323, unname(table(seuratObj$predicted_labels)['B cells']))
+  expect_equal(8, length(unique(seuratObj$majority_voting)))
+  expect_equal(82, length(unique(seuratObj$predicted_labels)))
+  expect_equal(254, unname(table(seuratObj$predicted_labels)['B cells']))
 
   # NOTE: this is very slow, so skip in automated testing for now
   modelFile <- 'myModel.pkl'
@@ -27,7 +27,7 @@ test_that("celltypist runs", {
 
   print(table(seuratObj$majority_voting))
   print(table(seuratObj$predicted_labels))
-  expect_equal(7, length(unique(seuratObj$majority_voting)))
-  expect_equal(9, length(unique(seuratObj$predicted_labels)))
+  expect_equal(8, length(unique(seuratObj$majority_voting)))
+  expect_equal(46, length(unique(seuratObj$predicted_labels)))
   expect_equal(356, unname(table(seuratObj$predicted_labels)['B cells']), tolerance = 2)
 })
