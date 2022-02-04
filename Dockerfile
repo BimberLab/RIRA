@@ -4,6 +4,9 @@ ADD . /RIRA_classification
 
 ENV RETICULATE_PYTHON=/usr/bin/python3
 
+# NOTE: this is required when running as non-root:
+ENV NUMBA_CACHE_DIR=/tmp
+
 RUN pip3 install celltypist
 
 RUN cd /RIRA_classification \
