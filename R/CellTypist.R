@@ -15,7 +15,7 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", extraArgs
   }
 
   if (!reticulate::py_module_available('celltypist')) {
-    stop('The celltypist python package has not been installed!')
+    stop('The celltypist python package has not been installed! If you believe it has been installed, run reticulate::import("celltypist") to get more information and debug')
   }
 
   print(paste0('Running celltypist using model: ', modelName))
@@ -67,7 +67,7 @@ TrainCellTypist <- function(seuratObj, labelField, modelFile) {
   }
 
   if (!reticulate::py_module_available('celltypist')) {
-    stop('The celltypist python package has not been installed!')
+    stop('The celltypist python package has not been installed! If you believe it has been installed, run reticulate::import("celltypist") to get more information and debug')
   }
 
   if (!labelField %in% names(seuratObj@meta.data)) {
