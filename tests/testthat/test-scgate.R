@@ -21,8 +21,7 @@ test_that("scGate runs with custom models", {
   seuratObj <- RIRA::RunScGateForModels(seuratObj, modelNames = c('Bcell', 'Tcell', 'NK', 'Myeloid', 'Stromal', 'pDC', 'Erythrocyte', 'Epithelial'), labelRename = list(Tcell = 'T_NK', NK = 'T_NK'))
   print(table(seuratObj$scGateConsensus))
   dat <- table(seuratObj$scGateConsensus)
-  #expect_equal(unname(dat[['Bcell']]), 244, info = 'With aliasing')
-  #expect_equal(unname(dat[['T_NK']]), 1601, info = 'With aliasing')
+  expect_equal(unname(dat[['pDC']]), 3)
 })
 
 test_that("scGate Runs", {
