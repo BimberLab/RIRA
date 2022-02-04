@@ -30,7 +30,7 @@ test_that("celltypist runs", {
 
   print(table(seuratObj$majority_voting))
   print(table(seuratObj$predicted_labels))
-  expect_equal(8, length(unique(seuratObj$majority_voting)), info = 'using custom model')
+  expect_equal(10, length(unique(seuratObj$majority_voting)), info = 'using custom model', tolerance = 1)
   expect_equal(54, length(unique(seuratObj$predicted_labels)), tolerance = 3)
   expect_equal(356, unname(table(seuratObj$predicted_labels)['B cells']), tolerance = 2)
 })
