@@ -10,6 +10,10 @@ ENV MPLCONFIGDIR=/tmp
 
 RUN pip3 install celltypist
 
+# NOTE: this is also added to support running as non-root. celltypist needs to write in ~/
+RUN mkdir /userHome && chmod -R 777 /userHome
+ENV HOME=/userHome
+
 RUN cd /RIRA_classification \
 	&& R CMD build . \
 	&& Rscript -e "BiocManager::install(ask = F, upgrade = 'always');" \
