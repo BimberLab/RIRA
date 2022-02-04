@@ -11,13 +11,16 @@ test_that("celltypist runs", {
   
   seuratObj <- RIRA::RunCellTypist(seuratObj)
   
-  expect_equal(9, length(unique(seuratObj$majority_voting)), info = 'using default model')
+  expect_equal(8, length(unique(seuratObj$majority_voting)), info = 'using default model')
   expect_equal(82, length(unique(seuratObj$predicted_labels)))
   expect_equal(254, unname(table(seuratObj$predicted_labels)['B cells']))
 
   # NOTE: this is very slow, so skip in automated testing for now
   modelFile <- 'myModel.pkl'
-  seuratObjForTraining <- subset(seuratObj, cells = sort(rownames(seuratObj@meta.data))[1:500])
+  cells <- rownames(seuratObj@meta.data)[!is.na(seuratObj$majority_voting)]
+  seuratObjForTraining <- subset(seuratObj, cells = cells)
+  seuratObjForTraining <- subset(seuratObjForTraining, cells = sort(rownames(seuratObjForTraining@meta.data))[1:500])
+  print(paste0('cells for training: ', ncol(seuratObjForTraining)))
   TrainCellTypist(seuratObjForTraining, 'majority_voting', paste0(getwd(), '/', modelFile))
 
   # A bit circular, but this is just a test case:

@@ -44,6 +44,7 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", extraArgs
   }
 
   labels <- utils::read.csv(labels, header = T, row.names = 1)
+  labels$majority_voting[labels$majority_voting == 'Unassigned'] <- NA
   seuratObj <- Seurat::AddMetaData(seuratObj, labels)
 
   unlink(seuratAnnData)
