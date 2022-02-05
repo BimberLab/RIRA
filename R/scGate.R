@@ -211,7 +211,7 @@ RunScGateForModels <- function(seuratObj, modelNames, min.cells = 10, assay = 'R
     toDrop <- grepl(seuratObj$scGateConsensus, pattern = ',')
     if (sum(toDrop) > 0) {
       print('Dropping the following ambiguous consensus labels:')
-      print(table(seuratObj$scGateConsensus[toDrop]))
+      print(sort(table(seuratObj$scGateConsensus[toDrop]), decreasing = T))
 
       seuratObj$scGateConsensus[toDrop] <- NA
     }
