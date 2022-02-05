@@ -87,7 +87,7 @@ test_that("scGates runs on all", {
   seuratObj <- RunScGateWithDefaultModels(seuratObj, dropAmbiguousConsensusValues = TRUE)
   dat <- table(seuratObj$scGateConsensus)
   dat
-  expect_equal(unname(dat[['NK']]), 151)
-  expect_equal(unname(dat[['Myeloid']]), 21)
+  expect_equal(unname(dat[['NK']]), 161)
+  expect_equal(unname(dat[['Myeloid']]), 18)
 })
 
