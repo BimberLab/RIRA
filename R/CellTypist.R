@@ -59,9 +59,10 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", extraArgs
 #' @param seuratObj The seurat object
 #' @param labelField The field in seuratObj@meta.data holding the labels for training
 #' @param modelFile The path to save the model
+#' @param minCellsPerClass If provided, any classes (and corresponding cells) with fewer than this many cells will be dropped from the training data
 #'
 #' @export
-TrainCellTypist <- function(seuratObj, labelField, modelFile) {
+TrainCellTypist <- function(seuratObj, labelField, modelFile, minCellsPerClass = 20) {
   if (!reticulate::py_available(initialize = TRUE)) {
     stop(paste0('Python/reticulate not configured. Run "reticulate::py_config()" to initialize python'))
   }
@@ -78,6 +79,10 @@ TrainCellTypist <- function(seuratObj, labelField, modelFile) {
   outFile <- tempfile()
   outDir <- dirname(outFile)
   seuratObj <- Seurat::DietSeurat(seuratObj)
+  if (!is.null(minCellsPerClass) && minCellsPerClass > 0) {
+    seuratObj <- .DropLowCountClasses(seuratObj, labelField, minCellsPerClass)
+  }
+
   trainData <- SeuratToAnnData(seuratObj, paste0(outFile, '-seurat-annData'))
 
   # potentially replace windows slashes with forward slash
@@ -97,7 +102,7 @@ TrainCellTypist <- function(seuratObj, labelField, modelFile) {
 
   write(typistCommand, file = scriptFile)
 
-  print('Running celltypist')
+  print('Running celltypist.train:')
   system2(reticulate::py_exe(), c(scriptFile))
 
   unlink(labelFile)

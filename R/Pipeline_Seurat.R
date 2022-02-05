@@ -171,9 +171,10 @@ TrainModel <- function(training_matrix, celltype, hyperparameter_tuning = F, lea
 #' @param n_models The number of models to be trained during hyperparameter tuning. The model with the highest accuracy will be selected and returned.
 #' @param n_cores If non-null, this number of workers will be used with future::plan
 #' @param gene_list If non-null, the input count matrix will be subset to these features
-#' @param verbose Whether or not to print the metrics data for each model after training. 
+#' @param verbose Whether or not to print the metrics data for each model after training.
+#' @param min_cells_per_class If provided, any classes (and corresponding cells) with fewer than this many cells will be dropped from the training data
 #' @export
-TrainAllModels <- function(seuratObj, celltype_column, assay = "RNA", slot = "data", output_dir = "./classifiers", hyperparameter_tuning = F, learner = "classif.ranger", inner_resampling = "cv", outer_resampling = "cv", inner_folds = 4, inner_ratio = 0.8,  outer_folds = 3, outer_ratio = 0.8, n_models = 20, n_cores = NULL, gene_list = NULL, verbose = TRUE){
+TrainAllModels <- function(seuratObj, celltype_column, assay = "RNA", slot = "data", output_dir = "./classifiers", hyperparameter_tuning = F, learner = "classif.ranger", inner_resampling = "cv", outer_resampling = "cv", inner_folds = 4, inner_ratio = 0.8,  outer_folds = 3, outer_ratio = 0.8, n_models = 20, n_cores = NULL, gene_list = NULL, verbose = TRUE, min_cells_per_class = 20){
   if (methods::missingArg(celltype_column)) {
     stop('Must provide the celltype_column argument')
   }
@@ -185,7 +186,11 @@ TrainAllModels <- function(seuratObj, celltype_column, assay = "RNA", slot = "da
   if (endsWith(output_dir, "/")){
     output_dir <- gsub(output_dir, pattern = "/$", replacement = "")
   }
-  
+
+  if (!is.null(min_cells_per_class) && min_cells_per_class > 0) {
+    seuratObj <- .DropLowCountClasses(seuratObj, celltype_column, min_cells_per_class)
+  }
+
   #Read the raw data from a seurat object and parse into an mlr3-compatible labeled matrix
   raw_data_matrix <- attr(x = seuratObj@assays[[assay]], which = slot)
   if (!all(is.null(gene_list))) {

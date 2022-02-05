@@ -72,3 +72,21 @@ SeuratToAnnData <- function(seuratObj, outFileBaseName) {
 
   return(paste0(outFileBaseName, ".h5ad"))
 }
+
+.DropLowCountClasses <- function(seuratObj, targetColumn, minCells) {
+  dat <- table(seuratObj@meta.data[[targetColumn]])
+  dat <- dat[dat > 0]
+  toDrop <- names(dat)[dat < minCells]
+  if (length(toDrop) > 0) {
+    print(paste0('The following classes will be dropped:'))
+    for (c in toDrop) {
+      print(paste0(c, ': ', dat[[c]], ' cells'))
+    }
+
+    toKeep <- rownames(seuratObj@meta.data)[!seuratObj@meta.data[[targetColumn]] %in% toDrop]
+    seuratObj <- subset(seuratObj, cells = toKeep)
+    print(paste0('Cells remaining: ', ncol(seuratObj)))
+  }
+
+  return(seuratObj)
+}

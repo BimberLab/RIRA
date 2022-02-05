@@ -82,5 +82,12 @@ test_that("scGates runs on all", {
   
   expect_equal(unname(dat[['Bcell,PanBcell']]), 244)
   expect_equal(unname(dat[['NK']]), 161)
+  
+  # Now with ambiguous cleanup:
+  seuratObj <- RunScGateWithDefaultModels(seuratObj, dropAmbiguousConsensusValues = TRUE)
+  dat <- table(seuratObj$scGateConsensus)
+  dat
+  expect_equal(unname(dat[['NK']]), 161)
+  expect_equal(unname(dat[['Myeloid']]), 18)
 })
 
