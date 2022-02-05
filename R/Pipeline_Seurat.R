@@ -188,7 +188,7 @@ TrainAllModels <- function(seuratObj, celltype_column, assay = "RNA", slot = "da
   }
 
   if (!is.null(min_cells_per_class) && min_cells_per_class > 0) {
-    seuratObj <- .DropLowCountCells(seuratObj, celltype_column, min_cells_per_class)
+    seuratObj <- .DropLowCountClasses(seuratObj, celltype_column, min_cells_per_class)
   }
 
   #Read the raw data from a seurat object and parse into an mlr3-compatible labeled matrix

@@ -80,7 +80,7 @@ TrainCellTypist <- function(seuratObj, labelField, modelFile, minCellsPerClass =
   outDir <- dirname(outFile)
   seuratObj <- Seurat::DietSeurat(seuratObj)
   if (!is.null(minCellsPerClass) && minCellsPerClass > 0) {
-    seuratObj <- .DropLowCountCells(seuratObj, labelField, minCellsPerClass)
+    seuratObj <- .DropLowCountClasses(seuratObj, labelField, minCellsPerClass)
   }
 
   trainData <- SeuratToAnnData(seuratObj, paste0(outFile, '-seurat-annData'))
