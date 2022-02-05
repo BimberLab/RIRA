@@ -4,7 +4,7 @@
 \alias{TrainCellTypist}
 \title{Train Celltypist}
 \usage{
-TrainCellTypist(seuratObj, labelField, modelFile)
+TrainCellTypist(seuratObj, labelField, modelFile, minCellsPerClass = 20)
 }
 \arguments{
 \item{seuratObj}{The seurat object}
@@ -12,6 +12,8 @@ TrainCellTypist(seuratObj, labelField, modelFile)
 \item{labelField}{The field in seuratObj@meta.data holding the labels for training}
 
 \item{modelFile}{The path to save the model}
+
+\item{minCellsPerClass}{If provided, any classes (and corresponding cells) with fewer than this many cells will be dropped from the training data}
 }
 \description{
 Train celltypist using the data in a seurat object and saves the resulting model
