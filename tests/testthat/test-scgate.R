@@ -6,7 +6,7 @@ testthat::context("scGate")
 
 test_that("scGates load", {
   gates <- GetAvailableScGates()
-  expect_equal(length(gates), 5)
+  expect_equal(length(gates), 6)
   
   gate <- GetScGateModel('demo_gate')
   expect_equal(length(gate$levels), 61)
@@ -18,7 +18,7 @@ test_that("scGate runs with custom models", {
   seuratObj <- suppressWarnings(pbmc3k)
 
   # Try with aliasing of models:
-  seuratObj <- RIRA::RunScGateForModels(seuratObj, modelNames = c('Bcell', 'Tcell', 'NK', 'Myeloid', 'Stromal', 'pDC', 'Erythrocyte', 'Epithelial'), labelRename = list(Tcell = 'T_NK', NK = 'T_NK'))
+  seuratObj <- RIRA::RunScGateForModels(seuratObj, modelNames = c('Bcell', 'Tcell', 'NK', 'Myeloid', 'Stromal', 'pDC', 'Erythrocyte', 'Epithelial', 'Platelet_MK'), labelRename = list(Tcell = 'T_NK', NK = 'T_NK'))
   print(table(seuratObj$scGateConsensus))
   dat <- table(seuratObj$scGateConsensus)
   expect_equal(unname(dat[['pDC']]), 1)
