@@ -7,9 +7,10 @@
 #' @param seuratObj The seurat object
 #' @param modelName The model name or path to celltypist model
 #' @param extraArgs An optional list of additional arguments passed directly on the command line to cell typist
+#' @param assayName The name of the assay to use. Others will be dropped
 #'
 #' @export
-RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", extraArgs = c("--majority-voting", "--mode", "prob_match", "--p-thres", 0.5)) {
+RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", extraArgs = c("--majority-voting", "--mode", "prob_match", "--p-thres", 0.5), assayName = 'RNA') {
   if (!reticulate::py_available(initialize = TRUE)) {
     stop(paste0('Python/reticulate not configured. Run "reticulate::py_config()" to initialize python'))
   }
@@ -22,7 +23,7 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", extraArgs
   outFile <- tempfile()
   outDir <- dirname(outFile)
   seuratObj <- Seurat::DietSeurat(seuratObj)
-  seuratAnnData <- SeuratToAnnData(seuratObj, paste0(outFile, '-seurat-annData'))
+  seuratAnnData <- SeuratToAnnData(seuratObj, paste0(outFile, '-seurat-annData'), assayName)
 
   #exe <- reticulate::py_exe()
   exe <- "celltypist"

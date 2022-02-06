@@ -7,7 +7,8 @@
 RunCellTypist(
   seuratObj,
   modelName = "Immune_All_Low.pkl",
-  extraArgs = c("--majority-voting", "--mode", "prob_match", "--p-thres", 0.5)
+  extraArgs = c("--majority-voting", "--mode", "prob_match", "--p-thres", 0.5),
+  assayName = "RNA"
 )
 }
 \arguments{
@@ -16,6 +17,8 @@ RunCellTypist(
 \item{modelName}{The model name or path to celltypist model}
 
 \item{extraArgs}{An optional list of additional arguments passed directly on the command line to cell typist}
+
+\item{assayName}{The name of the assay to use. Others will be dropped}
 }
 \description{
 Runs celltypist on a seurat object and stores the calls as metadata
