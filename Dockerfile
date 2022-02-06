@@ -8,7 +8,7 @@ ENV RETICULATE_PYTHON=/usr/bin/python3
 ENV NUMBA_CACHE_DIR=/tmp
 ENV MPLCONFIGDIR=/tmp
 
-RUN pip3 install celltypist
+RUN pip3 install numba celltypist
 
 # NOTE: this is also added to support running as non-root. celltypist needs to write in ~/
 RUN mkdir /userHome && chmod -R 777 /userHome
