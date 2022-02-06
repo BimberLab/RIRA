@@ -98,3 +98,7 @@ SeuratToAnnData <- function(seuratObj, outFileBaseName, assayName = NULL) {
 
   return(seuratObj)
 }
+
+.HasNormalizationBeenPerformed <- function(seuratObj, assayName = 'RNA'){
+  return(!identical(seuratObj@assays[[assayName]]@counts, seuratObj@assays[[assayName]]@data))
+}
