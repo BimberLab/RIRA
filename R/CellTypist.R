@@ -19,6 +19,11 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", extraArgs
     stop('The celltypist python package has not been installed! If you believe it has been installed, run reticulate::import("celltypist") to get more information and debug')
   }
 
+  if (all(seuratObj@assays[[assayName]]@counts == seuratObj@assays[[assayName]]@data)) {
+    print('Seurat object does not appear to be normalized, running now:')
+    seuratObj <- NormalizeData(seuratObj, verbose = FALSE)
+  }
+
   print(paste0('Running celltypist using model: ', modelName))
   outFile <- tempfile()
   outDir <- dirname(outFile)
