@@ -56,6 +56,17 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", extraArgs
   unlink(seuratAnnData)
   unlink(labels)
 
+  print(ggplot(seuratObj@meta.data, aes(x = majority_voting, fill = majority_voting)) +
+          geom_bar(color = 'black') +
+          egg::theme_presentation(base_size = 12) +
+          ggtitle('Celltypist Call') +
+          labs(x = 'Celltypist Call', y = '# Cells') +
+          theme(
+            legend.position = 'none',
+            axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)
+          )
+  )
+
   return(seuratObj)
 }
 
