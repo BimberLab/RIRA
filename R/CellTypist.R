@@ -27,8 +27,7 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", extraArgs
   print(paste0('Running celltypist using model: ', modelName))
   outFile <- tempfile()
   outDir <- dirname(outFile)
-  seuratObj <- Seurat::DietSeurat(seuratObj)
-  seuratAnnData <- SeuratToAnnData(seuratObj, paste0(outFile, '-seurat-annData'), assayName)
+  seuratAnnData <- SeuratToAnnData(seuratObj, paste0(outFile, '-seurat-annData'), assayName, doDiet = TRUE)
 
   #exe <- reticulate::py_exe()
   exe <- "celltypist"

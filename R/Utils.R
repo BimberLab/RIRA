@@ -63,7 +63,7 @@ SetAtlasDir <- function(folderPath) {
   return(parentFolder)
 }
 
-SeuratToAnnData <- function(seuratObj, outFileBaseName, assayName = NULL) {
+SeuratToAnnData <- function(seuratObj, outFileBaseName, assayName = NULL, doDiet = FALSE) {
   tmpFile <- outFileBaseName
   if (!is.null(assayName)) {
     for (an in names(seuratObj@assays)) {
@@ -71,6 +71,10 @@ SeuratToAnnData <- function(seuratObj, outFileBaseName, assayName = NULL) {
         seuratObj[[an]] <- NULL
       }
     }
+  }
+
+  if (doDiet) {
+    seuratObj <- Seurat::DietSeurat(seuratObj)
   }
 
   SeuratDisk::SaveH5Seurat(seuratObj, filename = tmpFile)
