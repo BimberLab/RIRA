@@ -157,10 +157,11 @@ RunScGateWithDefaultModels <- function(seuratObj, min.cells = 10, assay = 'RNA',
 #' @param genes.blacklist Passed directly to scGate::scGate. Genes blacklisted from variable features. The default loads the list of genes in scGate::genes.blacklist.default; you may deactivate blacklisting by setting genes.blacklist=NULL
 #' @param labelRename An optional list that maps the model name to the final label that should be used in the seurat object. for exmaple: list(Tcell = 'T_NK', NK = 'T_NK'), would re-label cells classified as either 'Tcell' or 'NK' by those models to one common label of T_NK
 #' @param dropAmbiguousConsensusValues If true, any consensus calls that are ambiguous will be set to NA
+#' @param consensusModels An optional list of model names to consider for the consensus call. This allows many models to be run, yet only consider a subset when creating the consensus call. This might be useful if some models overlap or produce false-positives.
 #'
 #' @export
-RunScGateForModels <- function(seuratObj, modelNames, min.cells = 10, assay = 'RNA', pos.thr = 0.13, neg.thr = 0.13, ncores = 1, genes.blacklist = 'default', labelRename = NULL, dropAmbiguousConsensusValues = FALSE) {
-  fieldsToConsider <- c()
+RunScGateForModels <- function(seuratObj, modelNames, min.cells = 10, assay = 'RNA', pos.thr = 0.13, neg.thr = 0.13, ncores = 1, genes.blacklist = 'default', labelRename = NULL, dropAmbiguousConsensusValues = FALSE, consensusModels = NULL) {
+  fieldsToConsiderForConsensus <- c()
   for (modelName in modelNames){
     print(paste0('Running model: ', modelName))
     cellLabel <- modelName
@@ -182,7 +183,10 @@ RunScGateForModels <- function(seuratObj, modelNames, min.cells = 10, assay = 'R
               doPlotUCellScores = FALSE
     )
 
-    fieldsToConsider <- c(fieldsToConsider, fn)
+    if (all(is.null(consensusModels)) || modelName %in% consensusModels) {
+      fieldsToConsiderForConsensus <- c(fieldsToConsiderForConsensus, fn)
+    }
+
     seuratObj@meta.data[[fn]] <- as.character(seuratObj@meta.data[[fn]])
     seuratObj@meta.data[[fn]] <- ifelse(seuratObj@meta.data[[fn]] == 'Pure', yes = cellLabel, no = NA)
   }
@@ -196,9 +200,9 @@ RunScGateForModels <- function(seuratObj, modelNames, min.cells = 10, assay = 'R
   .PlotUCellScores(seuratObj)
 
   # TODO: should we consider UCell thresholds or the delta between the top two calls?
-  dat <- seuratObj@meta.data[,fieldsToConsider, drop = FALSE]
+  dat <- seuratObj@meta.data[,fieldsToConsiderForConsensus, drop = FALSE]
   seuratObj$scGateConsensus <- sapply(1:nrow(dat), function(idx) {
-    vals <- unlist(dat[idx, fieldsToConsider, drop = T])
+    vals <- unlist(dat[idx, fieldsToConsiderForConsensus, drop = T])
     vals <- unique(vals[!is.na(vals)])
     if (length(vals) == 0) {
       return(NA)
