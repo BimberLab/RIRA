@@ -119,7 +119,13 @@ TrainCellTypist <- function(seuratObj, labelField, modelFile, minCellsPerClass =
   write(typistCommand, file = scriptFile)
 
   print('Running celltypist.train:')
+  print(typistCommand)
+
   system2(reticulate::py_exe(), c(scriptFile))
+
+  if (!file.exists(modelFile)) {
+    stop(paste0('Unable to find file: ', modelFile))
+  }
 
   unlink(labelFile)
   unlink(scriptFile)
