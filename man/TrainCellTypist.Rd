@@ -9,7 +9,8 @@ TrainCellTypist(
   labelField,
   modelFile,
   minCellsPerClass = 20,
-  assayName = "RNA"
+  assayName = "RNA",
+  tempFileLocation = NULL
 )
 }
 \arguments{
@@ -22,6 +23,8 @@ TrainCellTypist(
 \item{minCellsPerClass}{If provided, any classes (and corresponding cells) with fewer than this many cells will be dropped from the training data}
 
 \item{assayName}{The name of the assay to use}
+
+\item{tempFileLocation}{The location where temporary files (like the annData version of the seurat object), will be written.}
 }
 \description{
 Train celltypist using the data in a seurat object and saves the resulting model

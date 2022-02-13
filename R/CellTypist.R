@@ -77,9 +77,10 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", extraArgs
 #' @param modelFile The path to save the model
 #' @param minCellsPerClass If provided, any classes (and corresponding cells) with fewer than this many cells will be dropped from the training data
 #' @param assayName The name of the assay to use
+#' @param tempFileLocation The location where temporary files (like the annData version of the seurat object), will be written.
 #'
 #' @export
-TrainCellTypist <- function(seuratObj, labelField, modelFile, minCellsPerClass = 20, assayName = 'RNA') {
+TrainCellTypist <- function(seuratObj, labelField, modelFile, minCellsPerClass = 20, assayName = 'RNA', tempFileLocation = NULL) {
   if (!reticulate::py_available(initialize = TRUE)) {
     stop(paste0('Python/reticulate not configured. Run "reticulate::py_config()" to initialize python'))
   }
@@ -93,8 +94,11 @@ TrainCellTypist <- function(seuratObj, labelField, modelFile, minCellsPerClass =
   }
 
   modelFile <- gsub(modelFile, pattern = '\\\\', replacement = '/')
-  outFile <- tempfile()
-  outDir <- dirname(outFile)
+  outDir <- ifelse(is.null(tempFileLocation), yes = tempdir(), no = tempFileLocation)
+  if (endsWith(outDir, "/")){
+    outDir <- gsub(outDir, pattern = "/$", replacement = "")
+  }
+  outFile <- tempfile(tmpdir = outDir)
 
   if (!is.null(minCellsPerClass) && minCellsPerClass > 0) {
     seuratObj <- .DropLowCountClasses(seuratObj, labelField, minCellsPerClass)

@@ -7,6 +7,7 @@ ENV RETICULATE_PYTHON=/usr/bin/python3
 # NOTE: this is required when running as non-root. Setting MPLCONFIGDIR removes a similar warning.
 ENV NUMBA_CACHE_DIR=/tmp
 ENV MPLCONFIGDIR=/tmp
+ENV CELLTYPIST_FOLDER=/tmp
 
 RUN pip3 install numba celltypist
 
