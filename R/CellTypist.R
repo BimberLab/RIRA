@@ -76,9 +76,10 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", extraArgs
 #' @param labelField The field in seuratObj@meta.data holding the labels for training
 #' @param modelFile The path to save the model
 #' @param minCellsPerClass If provided, any classes (and corresponding cells) with fewer than this many cells will be dropped from the training data
+#' @param assayName The name of the assay to use
 #'
 #' @export
-TrainCellTypist <- function(seuratObj, labelField, modelFile, minCellsPerClass = 20) {
+TrainCellTypist <- function(seuratObj, labelField, modelFile, minCellsPerClass = 20, assayName = 'RNA') {
   if (!reticulate::py_available(initialize = TRUE)) {
     stop(paste0('Python/reticulate not configured. Run "reticulate::py_config()" to initialize python'))
   }
@@ -94,12 +95,19 @@ TrainCellTypist <- function(seuratObj, labelField, modelFile, minCellsPerClass =
   modelFile <- gsub(modelFile, pattern = '\\\\', replacement = '/')
   outFile <- tempfile()
   outDir <- dirname(outFile)
-  seuratObj <- Seurat::DietSeurat(seuratObj)
+
   if (!is.null(minCellsPerClass) && minCellsPerClass > 0) {
     seuratObj <- .DropLowCountClasses(seuratObj, labelField, minCellsPerClass)
   }
 
-  trainData <- SeuratToAnnData(seuratObj, paste0(outFile, '-seurat-annData'))
+  if (sum(is.null(seuratObj@meta.data[[labelField]]) || is.na(seuratObj@meta.data[[labelField]])) > 0) {
+    initialCells <- ncol(seuratObj@assays[[assayName]])
+    toKeep <- colnames(seuratObj@assays[[assayName]])[!is.null(seuratObj@meta.data[[labelField]]) && !is.na(seuratObj@meta.data[[labelField]])]
+    print(paste0('Dropping cells with NA or NULL labels, total dropped: ', (initialCells - length(toKeep))))
+    seuratObj <- subset(seuratObj, cells = toKeep)
+  }
+
+  trainData <- SeuratToAnnData(seuratObj, paste0(outFile, '-seurat-annData'), assayName = assayName, doDiet = TRUE)
 
   # potentially replace windows slashes with forward slash
   trainData <- gsub(trainData, pattern = '\\\\', replacement = '/')

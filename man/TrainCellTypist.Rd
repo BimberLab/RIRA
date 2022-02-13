@@ -4,7 +4,13 @@
 \alias{TrainCellTypist}
 \title{Train Celltypist}
 \usage{
-TrainCellTypist(seuratObj, labelField, modelFile, minCellsPerClass = 20)
+TrainCellTypist(
+  seuratObj,
+  labelField,
+  modelFile,
+  minCellsPerClass = 20,
+  assayName = "RNA"
+)
 }
 \arguments{
 \item{seuratObj}{The seurat object}
@@ -14,6 +20,8 @@ TrainCellTypist(seuratObj, labelField, modelFile, minCellsPerClass = 20)
 \item{modelFile}{The path to save the model}
 
 \item{minCellsPerClass}{If provided, any classes (and corresponding cells) with fewer than this many cells will be dropped from the training data}
+
+\item{assayName}{The name of the assay to use}
 }
 \description{
 Train celltypist using the data in a seurat object and saves the resulting model
