@@ -100,9 +100,9 @@ TrainCellTypist <- function(seuratObj, labelField, modelFile, minCellsPerClass =
     seuratObj <- .DropLowCountClasses(seuratObj, labelField, minCellsPerClass)
   }
 
-  if (sum(is.null(seuratObj@meta.data[[labelField]]) || is.na(seuratObj@meta.data[[labelField]])) > 0) {
+  if (sum(is.null(seuratObj@meta.data[[labelField]]) | is.na(seuratObj@meta.data[[labelField]])) > 0) {
     initialCells <- ncol(seuratObj@assays[[assayName]])
-    toKeep <- colnames(seuratObj@assays[[assayName]])[!is.null(seuratObj@meta.data[[labelField]]) && !is.na(seuratObj@meta.data[[labelField]])]
+    toKeep <- colnames(seuratObj@assays[[assayName]])[!is.null(seuratObj@meta.data[[labelField]]) & !is.na(seuratObj@meta.data[[labelField]])]
     print(paste0('Dropping cells with NA or NULL labels, total dropped: ', (initialCells - length(toKeep))))
     seuratObj <- subset(seuratObj, cells = toKeep)
   }
