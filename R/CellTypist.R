@@ -78,9 +78,10 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", extraArgs
 #' @param minCellsPerClass If provided, any classes (and corresponding cells) with fewer than this many cells will be dropped from the training data
 #' @param assayName The name of the assay to use
 #' @param tempFileLocation The location where temporary files (like the annData version of the seurat object), will be written.
+#' @param dropAmbiguousLabelValues If true, and label value with a comma will be dropped.
 #'
 #' @export
-TrainCellTypist <- function(seuratObj, labelField, modelFile, minCellsPerClass = 20, assayName = 'RNA', tempFileLocation = NULL) {
+TrainCellTypist <- function(seuratObj, labelField, modelFile, minCellsPerClass = 20, assayName = 'RNA', tempFileLocation = NULL, dropAmbiguousLabelValues = TRUE) {
   if (!reticulate::py_available(initialize = TRUE)) {
     stop(paste0('Python/reticulate not configured. Run "reticulate::py_config()" to initialize python'))
   }
@@ -114,6 +115,19 @@ TrainCellTypist <- function(seuratObj, labelField, modelFile, minCellsPerClass =
     toKeep <- colnames(seuratObj@assays[[assayName]])[!is.null(seuratObj@meta.data[[labelField]]) & !is.na(seuratObj@meta.data[[labelField]])]
     print(paste0('Dropping cells with NA or NULL labels, total dropped: ', (initialCells - length(toKeep))))
     seuratObj <- subset(seuratObj, cells = toKeep)
+  }
+
+  if (dropAmbiguousLabelValues) {
+    toDrop <- grepl(seuratObj[[labelField]], pattern = ',')
+    if (sum(toDrop) > 0) {
+      print('Dropping the following ambiguous consensus labels:')
+      print(sort(table(seuratObj[[labelField]][toDrop])))
+
+      initialCells <- ncol(seuratObj@assays[[assayName]])
+      toKeep <- colnames(seuratObj@assays[[assayName]])[!toDrop]
+      print(paste0('Dropping cells with commas in the label value: ', (initialCells - length(toKeep))))
+      seuratObj <- subset(seuratObj, cells = toKeep)
+    }
   }
 
   trainData <- SeuratToAnnData(seuratObj, paste0(outFile, '-seurat-annData'), assayName = assayName, doDiet = TRUE)

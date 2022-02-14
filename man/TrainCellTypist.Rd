@@ -10,7 +10,8 @@ TrainCellTypist(
   modelFile,
   minCellsPerClass = 20,
   assayName = "RNA",
-  tempFileLocation = NULL
+  tempFileLocation = NULL,
+  dropAmbiguousLabelValues = TRUE
 )
 }
 \arguments{
@@ -25,6 +26,8 @@ TrainCellTypist(
 \item{assayName}{The name of the assay to use}
 
 \item{tempFileLocation}{The location where temporary files (like the annData version of the seurat object), will be written.}
+
+\item{dropAmbiguousLabelValues}{If true, and label value with a comma will be dropped.}
 }
 \description{
 Train celltypist using the data in a seurat object and saves the resulting model
