@@ -120,10 +120,10 @@ TrainCellTypist <- function(seuratObj, labelField, modelFile, minCellsPerClass =
 
   # potentially replace windows slashes with forward slash
   trainData <- gsub(trainData, pattern = '\\\\', replacement = '/')
-  outDir <- gsub(outDir, pattern = '\\\\', replacement = '/')
+  outFile <- gsub(outFile, pattern = '\\\\', replacement = '/')
 
-  labelFile <- paste0(outDir, '.seurat.labels.txt')
-  scriptFile <- paste0(outDir, '.seurat.train.py')
+  labelFile <- paste0(outFile, '.seurat.labels.txt')
+  scriptFile <- paste0(outFile, '.seurat.train.py')
 
   utils::write.table(seuratObj@meta.data[[labelField]], row.names = F, sep = '\t', quote = F, col.names = F, file = labelFile)
 
