@@ -104,7 +104,7 @@ GetScGateModel <- function(modelName, allowSCGateDB = TRUE) {
     stop(paste0('Unable to find gate: ', modelName))
   }
 
-  models.DB <- scGate::get_scGateDB(force_update = T)
+  models.DB <- scGate::get_scGateDB(force_update = T, destination = tempdir())
   if (!modelName %in% names(models.DB$human$generic)){
     stop(paste0('Unable to find model: ', modelName))
   }
@@ -128,7 +128,7 @@ GetScGateModel <- function(modelName, allowSCGateDB = TRUE) {
 #'
 #' @export
 RunScGateWithDefaultModels <- function(seuratObj, min.cells = 10, assay = 'RNA', pos.thr = 0.13, neg.thr = 0.13, ncores = 1, genes.blacklist = 'default', labelRename = NULL, dropAmbiguousConsensusValues = FALSE) {
-  models.DB <- scGate::get_scGateDB(force_update = T)
+  models.DB <- scGate::get_scGateDB(force_update = T, destination = tempdir())
   modelNames <- names(models.DB$human$generic)
 
   return(RunScGateForModels(seuratObj,

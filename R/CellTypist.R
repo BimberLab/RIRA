@@ -94,7 +94,12 @@ TrainCellTypist <- function(seuratObj, labelField, modelFile, minCellsPerClass =
   }
 
   modelFile <- gsub(modelFile, pattern = '\\\\', replacement = '/')
-  outDir <- ifelse(is.null(tempFileLocation), yes = tempdir(), no = tempFileLocation)
+  if (is.null(tempFileLocation)) {
+    outDir <- tempdir()
+  } else {
+    outDir <- tempFileLocation
+  }
+
   if (endsWith(outDir, "/")){
     outDir <- gsub(outDir, pattern = "/$", replacement = "")
   }
