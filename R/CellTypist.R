@@ -118,10 +118,10 @@ TrainCellTypist <- function(seuratObj, labelField, modelFile, minCellsPerClass =
   }
 
   if (dropAmbiguousLabelValues) {
-    toDrop <- grepl(seuratObj[[labelField]], pattern = ',')
+    toDrop <- grepl(seuratObj@meta.data[[labelField]], pattern = ',')
     if (sum(toDrop) > 0) {
       print('Dropping the following ambiguous consensus labels:')
-      print(sort(table(seuratObj[[labelField]][toDrop])))
+      print(sort(table(seuratObj@meta.data[[labelField]][toDrop])))
 
       initialCells <- ncol(seuratObj@assays[[assayName]])
       toKeep <- colnames(seuratObj@assays[[assayName]])[!toDrop]
