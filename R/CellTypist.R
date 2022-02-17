@@ -125,7 +125,7 @@ TrainCellTypist <- function(seuratObj, labelField, modelFile, minCellsPerClass =
 
       initialCells <- ncol(seuratObj@assays[[assayName]])
       toKeep <- colnames(seuratObj@assays[[assayName]])[!toDrop]
-      print(paste0('Dropping cells with commas in the label value: ', (initialCells - length(toKeep))))
+      print(paste0('Total cells dropped: ', (initialCells - length(toKeep))))
       seuratObj <- subset(seuratObj, cells = toKeep)
     }
   }
