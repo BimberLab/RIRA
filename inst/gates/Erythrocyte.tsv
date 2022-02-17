@@ -1,4 +1,4 @@
 levels	use_as	name
-level1  negative    Immune
-level1  negative    Lymphoid
+level1	negative	Immune
+level1	negative	Lymphoid
 level2	positive	Erythrocyte
