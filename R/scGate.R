@@ -22,9 +22,10 @@ utils::globalVariables(
 #' @param output.col.name Passed directly to scGate::scGate. Column name with 'pure/impure' annotation
 #' @param genes.blacklist Passed directly to scGate::scGate. Genes blacklisted from variable features. The default loads the list of genes in scGate::genes.blacklist.default; you may deactivate blacklisting by setting genes.blacklist=NULL
 #' @param doPlotUCellScores If true, FeaturePlots will be created for each UCell score used in classification
+#' @param assayName The assay to use for scGate.
 #'
 #' @export
-RunScGate <- function(seuratObj, model, min.cells = 10, assay = 'RNA', pos.thr = 0.13, neg.thr = 0.13, ncores = 1, output.col.name = "is.pure", genes.blacklist = 'default', doPlotUCellScores = TRUE) {
+RunScGate <- function(seuratObj, model, min.cells = 10, assay = 'RNA', pos.thr = 0.13, neg.thr = 0.13, ncores = 1, output.col.name = "is.pure", genes.blacklist = 'default', doPlotUCellScores = TRUE, assayName = 'RNA') {
   if (is.character(model)) {
     model <- GetScGateModel(model)
     if (is.null(model)) {
@@ -40,6 +41,7 @@ RunScGate <- function(seuratObj, model, min.cells = 10, assay = 'RNA', pos.thr =
                         neg.thr = neg.thr,
                         seed = GetSeed(),
                         ncores = ncores,
+                        assay = assayName,
                         output.col.name = output.col.name,
                         genes.blacklist = genes.blacklist
   ))
@@ -104,7 +106,8 @@ GetScGateModel <- function(modelName, allowSCGateDB = TRUE) {
     stop(paste0('Unable to find gate: ', modelName))
   }
 
-  models.DB <- scGate::get_scGateDB(force_update = T, destination = tempdir())
+  modelDir <- gsub(tempdir(), pattern = '\\\\', replacement = '/')
+  models.DB <- scGate::get_scGateDB(force_update = T, destination = modelDir)
   if (!modelName %in% names(models.DB$human$generic)){
     stop(paste0('Unable to find model: ', modelName))
   }
@@ -128,7 +131,8 @@ GetScGateModel <- function(modelName, allowSCGateDB = TRUE) {
 #'
 #' @export
 RunScGateWithDefaultModels <- function(seuratObj, min.cells = 10, assay = 'RNA', pos.thr = 0.13, neg.thr = 0.13, ncores = 1, genes.blacklist = 'default', labelRename = NULL, dropAmbiguousConsensusValues = FALSE) {
-  models.DB <- scGate::get_scGateDB(force_update = T, destination = tempdir())
+  modelDir <- gsub(tempdir(), pattern = '\\\\', replacement = '/')
+  models.DB <- scGate::get_scGateDB(force_update = T, destination = modelDir)
   modelNames <- names(models.DB$human$generic)
 
   return(RunScGateForModels(seuratObj,

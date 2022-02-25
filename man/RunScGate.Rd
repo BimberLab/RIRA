@@ -14,7 +14,8 @@ RunScGate(
   ncores = 1,
   output.col.name = "is.pure",
   genes.blacklist = "default",
-  doPlotUCellScores = TRUE
+  doPlotUCellScores = TRUE,
+  assayName = "RNA"
 )
 }
 \arguments{
@@ -37,6 +38,8 @@ RunScGate(
 \item{genes.blacklist}{Passed directly to scGate::scGate. Genes blacklisted from variable features. The default loads the list of genes in scGate::genes.blacklist.default; you may deactivate blacklisting by setting genes.blacklist=NULL}
 
 \item{doPlotUCellScores}{If true, FeaturePlots will be created for each UCell score used in classification}
+
+\item{assayName}{The assay to use for scGate.}
 }
 \description{
 Helper function to run scGate
