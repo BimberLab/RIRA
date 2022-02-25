@@ -22,10 +22,9 @@ utils::globalVariables(
 #' @param output.col.name Passed directly to scGate::scGate. Column name with 'pure/impure' annotation
 #' @param genes.blacklist Passed directly to scGate::scGate. Genes blacklisted from variable features. The default loads the list of genes in scGate::genes.blacklist.default; you may deactivate blacklisting by setting genes.blacklist=NULL
 #' @param doPlotUCellScores If true, FeaturePlots will be created for each UCell score used in classification
-#' @param assayName The assay to use for scGate.
 #'
 #' @export
-RunScGate <- function(seuratObj, model, min.cells = 10, assay = 'RNA', pos.thr = 0.13, neg.thr = 0.13, ncores = 1, output.col.name = "is.pure", genes.blacklist = 'default', doPlotUCellScores = TRUE, assayName = 'RNA') {
+RunScGate <- function(seuratObj, model, min.cells = 10, assay = 'RNA', pos.thr = 0.13, neg.thr = 0.13, ncores = 1, output.col.name = "is.pure", genes.blacklist = 'default', doPlotUCellScores = TRUE) {
   if (is.character(model)) {
     model <- GetScGateModel(model)
     if (is.null(model)) {
@@ -41,7 +40,6 @@ RunScGate <- function(seuratObj, model, min.cells = 10, assay = 'RNA', pos.thr =
                         neg.thr = neg.thr,
                         seed = GetSeed(),
                         ncores = ncores,
-                        assay = assayName,
                         output.col.name = output.col.name,
                         genes.blacklist = genes.blacklist
   ))
