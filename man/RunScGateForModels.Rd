@@ -7,7 +7,7 @@
 RunScGateForModels(
   seuratObj,
   modelNames,
-  min.cells = 10,
+  min.cells = 30,
   assay = "RNA",
   pos.thr = 0.13,
   neg.thr = 0.13,
