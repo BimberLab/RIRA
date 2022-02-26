@@ -24,7 +24,7 @@ utils::globalVariables(
 #' @param doPlotUCellScores If true, FeaturePlots will be created for each UCell score used in classification
 #'
 #' @export
-RunScGate <- function(seuratObj, model, min.cells = 10, assay = 'RNA', pos.thr = 0.13, neg.thr = 0.13, ncores = 1, output.col.name = "is.pure", genes.blacklist = 'default', doPlotUCellScores = TRUE) {
+RunScGate <- function(seuratObj, model, min.cells = 30, assay = 'RNA', pos.thr = 0.13, neg.thr = 0.13, ncores = 1, output.col.name = "is.pure", genes.blacklist = 'default', doPlotUCellScores = TRUE) {
   if (is.character(model)) {
     model <- GetScGateModel(model)
     if (is.null(model)) {
@@ -128,7 +128,7 @@ GetScGateModel <- function(modelName, allowSCGateDB = TRUE) {
 #' @param dropAmbiguousConsensusValues If true, any consensus calls that are ambiguous will be set to NA
 #'
 #' @export
-RunScGateWithDefaultModels <- function(seuratObj, min.cells = 10, assay = 'RNA', pos.thr = 0.13, neg.thr = 0.13, ncores = 1, genes.blacklist = 'default', labelRename = NULL, dropAmbiguousConsensusValues = FALSE) {
+RunScGateWithDefaultModels <- function(seuratObj, min.cells = 30, assay = 'RNA', pos.thr = 0.13, neg.thr = 0.13, ncores = 1, genes.blacklist = 'default', labelRename = NULL, dropAmbiguousConsensusValues = FALSE) {
   modelDir <- gsub(tempdir(), pattern = '\\\\', replacement = '/')
   models.DB <- scGate::get_scGateDB(force_update = T, destination = modelDir)
   modelNames <- names(models.DB$human$generic)
@@ -162,7 +162,7 @@ RunScGateWithDefaultModels <- function(seuratObj, min.cells = 10, assay = 'RNA',
 #' @param consensusModels An optional list of model names to consider for the consensus call. This allows many models to be run, yet only consider a subset when creating the consensus call. This might be useful if some models overlap or produce false-positives.
 #'
 #' @export
-RunScGateForModels <- function(seuratObj, modelNames, min.cells = 10, assay = 'RNA', pos.thr = 0.13, neg.thr = 0.13, ncores = 1, genes.blacklist = 'default', labelRename = NULL, dropAmbiguousConsensusValues = FALSE, consensusModels = NULL) {
+RunScGateForModels <- function(seuratObj, modelNames, min.cells = 30, assay = 'RNA', pos.thr = 0.13, neg.thr = 0.13, ncores = 1, genes.blacklist = 'default', labelRename = NULL, dropAmbiguousConsensusValues = FALSE, consensusModels = NULL) {
   fieldsToConsiderForConsensus <- c()
   for (modelName in modelNames){
     print(paste0('Running model: ', modelName))
