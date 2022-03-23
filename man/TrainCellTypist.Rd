@@ -30,7 +30,7 @@ TrainCellTypist(
 
 \item{dropAmbiguousLabelValues}{If true, and label value with a comma will be dropped.}
 
-\item{excludedClasses}{A vector of labels to discard. Note: NA can be used within this vector (i.e. c('Unassigned', NA, 'Other'))}
+\item{excludedClasses}{A vector of labels to discard.}
 }
 \description{
 Train celltypist using the data in a seurat object and saves the resulting model
