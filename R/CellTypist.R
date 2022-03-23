@@ -8,9 +8,13 @@
 #' @param modelName The model name or path to celltypist model
 #' @param extraArgs An optional list of additional arguments passed directly on the command line to cell typist
 #' @param assayName The name of the assay to use. Others will be dropped
+#' @param columnPrefix A prefix that will be added to the beginning of the resulting columns, added the seurat@meta.data
+#' @param convertAmbiguousToNA If true, any values for majority_voting with commas (indicating they are ambiguous) will be converted to NA
+#' @param pThreshold By default, this would be passed to the --p-thres argument. However, if you also provide extraArgs, this is ignored.
+#' @param minProp By default, this would be passed to the --min-prop argument. However, if you also provide extraArgs, this is ignored.
 #'
 #' @export
-RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", extraArgs = c("--majority-voting", "--mode", "prob_match", "--p-thres", 0.5), assayName = 'RNA') {
+RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshold = 0.5, minProp = 0, extraArgs = c("--majority-voting", "--mode", "prob_match", "--p-thres", pThreshold, "--min-prop", minProp), assayName = 'RNA', columnPrefix = NULL, convertAmbiguousToNA = FALSE) {
   if (!reticulate::py_available(initialize = TRUE)) {
     stop(paste0('Python/reticulate not configured. Run "reticulate::py_config()" to initialize python'))
   }
@@ -35,8 +39,7 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", extraArgs
   system2(exe, c("--update-models", "--quiet"))
 
   # "-m", "celltypist.command_line",
-  # "--plot-results"
-  args <- c("-i", seuratAnnData, "-m", modelName, "--outdir", outDir, "--prefix", "celltypist.", "--quiet")
+  args <- c("-i", seuratAnnData, "-m", modelName, "--outdir", outDir, "--prefix", "celltypist.", "--quiet", "--plot-results")
   if (!all(is.na(extraArgs))) {
     args <- c(args, extraArgs)
   }
@@ -50,6 +53,19 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", extraArgs
 
   labels <- utils::read.csv(labels, header = T, row.names = 1)
   labels$majority_voting[labels$majority_voting == 'Unassigned'] <- NA
+
+  if (convertAmbiguousToNA) {
+    toDrop <- grepl(labels$majority_voting, pattern = ',')
+    if (sum(toDrop) > 0) {
+      print(paste0('Converting ', sum(toDrop), ' cells with ambiguous values for majority_voting to NAs'))
+      labels$majority_voting[toDrop] <- NA
+    }
+  }
+
+  if (!is.null(columnPrefix)) {
+    names(labels) <- paste0(columnPrefix, names(labels))
+  }
+
   seuratObj <- Seurat::AddMetaData(seuratObj, labels)
 
   unlink(seuratAnnData)
@@ -77,11 +93,12 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", extraArgs
 #' @param modelFile The path to save the model
 #' @param minCellsPerClass If provided, any classes (and corresponding cells) with fewer than this many cells will be dropped from the training data
 #' @param assayName The name of the assay to use
+#' @param excludedClasses A vector of labels to discard.
 #' @param tempFileLocation The location where temporary files (like the annData version of the seurat object), will be written.
 #' @param dropAmbiguousLabelValues If true, and label value with a comma will be dropped.
 #'
 #' @export
-TrainCellTypist <- function(seuratObj, labelField, modelFile, minCellsPerClass = 20, assayName = 'RNA', tempFileLocation = NULL, dropAmbiguousLabelValues = TRUE) {
+TrainCellTypist <- function(seuratObj, labelField, modelFile, minCellsPerClass = 20, assayName = 'RNA', tempFileLocation = NULL, dropAmbiguousLabelValues = TRUE, excludedClasses = NA) {
   if (!reticulate::py_available(initialize = TRUE)) {
     stop(paste0('Python/reticulate not configured. Run "reticulate::py_config()" to initialize python'))
   }
@@ -106,8 +123,14 @@ TrainCellTypist <- function(seuratObj, labelField, modelFile, minCellsPerClass =
   }
   outFile <- tempfile(tmpdir = outDir)
 
-  if (!is.null(minCellsPerClass) && minCellsPerClass > 0) {
-    seuratObj <- .DropLowCountClasses(seuratObj, labelField, minCellsPerClass)
+  if (!is.null(excludedClasses)) {
+    for (label in excludedClasses) {
+      print(paste0('Dropping label: ', label))
+        toKeep <- rownames(seuratObj@meta.data)[seuratObj@meta.data[[label]] != label]
+        seuratObj <- subset(seuratObj, cells = toKeep)
+      }
+      print(paste0('Cells remaining: ', ncol(seuratObj)))
+    }
   }
 
   if (sum(is.null(seuratObj@meta.data[[labelField]]) | is.na(seuratObj@meta.data[[labelField]])) > 0) {
@@ -128,6 +151,11 @@ TrainCellTypist <- function(seuratObj, labelField, modelFile, minCellsPerClass =
       print(paste0('Total cells dropped: ', (initialCells - length(toKeep))))
       seuratObj <- subset(seuratObj, cells = toKeep)
     }
+  }
+
+  # Perform this after other filters are applied, so low-count classes are not binned into 'Other'
+  if (!is.null(minCellsPerClass) && minCellsPerClass > 0) {
+    seuratObj <- .DropLowCountClasses(seuratObj, labelField, minCellsPerClass)
   }
 
   trainData <- SeuratToAnnData(seuratObj, paste0(outFile, '-seurat-annData'), assayName = assayName, doDiet = TRUE)

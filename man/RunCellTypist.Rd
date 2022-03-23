@@ -8,7 +8,9 @@ RunCellTypist(
   seuratObj,
   modelName = "Immune_All_Low.pkl",
   extraArgs = c("--majority-voting", "--mode", "prob_match", "--p-thres", 0.5),
-  assayName = "RNA"
+  assayName = "RNA",
+  columnPrefix = NULL,
+  convertAmbiguousToNA = FALSE
 )
 }
 \arguments{
@@ -19,6 +21,10 @@ RunCellTypist(
 \item{extraArgs}{An optional list of additional arguments passed directly on the command line to cell typist}
 
 \item{assayName}{The name of the assay to use. Others will be dropped}
+
+\item{columnPrefix}{A prefix that will be added to the beginning of the resulting columns, added the seurat@meta.data}
+
+\item{convertAmbiguousToNA}{If true, any values for majority_voting with commas (indicating they are ambiguous) will be converted to NA}
 }
 \description{
 Runs celltypist on a seurat object and stores the calls as metadata

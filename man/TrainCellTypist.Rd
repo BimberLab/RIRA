@@ -11,7 +11,8 @@ TrainCellTypist(
   minCellsPerClass = 20,
   assayName = "RNA",
   tempFileLocation = NULL,
-  dropAmbiguousLabelValues = TRUE
+  dropAmbiguousLabelValues = TRUE,
+  excludedClasses = NA
 )
 }
 \arguments{
@@ -28,6 +29,8 @@ TrainCellTypist(
 \item{tempFileLocation}{The location where temporary files (like the annData version of the seurat object), will be written.}
 
 \item{dropAmbiguousLabelValues}{If true, and label value with a comma will be dropped.}
+
+\item{excludedClasses}{A vector of labels to discard. Note: NA can be used within this vector (i.e. c('Unassigned', NA, 'Other'))}
 }
 \description{
 Train celltypist using the data in a seurat object and saves the resulting model
