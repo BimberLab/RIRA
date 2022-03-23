@@ -128,7 +128,6 @@ TrainCellTypist <- function(seuratObj, labelField, modelFile, minCellsPerClass =
       print(paste0('Dropping label: ', label))
         toKeep <- rownames(seuratObj@meta.data)[seuratObj@meta.data[[label]] != label]
         seuratObj <- subset(seuratObj, cells = toKeep)
-      }
       print(paste0('Cells remaining: ', ncol(seuratObj)))
     }
   }
