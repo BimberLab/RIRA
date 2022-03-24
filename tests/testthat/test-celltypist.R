@@ -1,4 +1,4 @@
-suppressWarnings(library(SeuratData))
+library(SeuratData)
 library(testthat)
 
 testthat::context("celltypist")
