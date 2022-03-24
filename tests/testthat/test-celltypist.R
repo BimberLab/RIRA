@@ -7,8 +7,12 @@ test_that("celltypist runs", {
   suppressWarnings(SeuratData::InstallData("pbmc3k"))
   suppressWarnings(data("pbmc3k"))
   seuratObj <- suppressWarnings(pbmc3k)
+  print(seuratObj)
+
   seuratObj <- Seurat::NormalizeData(seuratObj, verbose = FALSE)
-  
+  print(head(rownames(seuratObj[['RNA']]), n = 10))
+  print(tail(rownames(seuratObj[['RNA']]), n = 10))
+
   seuratObj <- RIRA::RunCellTypist(seuratObj)
   
   expect_equal(8, length(unique(seuratObj$majority_voting)), info = 'using default model')
