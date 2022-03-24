@@ -39,7 +39,13 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
   system2(exe, c("--update-models", "--quiet"))
 
   # "-m", "celltypist.command_line",
-  args <- c("-i", seuratAnnData, "-m", modelName, "--outdir", outDir, "--prefix", "celltypist.", "--quiet", "--plot-results")
+  args <- c("-i", seuratAnnData, "-m", modelName, "--outdir", outDir, "--prefix", "celltypist.", "--quiet")
+
+  # NOTE: this produces a series of PDFs, one per class. Consider either providing an argument on where to move these, or reading/printing them
+  #if (generatePlots) {
+  #  args <- c(args, "--plot-results")
+  #}
+
   if (!all(is.na(extraArgs))) {
     args <- c(args, extraArgs)
   }
