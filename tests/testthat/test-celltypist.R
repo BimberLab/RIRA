@@ -4,7 +4,7 @@ library(testthat)
 testthat::context("celltypist")
 
 test_that("celltypist runs", {
-  suppressWarnings(SeuratData::InstallData("pbmc3k"))
+  suppressWarnings(SeuratData::InstallData("pbmc3k", force.reinstall = T))
   suppressWarnings(data("pbmc3k"))
   seuratObj <- suppressWarnings(pbmc3k)
   print(seuratObj)

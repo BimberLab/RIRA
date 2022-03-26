@@ -39,6 +39,7 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
   seuratAnnData <- SeuratToAnnData(seuratObj, paste0(outFile, '-seurat-annData'), assayName, doDiet = TRUE)
 
   # Debug feature labels:
+  scriptFile <- paste0(outFile, '.seurat.debug.py')
   modelFile <- '~/.celltypist/data/models/Immune_All_Low.pkl'
   debugCommand <- c(paste0(
     "import numpy as np;",
