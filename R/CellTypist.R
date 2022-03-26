@@ -38,7 +38,11 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
   outDir <- dirname(outFile)
   seuratAnnData <- SeuratToAnnData(seuratObj, paste0(outFile, '-seurat-annData'), assayName, doDiet = TRUE)
 
-  # Debug feature labels:
+  # Ensure models present:
+  #"-m", "celltypist.command_line",
+  system2("celltypist", c("--update-models", "--quiet"))
+
+  # TODO: temporary debugging of feature labels:
   scriptFile <- paste0(outFile, '.seurat.debug.py')
   modelFile <- '/home/runner/.celltypist/data/models/Immune_All_Low.pkl'
   debugCommand <- c(paste0(
@@ -61,13 +65,8 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
   print(debugCommand)
 
   system2(reticulate::py_exe(), c(scriptFile))
-  #unlink(scriptFile)
-
-
-  #exe <- reticulate::py_exe()
-  exe <- "celltypist"
-  #"-m", "celltypist.command_line",
-  system2(exe, c("--update-models", "--quiet"))
+  unlink(scriptFile)
+  # EO debuggin
 
   # "-m", "celltypist.command_line",
   args <- c("-i", seuratAnnData, "-m", modelName, "--outdir", outDir, "--prefix", "celltypist.", "--quiet")
@@ -81,7 +80,7 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
     args <- c(args, extraArgs)
   }
 
-  system2(exe, args)
+  system2("celltypist", args)
 
   labels <- paste0(outDir, '/celltypist.predicted_labels.csv')
   if (!file.exists(labels)) {
