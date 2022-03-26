@@ -49,7 +49,7 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
     "modelFeats.sort();",
     "print('feats in celltypist model:');",
     "print(modelFeats);",
-    "adFeats = sc.read('", seuratAnnData, "').var_names.values;",
+    "adFeats = sc.read('", gsub(seuratAnnData, pattern = '\\\\', replacement = '/'), "').var_names.values;",
     "adFeats.sort();",
     "print('feats in aData:');",
     "print(adFeats);",
