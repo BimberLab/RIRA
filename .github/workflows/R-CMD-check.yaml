@@ -79,13 +79,6 @@ jobs:
             eval sudo $cmd
           done < <(Rscript -e 'writeLines(remotes::system_requirements("ubuntu", "20.04"))')
 
-      # This is a temp fix until resolved in main repo
-      - name: Install SeuratData
-        run: |
-          Sys.setenv("R_REMOTES_NO_ERRORS_FROM_WARNINGS" = "true")
-          remotes::install_github("bbimber/seurat-data@remove-warning")
-        shell: Rscript {0}
-
       - name: Install dependencies
         run: |
           remotes::install_deps(dependencies = TRUE, upgrade = "always")

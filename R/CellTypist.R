@@ -1,5 +1,10 @@
 #' @include Utils.R
 
+utils::globalVariables(
+  names = c('majority_voting'),
+  package = 'RIRA',
+  add = TRUE
+)
 
 #' @title Run Celltypist
 #'
@@ -25,13 +30,38 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
 
   if (!.HasNormalizationBeenPerformed(seuratObj, assayName)) {
     print('Seurat object does not appear to be normalized, running now:')
-    seuratObj <- NormalizeData(seuratObj, verbose = FALSE)
+    seuratObj <- Seurat::NormalizeData(seuratObj, verbose = FALSE)
   }
 
   print(paste0('Running celltypist using model: ', modelName))
   outFile <- tempfile()
   outDir <- dirname(outFile)
   seuratAnnData <- SeuratToAnnData(seuratObj, paste0(outFile, '-seurat-annData'), assayName, doDiet = TRUE)
+
+  # Debug feature labels:
+  modelFile <- '~/.celltypist/data/models/Immune_All_Low.pkl'
+  debugCommand <- c(paste0(
+    "import numpy as np;",
+    "import scanpy as sc;",
+    "import pickle;",
+    "modelFeats = pickle.load(open('", modelFile, "', 'rb'))['Model'].features;",
+    "modelFeats.sort();",
+    "print('feats in celltypist model:');",
+    "print(modelFeats);",
+    "adFeats = sc.read('", seuratAnnData, "').var_names.values;",
+    "adFeats.sort();",
+    "print('feats in aData:');",
+    "print(adFeats);",
+    "print('total feats shared with model: ' + str(sum(np.in1d(modelFeats, adFeats))));"
+  ))
+  write(debugCommand, file = scriptFile)
+
+  print('Debug celltypist feature labels:')
+  print(debugCommand)
+
+  system2(reticulate::py_exe(), c(scriptFile))
+  #unlink(scriptFile)
+
 
   #exe <- reticulate::py_exe()
   exe <- "celltypist"
