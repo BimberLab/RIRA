@@ -40,7 +40,7 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
 
   # Debug feature labels:
   scriptFile <- paste0(outFile, '.seurat.debug.py')
-  modelFile <- '~/.celltypist/data/models/Immune_All_Low.pkl'
+  modelFile <- '/home/runner/.celltypist/data/models/Immune_All_Low.pkl'
   debugCommand <- c(paste0(
     "import numpy as np;",
     "import scanpy as sc;",
