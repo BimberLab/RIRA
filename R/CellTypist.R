@@ -48,7 +48,7 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
 
   print('reload anndata into R:')
   ad <- anndata::read_h5ad(seuratAnnData)
-  print(ad$var_names)
+  print(head(sort(ad$var_names)))
 
   print('Converting to h5seurat')
   x <- SeuratDisk::Convert(annFile, dest = "h5seurat", overwrite = T)
