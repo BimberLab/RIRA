@@ -51,7 +51,7 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
   print(head(sort(ad$var_names)))
 
   print('Converting to h5seurat')
-  x <- SeuratDisk::Convert(annFile, dest = "h5seurat", overwrite = T)
+  x <- SeuratDisk::Convert(seuratAnnData, dest = "h5seurat", overwrite = T)
   x <- SeuratDisk::LoadH5Seurat(x)
   print(head(sort(rownames(x$RNA))))
 
