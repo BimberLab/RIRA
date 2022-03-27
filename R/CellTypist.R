@@ -43,6 +43,10 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
   system2("celltypist", c("--update-models", "--quiet"))
 
   # TODO: temporary debugging of feature labels:
+  ad <- anndata::read_h5ad(seuratAnnData)
+  print('reload anndata into R:')
+  print(ad$var_names)
+
   scriptFile <- paste0(outFile, '.seurat.debug.py')
   modelFile <- '/home/runner/.celltypist/data/models/Immune_All_Low.pkl'
   debugCommand <- c(paste0(
