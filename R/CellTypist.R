@@ -43,9 +43,17 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
   system2("celltypist", c("--update-models", "--quiet"))
 
   # TODO: temporary debugging of feature labels:
-  ad <- anndata::read_h5ad(seuratAnnData)
+  print('Seurat labels:')
+  print(head(sort(rownames(seuratObj$RNA))))
+
   print('reload anndata into R:')
+  ad <- anndata::read_h5ad(seuratAnnData)
   print(ad$var_names)
+
+  print('Converting to h5seurat')
+  x <- SeuratDisk::Convert(annFile, dest = "h5seurat", overwrite = T)
+  x <- SeuratDisk::LoadH5Seurat(x)
+  print(head(sort(rownames(x$RNA))))
 
   scriptFile <- paste0(outFile, '.seurat.debug.py')
   modelFile <- '/home/runner/.celltypist/data/models/Immune_All_Low.pkl'
