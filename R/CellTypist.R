@@ -39,49 +39,10 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
   seuratAnnData <- SeuratToAnnData(seuratObj, paste0(outFile, '-seurat-annData'), assayName, doDiet = TRUE)
 
   # Ensure models present:
-  #"-m", "celltypist.command_line",
-  system2("celltypist", c("--update-models", "--quiet"))
+  system2(reticulate::py_exe(), c("-m", "celltypist.command_line", "--update-models", "--quiet"))
 
-  # TODO: temporary debugging of feature labels:
-  print('Seurat labels:')
-  print(head(sort(rownames(seuratObj$RNA))))
-
-  print('reload anndata into R:')
-  ad <- anndata::read_h5ad(seuratAnnData)
-  print(head(sort(ad$var_names)))
-
-  print('Converting to h5seurat')
-  x <- SeuratDisk::Convert(seuratAnnData, dest = "h5seurat", overwrite = T)
-  x <- SeuratDisk::LoadH5Seurat(x)
-  print(head(sort(rownames(x$RNA))))
-
-  scriptFile <- paste0(outFile, '.seurat.debug.py')
-  modelFile <- '/home/runner/.celltypist/data/models/Immune_All_Low.pkl'
-  debugCommand <- c(paste0(
-    "import numpy as np;",
-    "import scanpy as sc;",
-    "import pickle;",
-    "modelFeats = pickle.load(open('", modelFile, "', 'rb'))['Model'].features;",
-    "modelFeats.sort();",
-    "print('feats in celltypist model:');",
-    "print(modelFeats);",
-    "adFeats = sc.read('", gsub(seuratAnnData, pattern = '\\\\', replacement = '/'), "').var_names.values;",
-    "adFeats.sort();",
-    "print('feats in aData:');",
-    "print(adFeats);",
-    "print('total feats shared with model: ' + str(sum(np.in1d(modelFeats, adFeats))));"
-  ))
-  write(debugCommand, file = scriptFile)
-
-  print('Debug celltypist feature labels:')
-  print(debugCommand)
-
-  system2(reticulate::py_exe(), c(scriptFile))
-  unlink(scriptFile)
-  # EO debuggin
-
-  # "-m", "celltypist.command_line",
-  args <- c("-i", seuratAnnData, "-m", modelName, "--outdir", outDir, "--prefix", "celltypist.", "--quiet")
+  # Now run celltypist itself:
+  args <- c("-m", "celltypist.command_line", "-i", seuratAnnData, "-m", modelName, "--outdir", outDir, "--prefix", "celltypist.", "--quiet")
 
   # NOTE: this produces a series of PDFs, one per class. Consider either providing an argument on where to move these, or reading/printing them
   #if (generatePlots) {
@@ -92,7 +53,7 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
     args <- c(args, extraArgs)
   }
 
-  system2("celltypist", args)
+  system2(reticulate::py_exe(), args)
 
   labels <- paste0(outDir, '/celltypist.predicted_labels.csv')
   if (!file.exists(labels)) {
