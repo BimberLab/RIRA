@@ -9,7 +9,9 @@ ENV NUMBA_CACHE_DIR=/tmp
 ENV MPLCONFIGDIR=/tmp
 ENV CELLTYPIST_FOLDER=/tmp
 
-RUN pip3 install numba celltypist
+# TODO: see issue for anndata specific version: https://github.com/theislab/anndata/issues/747
+RUN pip3 install numba celltypist \
+    && pip3 install anndata==0.7.8
 
 # NOTE: this is also added to support running as non-root. celltypist needs to write in ~/
 RUN mkdir /userHome && chmod -R 777 /userHome
