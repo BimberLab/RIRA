@@ -1,5 +1,10 @@
 #' @include Utils.R
 
+utils::globalVariables(
+  names = c('majority_voting'),
+  package = 'RIRA',
+  add = TRUE
+)
 
 #' @title Run Celltypist
 #'
@@ -25,7 +30,7 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
 
   if (!.HasNormalizationBeenPerformed(seuratObj, assayName)) {
     print('Seurat object does not appear to be normalized, running now:')
-    seuratObj <- NormalizeData(seuratObj, verbose = FALSE)
+    seuratObj <- Seurat::NormalizeData(seuratObj, verbose = FALSE)
   }
 
   print(paste0('Running celltypist using model: ', modelName))
@@ -33,13 +38,11 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
   outDir <- dirname(outFile)
   seuratAnnData <- SeuratToAnnData(seuratObj, paste0(outFile, '-seurat-annData'), assayName, doDiet = TRUE)
 
-  #exe <- reticulate::py_exe()
-  exe <- "celltypist"
-  #"-m", "celltypist.command_line",
-  system2(exe, c("--update-models", "--quiet"))
+  # Ensure models present:
+  system2(reticulate::py_exe(), c("-m", "celltypist.command_line", "--update-models", "--quiet"))
 
-  # "-m", "celltypist.command_line",
-  args <- c("-i", seuratAnnData, "-m", modelName, "--outdir", outDir, "--prefix", "celltypist.", "--quiet")
+  # Now run celltypist itself:
+  args <- c("-m", "celltypist.command_line", "-i", seuratAnnData, "-m", modelName, "--outdir", outDir, "--prefix", "celltypist.", "--quiet")
 
   # NOTE: this produces a series of PDFs, one per class. Consider either providing an argument on where to move these, or reading/printing them
   #if (generatePlots) {
@@ -50,7 +53,7 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
     args <- c(args, extraArgs)
   }
 
-  system2(exe, args)
+  system2(reticulate::py_exe(), args)
 
   labels <- paste0(outDir, '/celltypist.predicted_labels.csv')
   if (!file.exists(labels)) {
@@ -104,7 +107,7 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
 #' @param dropAmbiguousLabelValues If true, and label value with a comma will be dropped.
 #'
 #' @export
-TrainCellTypist <- function(seuratObj, labelField, modelFile, minCellsPerClass = 20, assayName = 'RNA', tempFileLocation = NULL, dropAmbiguousLabelValues = TRUE, excludedClasses = NA) {
+TrainCellTypist <- function(seuratObj, labelField, modelFile, minCellsPerClass = 20, assayName = 'RNA', tempFileLocation = NULL, dropAmbiguousLabelValues = TRUE, excludedClasses = NULL) {
   if (!reticulate::py_available(initialize = TRUE)) {
     stop(paste0('Python/reticulate not configured. Run "reticulate::py_config()" to initialize python'))
   }

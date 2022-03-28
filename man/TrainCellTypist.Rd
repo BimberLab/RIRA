@@ -12,7 +12,7 @@ TrainCellTypist(
   assayName = "RNA",
   tempFileLocation = NULL,
   dropAmbiguousLabelValues = TRUE,
-  excludedClasses = NA
+  excludedClasses = NULL
 )
 }
 \arguments{

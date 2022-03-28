@@ -1,3 +1,4 @@
+library(Seurat)
 library(SeuratData)
 library(testthat)
 
@@ -10,9 +11,6 @@ test_that("celltypist runs", {
   print(seuratObj)
 
   seuratObj <- Seurat::NormalizeData(seuratObj, verbose = FALSE)
-  print(head(rownames(seuratObj[['RNA']]), n = 10))
-  print(tail(rownames(seuratObj[['RNA']]), n = 10))
-
   seuratObj <- RIRA::RunCellTypist(seuratObj)
   
   expect_equal(8, length(unique(seuratObj$majority_voting)), info = 'using default model')
