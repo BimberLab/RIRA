@@ -36,8 +36,7 @@ Imports:
     egg,
     reticulate,
     SeuratDisk,
-    naturalsort,
-    anndata
+    naturalsort
 Suggests:
     devtools,
     testthat (>= 2.1.0),
