@@ -57,7 +57,7 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
 
   labels <- paste0(outDir, '/celltypist.predicted_labels.csv')
   if (!file.exists(labels)) {
-    stop(paste0('Missing file: ', labels))
+    stop(paste0('Missing file: ', labels, '. files present: ', paste0(list.files(outDir), collapse = ', ')))
   }
 
   labels <- utils::read.csv(labels, header = T, row.names = 1)
