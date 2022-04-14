@@ -1,0 +1,11 @@
+levels	use_as	name
+level1	negative	Erythrocyte
+level1	negative	Epithelial
+level1	negative	Stromal
+level1	negative	AvEp
+level1	positive	pDC
+level1	positive	Bcell
+level1	positive	Myeloid
+level1	positive	Tcell
+level1	positive	NK
+level2	positive	Bcell
