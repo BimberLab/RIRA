@@ -162,7 +162,7 @@ RunScGateWithDefaultModels <- function(seuratObj, min.cells = 30, assay = 'RNA',
 #' @param consensusModels An optional list of model names to consider for the consensus call. This allows many models to be run, yet only consider a subset when creating the consensus call. This might be useful if some models overlap or produce false-positives.
 #'
 #' @export
-RunScGateForModels <- function(seuratObj, modelNames, dirName, min.cells = 30, assay = 'RNA', pos.thr = 0.13, neg.thr = 0.13, ncores = 1, genes.blacklist = 'default', labelRename = NULL, dropAmbiguousConsensusValues = FALSE, consensusModels = NULL) {
+RunScGateForModels <- function(seuratObj, modelNames, dirName = "gates", min.cells = 30, assay = 'RNA', pos.thr = 0.13, neg.thr = 0.13, ncores = 1, genes.blacklist = 'default', labelRename = NULL, dropAmbiguousConsensusValues = FALSE, consensusModels = NULL) {
   fieldsToConsiderForConsensus <- c()
   for (modelName in modelNames){
     print(paste0('Running model: ', modelName))
