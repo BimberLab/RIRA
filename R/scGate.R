@@ -24,9 +24,9 @@ utils::globalVariables(
 #' @param doPlotUCellScores If true, FeaturePlots will be created for each UCell score used in classification
 #'
 #' @export
-RunScGate <- function(seuratObj, model, dirName = "gates", min.cells = 30, assay = 'RNA', pos.thr = 0.13, neg.thr = 0.13, ncores = 1, output.col.name = "is.pure", genes.blacklist = 'default', doPlotUCellScores = TRUE) {
+RunScGate <- function(seuratObj, model, min.cells = 30, assay = 'RNA', pos.thr = 0.13, neg.thr = 0.13, ncores = 1, output.col.name = "is.pure", genes.blacklist = 'default', doPlotUCellScores = TRUE) {
   if (is.character(model)) {
-    model <- GetScGateModel(model, dirName)
+    model <- GetScGateModel(model)
     if (is.null(model)) {
       stop(paste0('Unknown gate model: ', model))
     }
@@ -93,10 +93,10 @@ GetAvailableScGates <- function() {
 #' @param modelName The name of the gate to return. See GetAvailableScGates() for a list of known gates
 #' @param allowSCGateDB If true, this will search local models and the models provided by scGate::get_scGateDB()
 #' @export
-GetScGateModel <- function(modelName, dirName = "gates", allowSCGateDB = TRUE) {
-  gateFile <- system.file(paste0(dirName,"/", modelName, ".tsv"), package = "RIRA")
+GetScGateModel <- function(modelName, allowSCGateDB = TRUE) {
+  gateFile <- system.file(paste0("gates/", modelName, ".tsv"), package = "RIRA")
   if (file.exists(gateFile)) {
-    masterFile <- system.file(paste0(dirName, "/master_table.tsv"), package = "RIRA")
+    masterFile <- system.file("gates/master_table.tsv", package = "RIRA")
     return(scGate::load_scGate_model(gateFile, master.table = masterFile))
   }
 
@@ -162,7 +162,7 @@ RunScGateWithDefaultModels <- function(seuratObj, min.cells = 30, assay = 'RNA',
 #' @param consensusModels An optional list of model names to consider for the consensus call. This allows many models to be run, yet only consider a subset when creating the consensus call. This might be useful if some models overlap or produce false-positives.
 #'
 #' @export
-RunScGateForModels <- function(seuratObj, modelNames, dirName = "gates", min.cells = 30, assay = 'RNA', pos.thr = 0.13, neg.thr = 0.13, ncores = 1, genes.blacklist = 'default', labelRename = NULL, dropAmbiguousConsensusValues = FALSE, consensusModels = NULL) {
+RunScGateForModels <- function(seuratObj, modelNames, min.cells = 30, assay = 'RNA', pos.thr = 0.13, neg.thr = 0.13, ncores = 1, genes.blacklist = 'default', labelRename = NULL, dropAmbiguousConsensusValues = FALSE, consensusModels = NULL) {
   fieldsToConsiderForConsensus <- c()
   for (modelName in modelNames){
     print(paste0('Running model: ', modelName))
@@ -175,7 +175,6 @@ RunScGateForModels <- function(seuratObj, modelNames, dirName = "gates", min.cel
     fn <- paste0(modelName, '.is.pure')
     seuratObj <- RunScGate(seuratObj = seuratObj,
               model = modelName,
-              dirName = dirName,
               min.cells = min.cells,
               assay = assay,
               pos.thr = pos.thr,
