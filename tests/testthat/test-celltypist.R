@@ -13,9 +13,9 @@ test_that("celltypist runs", {
   seuratObj <- Seurat::NormalizeData(seuratObj, verbose = FALSE)
   seuratObj <- RIRA::RunCellTypist(seuratObj)
   
-  expect_equal(8, length(unique(seuratObj$majority_voting)), info = 'using default model')
-  expect_equal(82, length(unique(seuratObj$predicted_labels)))
-  expect_equal(254, unname(table(seuratObj$predicted_labels)['B cells']))
+  expect_equal(7, length(unique(seuratObj$majority_voting)), info = 'using default model')
+  expect_equal(54, length(unique(seuratObj$predicted_labels)))
+  expect_equal(303, unname(table(seuratObj$predicted_labels)['B cells']))
 
   # NOTE: this is very slow, so skip in automated testing for now
   modelFile <- 'myModel.pkl'
