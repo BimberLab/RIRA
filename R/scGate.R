@@ -212,6 +212,7 @@ RunScGateForModels <- function(seuratObj, modelNames, min.cells = 30, assay = 'R
 
     return(paste0(sort(unique(vals)), collapse = ','))
   })
+  seuratObj$scGateRaw <- seuratObj$scGateConsensus
 
   if (dropAmbiguousConsensusValues) {
     toDrop <- grepl(seuratObj$scGateConsensus, pattern = ',')
