@@ -18,8 +18,8 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          - {os: ubuntu-20.04, r: 'next', bioc: 'devel', rspm: "https://packagemanager.rstudio.com/cran/__linux__/focal/latest"}
-          - {os: ubuntu-20.04, r: 'release', bioc: '3.14', rspm: "https://packagemanager.rstudio.com/cran/__linux__/focal/latest", pkgdown: "true"}
+          - {os: ubuntu-20.04, r: 'release', bioc: 'devel', rspm: "https://packagemanager.rstudio.com/cran/__linux__/focal/latest"}
+          - {os: ubuntu-20.04, r: '4.1', bioc: '3.14', rspm: "https://packagemanager.rstudio.com/cran/__linux__/focal/latest", pkgdown: "true"}
           - {os: ubuntu-20.04, r: '4.1', bioc: '3.13', rspm: "https://packagemanager.rstudio.com/cran/__linux__/focal/latest"}
 
     env:
