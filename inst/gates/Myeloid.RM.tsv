@@ -3,13 +3,7 @@ level1	negative	Erythrocyte.RM
 level1	negative	Epithelial.RM
 level1	negative	Stromal.RM
 level1	negative	AvEp.RM
-level1	positive	pDC.RM
-level1	positive	Bcell.RM
+level1	negative	Bcell.RM
+level1	negative	Tcell.RM
+level1	negative	NK.RM
 level1	positive	Myeloid.RM
-level1	positive	Tcell
-level1	positive	NK.RM
-level2	negative	Tcell
-level2	negative	NK.RM
-level2	negative	Bcell.RM
-level2	positive	Myeloid.RM
-level2	positive	pDC.RM
