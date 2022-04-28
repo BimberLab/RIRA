@@ -119,9 +119,9 @@ test_that("scGate Runs", {
 
   expected <- c(
     Bcell = 345,
-    Myeloid = 670,
+    MoMacDC = 671,
     T_NK = 1654,
-    'Bcell.RM,T_NK' = 14
+    'Bcell,T_NK' = 14
   )
 
   for (pop in names(expected)) {
