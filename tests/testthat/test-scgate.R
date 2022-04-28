@@ -102,8 +102,10 @@ test_that("scGate Runs", {
   dat <- table(seuratObj$scGateConsensus)
 
   expected <- c(
-    Bcell.RM = 100,
-    T_NK = 100
+    Bcell.RM = 345,
+    Myeloid.RM = 670,
+    T_NK = 1654,
+    Bcell.RM,T_NK = 14
   )
 
   for (pop in names(expected)) {
@@ -111,12 +113,15 @@ test_that("scGate Runs", {
   }
 
   # Now use wrapper
-  seuratObj <- RIRA::RunScGateForRhesusModels(seuratObj)
+  seuratObj <- RIRA::RunScGateWithRhesusModels(seuratObj)
   print(sort(table(seuratObj$scGateConsensus)))
   dat <- table(seuratObj$scGateConsensus)
 
   expected <- c(
-    Bcell.RM = 100
+    Bcell = 345,
+    Myeloid = 670,
+    T_NK = 1654,
+    Bcell.RM,T_NK = 14
   )
 
   for (pop in names(expected)) {
