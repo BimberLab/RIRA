@@ -105,7 +105,7 @@ test_that("scGate Runs", {
     Bcell.RM = 345,
     Myeloid.RM = 670,
     T_NK = 1654,
-    Bcell.RM,T_NK = 14
+    'Bcell.RM,T_NK' = 14
   )
 
   for (pop in names(expected)) {
@@ -121,7 +121,7 @@ test_that("scGate Runs", {
     Bcell = 345,
     Myeloid = 670,
     T_NK = 1654,
-    Bcell.RM,T_NK = 14
+    'Bcell.RM,T_NK' = 14
   )
 
   for (pop in names(expected)) {
