@@ -100,9 +100,26 @@ test_that("scGate Runs", {
   seuratObj <- RIRA::RunScGateForModels(seuratObj, modelNames = c('Bcell.RM', 'Tcell.RM', 'NK.RM', 'Myeloid.RM', 'AvEp.RM', 'Epithelial.RM', 'Erythrocyte.RM', 'pDC.RM', 'Stromal.RM'), labelRename = list(Tcell.RM = 'T_NK', NK.RM = 'T_NK'))
   print(sort(table(seuratObj$scGateConsensus)))
   dat <- table(seuratObj$scGateConsensus)
-  expect_equal(unname(dat[['Bcell']]), 244, info = 'With aliasing')
-  expect_equal(unname(dat[['T_NK']]), 1659, info = 'With aliasing')
 
-  expect_false('Tcell' %in% names(dat), info = 'With aliasing')
-  expect_false('NK' %in% names(dat), info = 'With aliasing')
+  expected <- c(
+    Bcell.RM = 100,
+    T_NK = 100
+  )
+
+  for (pop in names(expected)) {
+    expect_equal(unname(dat[[pop]]), expected[[pop]], info = 'RM models')
+  }
+
+  # Now use wrapper
+  seuratObj <- RIRA::RunScGateForRhesusModels(seuratObj)
+  print(sort(table(seuratObj$scGateConsensus)))
+  dat <- table(seuratObj$scGateConsensus)
+
+  expected <- c(
+    Bcell.RM = 100
+  )
+
+  for (pop in names(expected)) {
+    expect_equal(unname(dat[[pop]]), expected[[pop]], info = 'RM models using wrapper')
+  }
 })

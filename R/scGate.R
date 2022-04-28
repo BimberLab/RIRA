@@ -146,6 +146,45 @@ RunScGateWithDefaultModels <- function(seuratObj, min.cells = 30, assay = 'RNA',
   ))
 }
 
+#' @title Run scGate using Rhesus macaque models
+#'
+#' @description Helper function to run scGate, iterating the provided models and generating a consensus field
+#' @param seuratObj The seurat object
+#' @param min.cells Passed directly to scGate::scGate. Stop iterating if fewer than this number of cells is left
+#' @param assay Passed directly to scGate::scGate. Seurat assay to use
+#' @param pos.thr Passed directly to scGate::scGate. Minimum UCell score value for positive signatures
+#' @param neg.thr Passed directly to scGate::scGate. Maximum UCell score value for negative signatures
+#' @param ncores Passed directly to scGate::scGate. Number of processors for parallel processing (requires future.apply)
+#' @param genes.blacklist Passed directly to scGate::scGate. Genes blacklisted from variable features. The default loads the list of genes in scGate::genes.blacklist.default; you may deactivate blacklisting by setting genes.blacklist=NULL
+#' @param labelRename An optional list that maps the model name to the final label that should be used in the seurat object. for exmaple: list(Tcell = 'T_NK', NK = 'T_NK'), would re-label cells classified as either 'Tcell' or 'NK' by those models to one common label of T_NK
+#' @param dropAmbiguousConsensusValues If true, any consensus calls that are ambiguous will be set to NA
+#'
+#' @export
+RunScGateWithRhesusModels <- function(seuratObj, min.cells = 30, assay = 'RNA', pos.thr = 0.13, neg.thr = 0.13, ncores = 1, genes.blacklist = 'default', labelRename = NULL, dropAmbiguousConsensusValues = FALSE) {
+  return(RunScGateForModels(
+    seuratObj = seuratObj,
+    modelNames = c('Bcell.RM', 'Tcell.RM', 'NK.RM', 'Myeloid.RM', 'AvEp.RM', 'Epithelial.RM', 'Erythrocyte.RM', 'pDC.RM', 'Stromal.RM'),
+    labelRename = c(
+      Bcell.RM = 'Bcell',
+      Tcell.RM = 'T_NK',
+      NK.RM = 'T_NK',
+      Myeloid.RM = 'MoMacDC',
+      AvEp.RM = 'Epithelial',
+      Epithelial.RM = 'Epithelial',
+      Erythrocyte.RM = 'Erythrocyte',
+      pDC.RM = 'MoMacDC',
+      Stromal.RM = 'Stromal'
+    ),
+    min.cells = min.cells,
+    assay = assay,
+    pos.thr = pos.thr,
+    neg.thr = neg.thr,
+    ncores = ncores,
+    genes.blacklist = genes.blacklist,
+    dropAmbiguousConsensusValues = dropAmbiguousConsensusValues
+  ))
+}
+
 #' @title Run scGate for models
 #'
 #' @description Helper function to run scGate, iterating the provided models and generating a consensus field
