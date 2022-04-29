@@ -6,7 +6,7 @@ testthat::context("scGate")
 
 test_that("scGates load", {
   gates <- GetAvailableScGates()
-  expect_equal(length(gates), 6)
+  expect_equal(length(gates), 16)
   
   gate <- GetScGateModel('demo_gate')
   expect_equal(length(gate$levels), 61)
@@ -37,10 +37,10 @@ test_that("scGate Runs", {
 
   # Try with aliasing of models:
   seuratObj <- RIRA::RunScGateForModels(seuratObj, modelNames = c('Bcell', 'Tcell', 'NK', 'Myeloid'), labelRename = list(Tcell = 'T_NK', NK = 'T_NK'))
-  print(table(seuratObj$scGateConsensus))
+  print(sort(table(seuratObj$scGateConsensus)))
   dat <- table(seuratObj$scGateConsensus)
   expect_equal(unname(dat[['Bcell']]), 244, info = 'With aliasing')
-  expect_equal(unname(dat[['T_NK']]), 1601, info = 'With aliasing')
+  expect_equal(unname(dat[['T_NK']]), 1659, info = 'With aliasing')
 
   expect_false('Tcell' %in% names(dat), info = 'With aliasing')
   expect_false('NK' %in% names(dat), info = 'With aliasing')
@@ -80,14 +80,51 @@ test_that("scGates runs on all", {
   dat <- table(seuratObj$scGateConsensus)
   dat
   
-  expect_equal(unname(dat[['Bcell,PanBcell']]), 244)
-  expect_equal(unname(dat[['NK']]), 161)
+  expect_equal(unname(dat[['Bcell,PanBcell']]), 243)
+  expect_equal(unname(dat[['NK']]), 67)
   
   # Now with ambiguous cleanup:
   seuratObj <- RunScGateWithDefaultModels(seuratObj, dropAmbiguousConsensusValues = TRUE)
   dat <- table(seuratObj$scGateConsensus)
   dat
-  expect_equal(unname(dat[['NK']]), 161)
+  expect_equal(unname(dat[['NK']]), 67)
   expect_equal(unname(dat[['Myeloid']]), 18)
 })
 
+test_that("scGate Runs", {
+  suppressWarnings(SeuratData::InstallData("pbmc3k"))
+  suppressWarnings(data("pbmc3k"))
+  seuratObj <- suppressWarnings(pbmc3k)
+
+  # Try with aliasing of models:
+  seuratObj <- RIRA::RunScGateForModels(seuratObj, modelNames = c('Bcell.RM', 'Tcell.RM', 'NK.RM', 'Myeloid.RM', 'AvEp.RM', 'Epithelial.RM', 'Erythrocyte.RM', 'pDC.RM', 'Stromal.RM'), labelRename = list(Tcell.RM = 'T_NK', NK.RM = 'T_NK'))
+  print(sort(table(seuratObj$scGateConsensus)))
+  dat <- table(seuratObj$scGateConsensus)
+
+  expected <- c(
+    Bcell.RM = 345,
+    Myeloid.RM = 670,
+    T_NK = 1654,
+    'Bcell.RM,T_NK' = 14
+  )
+
+  for (pop in names(expected)) {
+    expect_equal(unname(dat[[pop]]), expected[[pop]], info = 'RM models')
+  }
+
+  # Now use wrapper
+  seuratObj <- RIRA::RunScGateWithRhesusModels(seuratObj)
+  print(sort(table(seuratObj$scGateConsensus)))
+  dat <- table(seuratObj$scGateConsensus)
+
+  expected <- c(
+    Bcell = 345,
+    MoMacDC = 671,
+    T_NK = 1654,
+    'Bcell,T_NK' = 14
+  )
+
+  for (pop in names(expected)) {
+    expect_equal(unname(dat[[pop]]), expected[[pop]], info = 'RM models using wrapper')
+  }
+})
