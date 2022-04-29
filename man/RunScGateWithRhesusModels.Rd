@@ -34,10 +34,6 @@ RunScGateWithRhesusModels(
 \item{labelRename}{An optional list that maps the model name to the final label that should be used in the seurat object. for exmaple: list(Tcell = 'T_NK', NK = 'T_NK'), would re-label cells classified as either 'Tcell' or 'NK' by those models to one common label of T_NK}
 
 \item{dropAmbiguousConsensusValues}{If true, any consensus calls that are ambiguous will be set to NA}
-
-\item{modelNames}{A vector of model names to run. They are assumed to be non-overlapping populations}
-
-\item{consensusModels}{An optional list of model names to consider for the consensus call. This allows many models to be run, yet only consider a subset when creating the consensus call. This might be useful if some models overlap or produce false-positives.}
 }
 \description{
 Helper function to run scGate, iterating the provided models and generating a consensus field
