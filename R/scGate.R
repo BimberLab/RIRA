@@ -156,11 +156,10 @@ RunScGateWithDefaultModels <- function(seuratObj, min.cells = 30, assay = 'RNA',
 #' @param neg.thr Passed directly to scGate::scGate. Maximum UCell score value for negative signatures
 #' @param ncores Passed directly to scGate::scGate. Number of processors for parallel processing (requires future.apply)
 #' @param genes.blacklist Passed directly to scGate::scGate. Genes blacklisted from variable features. The default loads the list of genes in scGate::genes.blacklist.default; you may deactivate blacklisting by setting genes.blacklist=NULL
-#' @param labelRename An optional list that maps the model name to the final label that should be used in the seurat object. for exmaple: list(Tcell = 'T_NK', NK = 'T_NK'), would re-label cells classified as either 'Tcell' or 'NK' by those models to one common label of T_NK
 #' @param dropAmbiguousConsensusValues If true, any consensus calls that are ambiguous will be set to NA
 #'
 #' @export
-RunScGateWithRhesusModels <- function(seuratObj, min.cells = 30, assay = 'RNA', pos.thr = 0.13, neg.thr = 0.13, ncores = 1, genes.blacklist = 'default', labelRename = NULL, dropAmbiguousConsensusValues = FALSE) {
+RunScGateWithRhesusModels <- function(seuratObj, min.cells = 30, assay = 'RNA', pos.thr = 0.13, neg.thr = 0.13, ncores = 1, genes.blacklist = 'default', dropAmbiguousConsensusValues = FALSE) {
   return(RunScGateForModels(
     seuratObj = seuratObj,
     modelNames = c('Bcell.RM', 'Tcell.RM', 'NK.RM', 'Myeloid.RM', 'AvEp.RM', 'Epithelial.RM', 'Erythrocyte.RM', 'pDC.RM', 'Stromal.RM'),
