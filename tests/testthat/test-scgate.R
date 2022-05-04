@@ -102,9 +102,9 @@ test_that("scGate Runs", {
   dat <- table(seuratObj$scGateConsensus)
 
   expected <- c(
-    Bcell.RM = 345,
-    Myeloid.RM = 670,
-    T_NK = 1654,
+    Bcell.RM = 339,
+    Myeloid.RM = 668,
+    T_NK = 1647,
     'Bcell.RM,T_NK' = 14
   )
 
@@ -118,9 +118,9 @@ test_that("scGate Runs", {
   dat <- table(seuratObj$scGateConsensus)
 
   expected <- c(
-    Bcell = 345,
-    MoMacDC = 671,
-    T_NK = 1654,
+    Bcell = 339,
+    MoMacDC = 66,
+    T_NK = 1647,
     'Bcell,T_NK' = 14
   )
 
