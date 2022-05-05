@@ -1,8 +1,2 @@
 levels	use_as	name
-level1	negative	Erythrocyte.RM
-level1	negative	Epithelial.RM
-level1	negative	Stromal.RM
-level1	negative	AvEp.RM
-level1	negative	Tcell.RM
-level1	negative	TCR.Constant
 level1	positive	NK.RM

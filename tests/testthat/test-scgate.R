@@ -6,8 +6,8 @@ testthat::context("scGate")
 
 test_that("scGates load", {
   gates <- GetAvailableScGates()
-  expect_equal(length(gates), 16)
-  
+  expect_equal(length(gates), 17)
+
   gate <- GetScGateModel('demo_gate')
   expect_equal(length(gate$levels), 61)
 })
@@ -47,7 +47,7 @@ test_that("scGate Runs", {
 
   # Add reductions so plotting will work:
   seuratObj <- suppressWarnings(pbmc3k)
-  seuratObj <- Seurat::NormalizeData(seuratObj)
+  seuratObj <- suppressWarnings(Seurat::NormalizeData(seuratObj))
   seuratObj <- Seurat::FindVariableFeatures(seuratObj, nfeatures = 2000)
   seuratObj <- Seurat::ScaleData(seuratObj)
   seuratObj <- Seurat::RunPCA(seuratObj, features = Seurat::VariableFeatures(object = seuratObj))
@@ -102,9 +102,9 @@ test_that("scGate Runs", {
   dat <- table(seuratObj$scGateConsensus)
 
   expected <- c(
-    Bcell.RM = 345,
-    Myeloid.RM = 670,
-    T_NK = 1654,
+    Bcell.RM = 339,
+    Myeloid.RM = 668,
+    T_NK = 1647,
     'Bcell.RM,T_NK' = 14
   )
 
@@ -118,9 +118,9 @@ test_that("scGate Runs", {
   dat <- table(seuratObj$scGateConsensus)
 
   expected <- c(
-    Bcell = 345,
-    MoMacDC = 671,
-    T_NK = 1654,
+    Bcell = 338,
+    MoMacDC = 653,
+    T_NK = 1647,
     'Bcell,T_NK' = 14
   )
 
