@@ -118,8 +118,8 @@ test_that("scGate Runs", {
   dat <- table(seuratObj$scGateConsensus)
 
   expected <- c(
-    Bcell = 339,
-    MoMacDC = 669,
+    Bcell = 338,
+    MoMacDC = 653,
     T_NK = 1647,
     'Bcell,T_NK' = 14
   )
