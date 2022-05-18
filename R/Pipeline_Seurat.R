@@ -1,4 +1,5 @@
 #' @import mlr3
+#' @import mlr3learners
 #' @import ranger
 #' @import ggplot2
 #'
