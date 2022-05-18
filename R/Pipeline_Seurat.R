@@ -1,4 +1,3 @@
-#' @import mlr3verse
 #' @import mlr3
 #' @import ranger
 #' @import ggplot2
