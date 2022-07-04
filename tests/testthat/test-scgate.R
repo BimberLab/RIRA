@@ -1,6 +1,7 @@
 library(Seurat)
 library(SeuratData)
 library(testthat)
+library(dplyr)
 
 testthat::context("scGate")
 
@@ -22,6 +23,9 @@ test_that("scGate runs with custom models", {
   print(table(seuratObj$scGateConsensus))
   dat <- table(seuratObj$scGateConsensus)
   expect_equal(unname(dat[['pDC']]), 1)
+
+  #At least execute this code once, so overt errors are caught
+  PlotImmuneMarkers(seuratObj)
 })
 
 test_that("scGate Runs", {

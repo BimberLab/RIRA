@@ -42,7 +42,7 @@ Suggests:
     SeuratData
 Remotes:
     pengminshi/cFIT,
-    carmonalab/UCell@v1.3,
+    carmonalab/UCell,
     carmonalab/scGate,
     bioc::SingleCellExperiment,
     bioc::DropletUtils,
@@ -53,6 +53,7 @@ Collate:
     'Utils.R'
     'Atlas.R'
     'CellTypist.R'
+    'Phenotyping.R'
     'Pipeline_Seurat.R'
     'cFIT.R'
     'scGate.R'

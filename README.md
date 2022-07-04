@@ -1,4 +1,4 @@
-[![R Build and Checks](https://github.com/bimberlabinternal/RIRA_classification/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/bimberlabinternal/RIRA_classification/actions/workflows/R-CMD-check.yaml)
+[![R Build and Checks](https://github.com/bimberlabinternal/RIRA/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/bimberlabinternal/RIRA/actions/workflows/R-CMD-check.yaml)
 
 ## Rhesus Immunome Reference Atlas (RIRA): A multi-tissue single-cell landscape of immune cells
 
@@ -44,10 +44,10 @@ The counts folder is passed to DropletUtils::read10xCounts to create the raw cou
 local({options(repos = BiocManager::repositories())})
 
 #Latest version:
-devtools::install_github(repo = 'bimberlabinternal/RIRA_classification', ref = 'master', dependencies = TRUE, upgrade = 'always')
+devtools::install_github(repo = 'bimberlabinternal/RIRA', ref = 'master', dependencies = TRUE, upgrade = 'always')
 ```
 
-Pre-packaged Docker images with all needed dependencies installed can be found on our [GitHub Packages page](https://github.com/orgs/BimberLabInternal/RIRA_classification/pkgs/container/rira). We recommend using a specific release, which you can do using tags:
+Pre-packaged Docker images with all needed dependencies installed can be found on our [GitHub Packages page](https://github.com/orgs/BimberLabInternal/RIRA/pkgs/container/rira). We recommend using a specific release, which you can do using tags:
 
 ```
 docker pull ghcr.io/bimberlabinternal/rira:latest
