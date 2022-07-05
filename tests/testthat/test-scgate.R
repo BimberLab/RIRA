@@ -23,9 +23,6 @@ test_that("scGate runs with custom models", {
   print(table(seuratObj$scGateConsensus))
   dat <- table(seuratObj$scGateConsensus)
   expect_equal(unname(dat[['pDC']]), 1)
-
-  #At least execute this code once, so overt errors are caught
-  PlotImmuneMarkers(seuratObj)
 })
 
 test_that("scGate Runs", {
@@ -57,9 +54,13 @@ test_that("scGate Runs", {
   seuratObj <- Seurat::RunPCA(seuratObj, features = Seurat::VariableFeatures(object = seuratObj))
   seuratObj <- Seurat::FindNeighbors(seuratObj, dims = 1:10)
   seuratObj <- Seurat::FindClusters(seuratObj, resolution = 0.5, random.seed = GetSeed())
-  
+
   seuratObj <- RunScGate(seuratObj, gate)
   expect_equal(sum(seuratObj$is.pure.level1 == 'Pure'), 2343, info = 'After DimRedux')
+
+  #At least execute this code once, so overt errors are caught
+  seuratObj <- Seurat::RunUMAP(seuratObj)
+  PlotImmuneMarkers(seuratObj, reductions = 'umap')
 })
 
 
