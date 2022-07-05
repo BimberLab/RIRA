@@ -59,7 +59,7 @@ test_that("scGate Runs", {
   expect_equal(sum(seuratObj$is.pure.level1 == 'Pure'), 2343, info = 'After DimRedux')
 
   #At least execute this code once, so overt errors are caught
-  seuratObj <- Seurat::RunUMAP(seuratObj)
+  seuratObj <- Seurat::RunUMAP(seuratObj, dims = 1:10)
   PlotImmuneMarkers(seuratObj, reductions = 'umap')
 })
 
