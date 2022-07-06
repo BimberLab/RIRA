@@ -2,7 +2,7 @@ context("Phenotyping")
 
 test_that("Gene sets work", {
   expect_equal(length(GetGeneSet('MMul10TcrGenes')), 107)
-  expect_equal(length(GetGeneSet('CD8_Activation.1')), 8)
+  expect_equal(length(GetGeneSet('TandNK_Activation.1')), 8)
 })
 
 test_that("ExpandGeneList works", {
