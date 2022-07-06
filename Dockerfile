@@ -1,6 +1,6 @@
 FROM ghcr.io/bimberlabinternal/cellmembrane:latest
 
-ADD . /RIRA_classification
+ADD . /RIRA
 
 ENV RETICULATE_PYTHON=/usr/bin/python3
 
@@ -9,15 +9,13 @@ ENV NUMBA_CACHE_DIR=/tmp
 ENV MPLCONFIGDIR=/tmp
 ENV CELLTYPIST_FOLDER=/tmp
 
-# TODO: see issue for anndata specific version: https://github.com/theislab/anndata/issues/747
-RUN pip3 install numba celltypist \
-    && pip3 install anndata==0.7.8
+RUN pip3 install numba celltypist
 
 # NOTE: this is also added to support running as non-root. celltypist needs to write in ~/
 RUN mkdir /userHome && chmod -R 777 /userHome
 ENV HOME=/userHome
 
-RUN cd /RIRA_classification \
+RUN cd /RIRA \
 	&& R CMD build . \
 	&& Rscript -e "BiocManager::install(ask = F, upgrade = 'always');" \
 	&& Rscript -e "devtools::install_deps(pkg = '.', dependencies = TRUE, upgrade = 'always');" \

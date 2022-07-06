@@ -1,6 +1,7 @@
 library(Seurat)
 library(SeuratData)
 library(testthat)
+library(dplyr)
 
 testthat::context("scGate")
 
@@ -53,9 +54,13 @@ test_that("scGate Runs", {
   seuratObj <- Seurat::RunPCA(seuratObj, features = Seurat::VariableFeatures(object = seuratObj))
   seuratObj <- Seurat::FindNeighbors(seuratObj, dims = 1:10)
   seuratObj <- Seurat::FindClusters(seuratObj, resolution = 0.5, random.seed = GetSeed())
-  
+
   seuratObj <- RunScGate(seuratObj, gate)
   expect_equal(sum(seuratObj$is.pure.level1 == 'Pure'), 2343, info = 'After DimRedux')
+
+  #At least execute this code once, so overt errors are caught
+  seuratObj <- Seurat::RunUMAP(seuratObj, dims = 1:10)
+  PlotImmuneMarkers(seuratObj, reductions = 'umap')
 })
 
 

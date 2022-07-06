@@ -35,14 +35,15 @@ Imports:
     egg,
     reticulate,
     SeuratDisk,
-    naturalsort
+    naturalsort,
+    patchwork
 Suggests:
     devtools,
     testthat (>= 2.1.0),
     SeuratData
 Remotes:
     pengminshi/cFIT,
-    carmonalab/UCell@v1.3,
+    carmonalab/UCell,
     carmonalab/scGate,
     bioc::SingleCellExperiment,
     bioc::DropletUtils,
@@ -53,6 +54,8 @@ Collate:
     'Utils.R'
     'Atlas.R'
     'CellTypist.R'
+    'Phenotyping.R'
+    'GeneModules.R'
     'Pipeline_Seurat.R'
     'cFIT.R'
     'scGate.R'
