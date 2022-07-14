@@ -395,8 +395,8 @@ MakePhenotypingDotPlot <- function(seuratObj,
   
   #Parse Phenotype Field to determine which cell type the phenotype targets
   dotplot_df$CellType <- 0 #pass 0 as an easy debugging test for un/underannotated gene sets
-  dotplot_df[grepl("TandNK_Activation|Cytotoxicity", dotplot_df$geneset_union), "CellType"] <- "Cell Type: T Cells / NK Cells"
   dotplot_df[grepl("MemoryAndNaive|EffectorCytokines|Exhaustion", dotplot_df$geneset_union), "CellType"] <- "Cell Type: T Cells"
+  dotplot_df[grepl("TandNK_Activation|Cytotoxicity", dotplot_df$geneset_union), "CellType"] <- "Cell Type: T Cells / NK Cells"
   dotplot_df[grepl("Myelocytes|Pro_Myelocytes", dotplot_df$geneset_union), "CellType"] <- "Cell Type: Neutrophil Precursors"
   
   #Sort the dataframe for faceting
