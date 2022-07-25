@@ -378,14 +378,14 @@ ExpandGeneList <- function(genes, verbose = TRUE) {
 #' @param yField The grouping variable used to calculate the average expression of genes and the y axis of the DotPlot.
 #' @param scaled A boolean defining whether to color dots by scaled expression or unscaled expression.
 #' @param gene_lists A vector of gene lists (defined by .RegisterGeneSet) to be queried and their genes be plotted.
+#' @export
 MakePhenotypingDotPlot <- function(seuratObj,
                                    yField = 'ClusterNames_0.2',
                                    scaled = T, 
                                    gene_lists = c('Cytotoxicity', 'EffectorCytokines')
 ){
   if (!is.logical(scaled)){
-    warning("Please ensure scaled is either TRUE (to use per-gene scaled expression) or FALSE (for raw gene expression)")
-    stop()
+    stop("Please ensure scaled is either TRUE (to use per-gene scaled expression) or FALSE (for raw gene expression)")
   }
   #Parse gene_lists and coerce into a vector of genes to be plotted
   meta_gene_vector <- unique(unlist(sapply(gene_lists, FUN = RIRA::GetGeneSet)))
