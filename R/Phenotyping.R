@@ -357,7 +357,7 @@ ExpandGeneList <- function(genes, verbose = TRUE) {
 #'
 #' @description A helper function that Takes an input gene and identifies any entries matching registered gene sets. This function is the complement to GetGeneSet.
 #' @param genes A vector of genes 
-.FindGeneSetsContaining <- function(genes) {
+.FindGeneSetsContaining <- function(genes){
   
   matchingGeneSets <- unlist(RIRA:::pkg.env$GENE_SETS)[ unlist(RIRA:::pkg.env$GENE_SETS) %in% genes]
   gene_matches_df <- data.frame(gene = matchingGeneSets, set = names(matchingGeneSets))
@@ -388,7 +388,7 @@ MakePhenotypingDotPlot <- function(seuratObj,
     stop()
   }
   #Parse gene_lists and coerce into a vector of genes to be plotted
-  meta_gene_vector<- unique(unlist(sapply(gene_lists, FUN = RIRA::GetGeneSet)))
+  meta_gene_vector <- unique(unlist(sapply(gene_lists, FUN = RIRA::GetGeneSet)))
   
   #Get initial plotting and expression data from Seurat's version of the DotPlot
   plt <- Seurat::DotPlot(seuratObj, features =  meta_gene_vector, group.by = yField)
@@ -397,14 +397,13 @@ MakePhenotypingDotPlot <- function(seuratObj,
   #Begin Phenotyping
   dotplot_df$Phenotype <- 0 #pass 0 as an easy debugging test for un/underannotated gene sets
   matching_genesets <- .FindGeneSetsContaining(dotplot_df$features.plot)
-  dotplot_df<- merge(dotplot_df, matching_genesets, by.x = "features.plot", by.y ='gene')
+  dotplot_df <- merge(dotplot_df, matching_genesets, by.x = "features.plot", by.y ='gene')
   
   #Parse Phenotype Field to determine which cell type the phenotype targets
   dotplot_df$CellType <- "Unknown_CellType" #set default celltype as unknown
   dotplot_df[grepl("MemoryAndNaive", dotplot_df$geneset_union), "CellType"] <- "Cell Type: T Cells"
   dotplot_df[grepl("Myelocytes|Pro_Myelocytes", dotplot_df$geneset_union), "CellType"] <- "Cell Type: Neutrophil Precursors"
   dotplot_df[grepl("TandNK_Activation|Cytotoxicity|EffectorCytokines|Exhaustion", dotplot_df$geneset_union), "CellType"] <- "Cell Type: T Cells / NK Cells"
-  
   
   #Sort the dataframe for faceting
   dotplot_df$CellType <- naturalsort::naturalfactor(dotplot_df$CellType)
@@ -420,15 +419,14 @@ MakePhenotypingDotPlot <- function(seuratObj,
     colors = c("navy", "gold", "orange", "red")
     colorLabel = 'Average Expression'
   }
-  
 
   P1 <- ggplot(dotplot_df, aes(x = features.plot, y = id, size = pct.exp, color = !!colorField)) + 
-    geom_point()+ 
+    geom_point() + 
     facet_wrap(~CellType+geneset_union, scales = "free_x") + 
     egg::theme_article() + 
     scale_color_gradientn(colors = colors) + 
     theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) + 
-    ylab(yField)+ 
+    ylab(yField) + 
     xlab("Genes") +
     labs(color=colorLabel, size = "Percentage of Cells\nWith Gene Expression")
   
