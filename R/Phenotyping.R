@@ -375,6 +375,7 @@ ExpandGeneList <- function(genes, verbose = TRUE) {
 #' @title MakePhenotypingDotPlot
 #'
 #' @description Creates a DotPlot using custom gene sets and attempts to coarsely group gene sets by cell type. 
+#' @param seuratObj A Seurat Object storing the count matrix to be used for phenotyping. 
 #' @param yField The grouping variable used to calculate the average expression of genes and the y axis of the DotPlot.
 #' @param scaled A boolean defining whether to color dots by scaled expression or unscaled expression.
 #' @param gene_lists A vector of gene lists (defined by .RegisterGeneSet) to be queried and their genes be plotted.

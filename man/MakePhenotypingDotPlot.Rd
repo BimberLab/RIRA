@@ -13,6 +13,8 @@ MakePhenotypingDotPlot(
 )
 }
 \arguments{
+\item{seuratObj}{A Seurat Object storing the count matrix to be used for phenotyping.}
+
 \item{yField}{The grouping variable used to calculate the average expression of genes and the y axis of the DotPlot.}
 
 \item{scaled}{A boolean defining whether to color dots by scaled expression or unscaled expression.}
