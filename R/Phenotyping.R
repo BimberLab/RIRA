@@ -432,13 +432,14 @@ MakePhenotypingDotPlot <- function(seuratObj,
     xlab("Genes") +
     labs(color=colorLabel, size = "Percentage of Cells\nWith Gene Expression")
   
-  scaling <- if(scale.by != "size" | scale.by != "radius"){
-    stop("Please specify scale.by = 'size' or scale.by = 'radius'")
-  } else if (scale.by == 'size'){
+ if (scale.by == 'size'){
     P1 <- P1 + ggplot2::scale_size()
   } else if (scale.by == 'radius'){
     P1 <- P1 + ggplot2::scale_radius()
+  } else {
+    stop("Please specify scale.by = 'size' or scale.by = 'radius'")
   }
+ 
   
   return(P1)
 }
