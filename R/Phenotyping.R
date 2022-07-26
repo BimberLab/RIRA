@@ -380,6 +380,7 @@ ExpandGeneList <- function(genes, verbose = TRUE) {
 #' @param scaled A boolean defining whether to color dots by scaled expression or unscaled expression.
 #' @param gene_lists A vector of gene lists (defined by .RegisterGeneSet) to be queried and their genes be plotted.
 #' @param scale.by Allow different scaling methods for dot size. 'radius' will de-emphasize lower/intermediately percent expressed genes.
+#' @param assay Which assay to use in the input seuratObj
 #' @export
 MakePhenotypingDotPlot <- function(seuratObj,
                                    yField = 'ClusterNames_0.2',

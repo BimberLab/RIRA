@@ -9,6 +9,7 @@ MakePhenotypingDotPlot(
   yField = "ClusterNames_0.2",
   scaled = T,
   gene_lists = c("Cytotoxicity", "EffectorCytokines"),
+  assay = "RNA",
   scale.by = "size"
 )
 }
@@ -20,6 +21,8 @@ MakePhenotypingDotPlot(
 \item{scaled}{A boolean defining whether to color dots by scaled expression or unscaled expression.}
 
 \item{gene_lists}{A vector of gene lists (defined by .RegisterGeneSet) to be queried and their genes be plotted.}
+
+\item{assay}{Which assay to use in the input seuratObj}
 
 \item{scale.by}{Allow different scaling methods for dot size. 'radius' will de-emphasize lower/intermediately percent expressed genes.}
 }
