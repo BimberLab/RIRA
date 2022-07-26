@@ -8,7 +8,8 @@ MakePhenotypingDotPlot(
   seuratObj,
   yField = "ClusterNames_0.2",
   scaled = T,
-  gene_lists = c("Cytotoxicity", "EffectorCytokines")
+  gene_lists = c("Cytotoxicity", "EffectorCytokines"),
+  scale.by = "size"
 )
 }
 \arguments{
@@ -17,6 +18,8 @@ MakePhenotypingDotPlot(
 \item{scaled}{A boolean defining whether to color dots by scaled expression or unscaled expression.}
 
 \item{gene_lists}{A vector of gene lists (defined by .RegisterGeneSet) to be queried and their genes be plotted.}
+
+\item{scale.by}{Allow different scaling methods for dot size. 'radius' will de-emphasize lower/intermediately percent expressed genes.}
 }
 \description{
 Creates a DotPlot using custom gene sets and attempts to coarsely group gene sets by cell type.

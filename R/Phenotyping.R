@@ -378,11 +378,13 @@ ExpandGeneList <- function(genes, verbose = TRUE) {
 #' @param yField The grouping variable used to calculate the average expression of genes and the y axis of the DotPlot.
 #' @param scaled A boolean defining whether to color dots by scaled expression or unscaled expression.
 #' @param gene_lists A vector of gene lists (defined by .RegisterGeneSet) to be queried and their genes be plotted.
+#' @param scale.by Allow different scaling methods for dot size. 'radius' will de-emphasize lower/intermediately percent expressed genes.
 #' @export
 MakePhenotypingDotPlot <- function(seuratObj,
                                    yField = 'ClusterNames_0.2',
                                    scaled = T, 
-                                   gene_lists = c('Cytotoxicity', 'EffectorCytokines')
+                                   gene_lists = c('Cytotoxicity', 'EffectorCytokines'), 
+                                   scale.by = "size"
 ){
   if (!is.logical(scaled)){
     stop("Please ensure scaled is either TRUE (to use per-gene scaled expression) or FALSE (for raw gene expression)")
@@ -429,6 +431,14 @@ MakePhenotypingDotPlot <- function(seuratObj,
     ylab(yField) + 
     xlab("Genes") +
     labs(color=colorLabel, size = "Percentage of Cells\nWith Gene Expression")
+  
+  scaling <- if(scale.by != "size" | scale.by != "radius"){
+    stop("Please specify scale.by = 'size' or scale.by = 'radius'")
+  } else if (scale.by == 'size'){
+    P1 <- P1 + ggplot2::scale_size()
+  } else if (scale.by == 'radius'){
+    P1 <- P1 + ggplot2::scale_radius()
+  }
   
   return(P1)
 }
