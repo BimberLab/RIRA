@@ -385,6 +385,7 @@ MakePhenotypingDotPlot <- function(seuratObj,
                                    yField = 'ClusterNames_0.2',
                                    scaled = T, 
                                    gene_lists = c('Cytotoxicity', 'EffectorCytokines'), 
+                                   assay = "RNA", 
                                    scale.by = "size"
 ){
   if (!is.logical(scaled)){
@@ -394,7 +395,7 @@ MakePhenotypingDotPlot <- function(seuratObj,
   meta_gene_vector <- unique(unlist(sapply(gene_lists, FUN = RIRA::GetGeneSet)))
   
   #Get initial plotting and expression data from Seurat's version of the DotPlot
-  plt <- Seurat::DotPlot(seuratObj, features =  meta_gene_vector, group.by = yField)
+  plt <- Seurat::DotPlot(seuratObj, features =  meta_gene_vector, group.by = yField, assay = assay)
   dotplot_df <- plt$data
   
   #Begin Phenotyping
@@ -441,6 +442,5 @@ MakePhenotypingDotPlot <- function(seuratObj,
     stop("Please specify scale.by = 'size' or scale.by = 'radius'")
   }
  
-  
   return(P1)
 }
