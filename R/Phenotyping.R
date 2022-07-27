@@ -255,7 +255,7 @@ GetGeneSet <- function(name) {
 	return(pkg.env$GENE_SETS[[name]])
 }
 
-.RegisterGeneSet('MMul10TcrGenes', c('LOC705095','LOC703029','LOC696306','LOC710951','LOC106999340','LOC106996262','LOC106999345','LOC106997707','LOC106997706','LOC710149','LOC700771','LOC699427','LOC711871','LOC709081','LOC698785','LOC114677052','LOC114676933','LOC106999353','LOC106999351','LOC106999350','LOC106999349','LOC106999348','LOC106999347','LOC106999346','LOC106999343','LOC106999341','LOC106999339','LOC106999337','LOC106999336','LOC106999335','LOC106999312','LOC106997705','LOC106997704','LOC106997703','LOC106997702','LOC106997697','LOC106997453','LOC106997452','LOC106997451','LOC106995765','LOC106992460','LOC106992446','LOC106992434','LOC106992433','LOC720538','LOC720456','LOC716949','LOC716866','LOC711537','LOC711386','LOC711194','LOC711141','LOC711066','LOC711031','LOC710821','LOC710627','LOC710455','LOC710361','LOC710183','LOC710093','LOC709531','LOC708581','LOC708328','LOC704883','LOC703153','LOC702904','LOC702550','LOC702113','LOC701992','LOC701875','LOC701745','LOC701395','LOC701262','LOC701152','LOC700224','LOC700154','LOC700105','LOC699912','LOC699790','LOC699543','LOC699298','LOC699162','LOC698913','LOC698543','LOC698289','LOC698161','LOC697792','LOC697466','LOC697234','LOC697054','LOC696752','LOC696684','LOC696557','LOC696075','LOC695943','LOC114679533','LOC114679531','LOC114677140','LOC114677139','LOC114677137','LOC114677136','LOC114677055','LOC114677054','LOC114677050','LOC114677049','LOC114677047','LOC114675766'))
+### Begin Phenotyping Gene Sets
 .RegisterGeneSet('TandNK_Activation.1', c('CCL4L1','MIR155HG','RGCC','NFKBIA','IFNG','NR4A3','TNFSF14','CCL3'))
 
 # This is based on T-cell analysis from lung T/NK cells. This my not be precisely Memory/Naive.
@@ -267,6 +267,9 @@ GetGeneSet <- function(name) {
 
 .RegisterGeneSet('Myelocytes', c("OLFM4", "LTF", "CAMP", "LCN2"))
 .RegisterGeneSet('Pro_Myelocytes', c("BPI", "MPO", "ELANE", "RTD1A", "RTD1B", "DEFA1B", "AZU1"))
+### End Phenotyping Gene Sets
+
+.RegisterGeneSet('MMul10TcrGenes', c('LOC705095','LOC703029','LOC696306','LOC710951','LOC106999340','LOC106996262','LOC106999345','LOC106997707','LOC106997706','LOC710149','LOC700771','LOC699427','LOC711871','LOC709081','LOC698785','LOC114677052','LOC114676933','LOC106999353','LOC106999351','LOC106999350','LOC106999349','LOC106999348','LOC106999347','LOC106999346','LOC106999343','LOC106999341','LOC106999339','LOC106999337','LOC106999336','LOC106999335','LOC106999312','LOC106997705','LOC106997704','LOC106997703','LOC106997702','LOC106997697','LOC106997453','LOC106997452','LOC106997451','LOC106995765','LOC106992460','LOC106992446','LOC106992434','LOC106992433','LOC720538','LOC720456','LOC716949','LOC716866','LOC711537','LOC711386','LOC711194','LOC711141','LOC711066','LOC711031','LOC710821','LOC710627','LOC710455','LOC710361','LOC710183','LOC710093','LOC709531','LOC708581','LOC708328','LOC704883','LOC703153','LOC702904','LOC702550','LOC702113','LOC701992','LOC701875','LOC701745','LOC701395','LOC701262','LOC701152','LOC700224','LOC700154','LOC700105','LOC699912','LOC699790','LOC699543','LOC699298','LOC699162','LOC698913','LOC698543','LOC698289','LOC698161','LOC697792','LOC697466','LOC697234','LOC697054','LOC696752','LOC696684','LOC696557','LOC696075','LOC695943','LOC114679533','LOC114679531','LOC114677140','LOC114677139','LOC114677137','LOC114677136','LOC114677055','LOC114677054','LOC114677050','LOC114677049','LOC114677047','LOC114675766'))
 .RegisterGeneSet("MMul10_MHC", c("MAMU-A", "MAMU-A3", "MAMU-AG", "LOC719250", "LOC100426197", "LOC714466", "LOC694372", "LOC114677644", "LOC114675360", "LOC106997902", "LOC698738", "LOC106996077", "LOC106992378", "LOC100424348", "LOC106995519", "LOC106992468", "LOC114676051", "LOC106996627", "LOC106997893", "LOC106997885", "LOC114675646", "LOC114669738", "LOC720132", "LOC719702", "LOC106996676", "LOC714964", "LOC114669810", "LOC114675357", "LOC100428435", "LOC100429195", "LOC699987", "LOC114677642", "LOC723473", "LOC106995461", "LOC106995452"))
 .RegisterGeneSet("MMul10_KIR", c("KIR3DL0", "KIR3DL2", "KIR2DS4", "KIR2DL4", "KIR3DS05", "KIR3DL12", "KIR3DL1", "KIR3DH", "KIR3DH5", "KIR3DL21", "KIR3DL11", "MAMU-KIR", "LOC106994859", "LOC114669735", "LOC100424026", "LOC100125572"))
 
@@ -348,4 +351,97 @@ ExpandGeneList <- function(genes, verbose = TRUE) {
 	}
 
 	return(ret)
+}
+
+#' @title .FindGeneSetsContaining
+#'
+#' @description A helper function that Takes an input gene and identifies any entries matching registered gene sets. This function is the complement to GetGeneSet.
+#' @param genes A vector of genes 
+.FindGeneSetsContaining <- function(genes){
+  
+  matchingGeneSets <- unlist(RIRA:::pkg.env$GENE_SETS)[ unlist(RIRA:::pkg.env$GENE_SETS) %in% genes]
+  gene_matches_df <- data.frame(gene = matchingGeneSets, set = names(matchingGeneSets))
+  #strip the trailing numbers from geneset names (and occasional peroids at the end of gene set signatures)
+  gene_matches_df$set <- gsub("\\.?[0-9]*$", "", gene_matches_df$set) 
+  
+  gene_matches_df <- gene_matches_df |> 
+    dplyr::group_by(gene) |>
+    dplyr::mutate(geneset_union = paste(set, collapse = ", "))
+  unique_gene_set_pairs <- unique.data.frame(gene_matches_df[,c("gene", "geneset_union")])
+  
+  return(unique_gene_set_pairs)
+}
+
+#' @title MakePhenotypingDotPlot
+#'
+#' @description Creates a DotPlot using custom gene sets and attempts to coarsely group gene sets by cell type. 
+#' @param seuratObj A Seurat Object storing the count matrix to be used for phenotyping. 
+#' @param yField The grouping variable used to calculate the average expression of genes and the y axis of the DotPlot.
+#' @param scaled A boolean defining whether to color dots by scaled expression or unscaled expression.
+#' @param gene_lists A vector of gene lists (defined by .RegisterGeneSet) to be queried and their genes be plotted.
+#' @param scale.by Allow different scaling methods for dot size. 'radius' will de-emphasize lower/intermediately percent expressed genes.
+#' @param assay Which assay to use in the input seuratObj
+#' @export
+MakePhenotypingDotPlot <- function(seuratObj,
+                                   yField = 'ClusterNames_0.2',
+                                   scaled = T, 
+                                   gene_lists = c('Cytotoxicity', 'EffectorCytokines'), 
+                                   assay = "RNA", 
+                                   scale.by = "size"
+){
+  if (!is.logical(scaled)){
+    stop("Please ensure scaled is either TRUE (to use per-gene scaled expression) or FALSE (for raw gene expression)")
+  }
+  #Parse gene_lists and coerce into a vector of genes to be plotted
+  meta_gene_vector <- unique(unlist(sapply(gene_lists, FUN = RIRA::GetGeneSet)))
+  
+  #Get initial plotting and expression data from Seurat's version of the DotPlot
+  plt <- Seurat::DotPlot(seuratObj, features =  meta_gene_vector, group.by = yField, assay = assay)
+  dotplot_df <- plt$data
+  
+  #Begin Phenotyping
+  dotplot_df$Phenotype <- 0 #pass 0 as an easy debugging test for un/underannotated gene sets
+  matching_genesets <- .FindGeneSetsContaining(dotplot_df$features.plot)
+  dotplot_df <- merge(dotplot_df, matching_genesets, by.x = "features.plot", by.y ='gene')
+  
+  #Parse Phenotype Field to determine which cell type the phenotype targets
+  dotplot_df$CellType <- "Unknown_CellType" #set default celltype as unknown
+  dotplot_df[grepl("MemoryAndNaive", dotplot_df$geneset_union), "CellType"] <- "Cell Type: T Cells"
+  dotplot_df[grepl("Myelocytes|Pro_Myelocytes", dotplot_df$geneset_union), "CellType"] <- "Cell Type: Neutrophil Precursors"
+  dotplot_df[grepl("TandNK_Activation|Cytotoxicity|EffectorCytokines|Exhaustion", dotplot_df$geneset_union), "CellType"] <- "Cell Type: T Cells / NK Cells"
+  
+  #Sort the dataframe for faceting
+  dotplot_df$CellType <- naturalsort::naturalfactor(dotplot_df$CellType)
+  dotplot_df <- dotplot_df |> arrange(CellType)
+  
+  #Determine if the data should be scaled or not, then alter the color scheme accordingly
+  if(scaled){
+    colorField <- sym("avg.exp.scaled")
+    colors <- c("blue", "white", "red")
+    colorLabel = 'Scaled Average Expression'
+  } else if(!scaled) {
+    colorField <- sym("avg.exp")
+    colors = c("navy", "gold", "orange", "red")
+    colorLabel = 'Average Expression'
+  }
+
+  P1 <- ggplot(dotplot_df, aes(x = features.plot, y = id, size = pct.exp, color = !!colorField)) + 
+    geom_point() + 
+    facet_wrap(~CellType+geneset_union, scales = "free_x") + 
+    egg::theme_article() + 
+    scale_color_gradientn(colors = colors) + 
+    theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) + 
+    ylab(yField) + 
+    xlab("Genes") +
+    labs(color=colorLabel, size = "Percentage of Cells\nWith Gene Expression")
+  
+ if (scale.by == 'size'){
+    P1 <- P1 + ggplot2::scale_size()
+  } else if (scale.by == 'radius'){
+    P1 <- P1 + ggplot2::scale_radius()
+  } else {
+    stop("Please specify scale.by = 'size' or scale.by = 'radius'")
+  }
+ 
+  return(P1)
 }
