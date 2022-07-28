@@ -38,14 +38,27 @@ PlotImmuneMarkers <- function(seuratObj, reductions = c('tsne', 'umap')) {
 	# LAMP1 = CD107a, cytotoxic capacity
 	PlotMarkerSeries(seuratObj, reductions = reductions, features =  c('IFNG', 'CD69', 'TNF', 'NFKBID', 'LTB', 'TNFRSF9', 'CCL4L1', 'NR4A3', 'TNFSF14', 'CD82', 'PIGT', 'IRF8', 'IRF4', 'IRF2', 'RGCC', 'PD1', 'PDCD1', 'TNFAIP3', 'LOC100423131', 'LOC100430627', 'ENSMMUG00000013779', 'XCL1', 'ENSMMUG00000060218', 'CCL4', 'ENSMMUG00000008111', 'CCL3', 'PLEK', 'NR4A2', 'LOC100426537', 'LOC114673087', 'KLF10', 'GADD45B', 'CD154', 'LAMP1', 'LOC703222', 'LOC701946', 'LOC100429751', 'LOC100423954'), 'CD8 Activation Markers')
 
+	# LEF1 = naive
+	# STAT1 = Th1 helper
+	# CD40LG, GATA3 = Th2
+	# FOXP3 = Treg
+	# AQP3, GPR183 = Tcm
+	# ANXA1, GPR183 = Tem
+	PlotMarkerSeries(seuratObj, reductions = reductions, features =  c('CD4', 'SELL', 'LEF1', 'STAT1', 'CD40LG', 'GATA3', 'FOXP3', 'AQP3', 'GPR183', 'HOPX', 'ITGB2'), 'CD4 Phenotypic Markers')
+
 	PlotMarkerSeries(seuratObj, reductions = reductions, features =  c('PRF1', 'GNLY', 'NKG7', 'GZMA','GZMB','GZMH','GZMK','GZMM'), 'Cytotoxicity')
 
 	PlotMarkerSet(seuratObj, reductions = reductions, features =  'B-cell Markers', c('MS4A1', 'CD79A', 'CD74', 'DRA'))
+
+	# Also: CD19-, MS4A1-, CD79B-
+	PlotMarkerSet(seuratObj, reductions = reductions, features =  'Plasma Cells', c('CD79A', 'JCHAIN', 'MZB1', 'XBP1', 'CD79A'))
 
 	PlotMarkerSet(seuratObj, reductions = reductions, features =  'Monocyte', c('LYZ', 'CST3', 'S100A6', 'VIM'))
 
 	# ITGB3 = CD61
 	PlotMarkerSet(seuratObj, reductions = reductions, features =  'Platelet/MK', c('ITGB3', 'PPBP'))
+
+	PlotMarkerSeries(seuratObj, reductions = reductions, features =  c('PPBP', 'PF4'), 'Megakaryocytes')
 
 	PlotMarkerSet(seuratObj, reductions = reductions, features =  'Stemness', c('CD34'))
 
@@ -61,7 +74,7 @@ PlotImmuneMarkers <- function(seuratObj, reductions = c('tsne', 'umap')) {
 	# CD1c = mDC
 	# THBD = CD141 / mDC
 	# CD80, CD86 = co-stimulatory. low expression = tolerogenic
-	PlotMarkerSeries(seuratObj, reductions = reductions, features =  c('CD14', 'FCGR3A', 'IL3RA', 'CLEC4C', 'CD1c', 'THBD', 'CD80', 'CD86', 'TGFB1'), 'DCs')
+	PlotMarkerSeries(seuratObj, reductions = reductions, features =  c('CD14', 'FCGR3A', 'IL3RA', 'CLEC4C', 'CD1C', 'THBD', 'CD80', 'CD86', 'TGFB1'), 'DCs')
 
 	PlotMarkerSet(seuratObj, reductions = reductions, features =  'Regulatory Markers', c('CD4', 'FOXP3', 'IL2RA', 'NR4A1'))
 
@@ -114,7 +127,7 @@ PlotImmuneMarkers <- function(seuratObj, reductions = c('tsne', 'umap')) {
 	PlotMarkerSeries(seuratObj, reductions = reductions, features =  c('NCR1', 'NCR2', 'NCR3'), 'NCRs')
 
 	# ITGAE = CD103
-	PlotMarkerSet(seuratObj, reductions = reductions, features =  'Resident Memory', c('ITGAE', 'ITGB7', 'CD69', 'CXCR6'))
+	PlotMarkerSet(seuratObj, reductions = reductions, features =  'Resident Memory', c('ITGAE', 'ITGB7', 'CD69', 'CXCR6', 'TYROBP'))
 
 	#chemokines
 	chemokines <- c('CCL1','CCL11','CCL13','CCL16','CCL17','CCL18','CCL19','CCL2','CCL20','CCL21','CCL22','CCL24','CCL25','CCL26','CCL27','CCL28','CCL5','CCL7','CCL8')
@@ -138,6 +151,8 @@ PlotImmuneMarkers <- function(seuratObj, reductions = c('tsne', 'umap')) {
 
 	PlotMarkerSeries(seuratObj, reductions = reductions, features =  c('CCR9','LILRA4'), 'pDC')
 
+	PlotMarkerSeries(seuratObj, reductions = reductions, features =  c('CD1C','THBD'), 'pDC')
+
 	PlotMarkerSeries(seuratObj, reductions = reductions, features =  c('CDH1','FLT1'), 'Epithelial')
 
 	PlotMarkerSeries(seuratObj, reductions = reductions, features =  c('LYZ','CSF1R','MSR1','MAFB','CD300E'), 'MoMacDC')
@@ -149,6 +164,10 @@ PlotImmuneMarkers <- function(seuratObj, reductions = c('tsne', 'umap')) {
 	PlotMarkerSeries(seuratObj, reductions = reductions, features =  GetGeneSet('MemoryAndNaive'), 'Putative Memory and Naive')
 
 	PlotMarkerSeries(seuratObj, reductions = reductions, features =  GetGeneSet('TandNK_Activation.1'), 'TandNK_Activation.1')
+
+	# IGHD, IGHM = naive B and geminal center?
+	# IGHA1 = plasma cells
+	# IGKC = plasma cells
 }
 
 
@@ -269,6 +288,12 @@ GetGeneSet <- function(name) {
 .RegisterGeneSet('Pro_Myelocytes', c("BPI", "MPO", "ELANE", "RTD1A", "RTD1B", "DEFA1B", "AZU1"))
 ### End Phenotyping Gene Sets
 
+# Sustaining CD4 survival?
+# TNFRSF4 = OX40
+# TNFSF4 = OX40L
+
+# Dysfunction?
+# 'MT1A', 'MT2A', 'MT1M'
 .RegisterGeneSet('MMul10TcrGenes', c('LOC705095','LOC703029','LOC696306','LOC710951','LOC106999340','LOC106996262','LOC106999345','LOC106997707','LOC106997706','LOC710149','LOC700771','LOC699427','LOC711871','LOC709081','LOC698785','LOC114677052','LOC114676933','LOC106999353','LOC106999351','LOC106999350','LOC106999349','LOC106999348','LOC106999347','LOC106999346','LOC106999343','LOC106999341','LOC106999339','LOC106999337','LOC106999336','LOC106999335','LOC106999312','LOC106997705','LOC106997704','LOC106997703','LOC106997702','LOC106997697','LOC106997453','LOC106997452','LOC106997451','LOC106995765','LOC106992460','LOC106992446','LOC106992434','LOC106992433','LOC720538','LOC720456','LOC716949','LOC716866','LOC711537','LOC711386','LOC711194','LOC711141','LOC711066','LOC711031','LOC710821','LOC710627','LOC710455','LOC710361','LOC710183','LOC710093','LOC709531','LOC708581','LOC708328','LOC704883','LOC703153','LOC702904','LOC702550','LOC702113','LOC701992','LOC701875','LOC701745','LOC701395','LOC701262','LOC701152','LOC700224','LOC700154','LOC700105','LOC699912','LOC699790','LOC699543','LOC699298','LOC699162','LOC698913','LOC698543','LOC698289','LOC698161','LOC697792','LOC697466','LOC697234','LOC697054','LOC696752','LOC696684','LOC696557','LOC696075','LOC695943','LOC114679533','LOC114679531','LOC114677140','LOC114677139','LOC114677137','LOC114677136','LOC114677055','LOC114677054','LOC114677050','LOC114677049','LOC114677047','LOC114675766'))
 .RegisterGeneSet("MMul10_MHC", c("MAMU-A", "MAMU-A3", "MAMU-AG", "LOC719250", "LOC100426197", "LOC714466", "LOC694372", "LOC114677644", "LOC114675360", "LOC106997902", "LOC698738", "LOC106996077", "LOC106992378", "LOC100424348", "LOC106995519", "LOC106992468", "LOC114676051", "LOC106996627", "LOC106997893", "LOC106997885", "LOC114675646", "LOC114669738", "LOC720132", "LOC719702", "LOC106996676", "LOC714964", "LOC114669810", "LOC114675357", "LOC100428435", "LOC100429195", "LOC699987", "LOC114677642", "LOC723473", "LOC106995461", "LOC106995452"))
 .RegisterGeneSet("MMul10_KIR", c("KIR3DL0", "KIR3DL2", "KIR2DS4", "KIR2DL4", "KIR3DS05", "KIR3DL12", "KIR3DL1", "KIR3DH", "KIR3DH5", "KIR3DL21", "KIR3DL11", "MAMU-KIR", "LOC106994859", "LOC114669735", "LOC100424026", "LOC100125572"))
@@ -359,7 +384,7 @@ ExpandGeneList <- function(genes, verbose = TRUE) {
 #' @param genes A vector of genes 
 .FindGeneSetsContaining <- function(genes){
   
-  matchingGeneSets <- unlist(RIRA:::pkg.env$GENE_SETS)[ unlist(RIRA:::pkg.env$GENE_SETS) %in% genes]
+  matchingGeneSets <- unlist(pkg.env$GENE_SETS)[ unlist(pkg.env$GENE_SETS) %in% genes]
   gene_matches_df <- data.frame(gene = matchingGeneSets, set = names(matchingGeneSets))
   #strip the trailing numbers from geneset names (and occasional peroids at the end of gene set signatures)
   gene_matches_df$set <- gsub("\\.?[0-9]*$", "", gene_matches_df$set) 
@@ -393,7 +418,7 @@ MakePhenotypingDotPlot <- function(seuratObj,
     stop("Please ensure scaled is either TRUE (to use per-gene scaled expression) or FALSE (for raw gene expression)")
   }
   #Parse gene_lists and coerce into a vector of genes to be plotted
-  meta_gene_vector <- unique(unlist(sapply(gene_lists, FUN = RIRA::GetGeneSet)))
+  meta_gene_vector <- unique(unlist(sapply(gene_lists, FUN = GetGeneSet)))
   
   #Get initial plotting and expression data from Seurat's version of the DotPlot
   plt <- Seurat::DotPlot(seuratObj, features =  meta_gene_vector, group.by = yField, assay = assay)
@@ -418,11 +443,11 @@ MakePhenotypingDotPlot <- function(seuratObj,
   if(scaled){
     colorField <- sym("avg.exp.scaled")
     colors <- c("blue", "white", "red")
-    colorLabel = 'Scaled Average Expression'
+    colorLabel <- 'Scaled Average Expression'
   } else if(!scaled) {
     colorField <- sym("avg.exp")
-    colors = c("navy", "gold", "orange", "red")
-    colorLabel = 'Average Expression'
+    colors <- c("navy", "gold", "orange", "red")
+    colorLabel <- 'Average Expression'
   }
 
   P1 <- ggplot(dotplot_df, aes(x = features.plot, y = id, size = pct.exp, color = !!colorField)) + 
