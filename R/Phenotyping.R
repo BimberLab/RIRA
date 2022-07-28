@@ -13,14 +13,14 @@ PlotImmuneMarkers <- function(seuratObj, reductions = c('tsne', 'umap')) {
 	}
 
 	#ENSMMUG00000003532=CD8b
-	PlotMarkerSeries(seuratObj, reductions = reductions, features =  c('CD8A', 'CD8B', 'ENSMMUG00000003532', 'CD4', 'IL7R', 'CD3D', 'CD3E','CD3G'), 'CD8/CD4 Markers')
+	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('CD8A', 'CD8B', 'ENSMMUG00000003532', 'CD4', 'IL7R', 'CD3D', 'CD3E','CD3G'), 'CD8/CD4 Markers')
 
 	#Eff v. Mem:
 	#IL7R = CD127
 	#IL2RA = CD25
 	#PTPRC = CD45
 	#SELL = CD62-L / CD-197
-	PlotMarkerSeries(seuratObj, reductions = reductions, features =  c('CCR7', 'SELL', 'GZMB', 'CCR5', 'IL2RA', 'PTPRC', 'IL7R', 'CTLA4', 'FAS', 'CD28', 'CD27', 'ITGA4', 'ITGB7', 'ITGB1'), 'Effector vs. Memory')
+	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('CCR7', 'SELL', 'GZMB', 'CCR5', 'IL2RA', 'PTPRC', 'IL7R', 'CTLA4', 'FAS', 'CD28', 'CD27', 'ITGA4', 'ITGB7', 'ITGB1'), 'Effector vs. Memory')
 
 	#CD8 Activation
 	# XCL1 = ENSMMUG00000060218
@@ -36,7 +36,7 @@ PlotImmuneMarkers <- function(seuratObj, reductions = c('tsne', 'umap')) {
 	# LOC100423954 = C-C motif chemokine 3-like 1
 	# CD154 = CD40L
 	# LAMP1 = CD107a, cytotoxic capacity
-	PlotMarkerSeries(seuratObj, reductions = reductions, features =  c('IFNG', 'CD69', 'TNF', 'NFKBID', 'LTB', 'TNFRSF9', 'CCL4L1', 'NR4A3', 'TNFSF14', 'CD82', 'PIGT', 'IRF8', 'IRF4', 'IRF2', 'RGCC', 'PD1', 'PDCD1', 'TNFAIP3', 'LOC100423131', 'LOC100430627', 'ENSMMUG00000013779', 'XCL1', 'ENSMMUG00000060218', 'CCL4', 'ENSMMUG00000008111', 'CCL3', 'PLEK', 'NR4A2', 'LOC100426537', 'LOC114673087', 'KLF10', 'GADD45B', 'CD154', 'LAMP1', 'LOC703222', 'LOC701946', 'LOC100429751', 'LOC100423954'), 'CD8 Activation Markers')
+	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('IFNG', 'CD69', 'TNF', 'NFKBID', 'LTB', 'TNFRSF9', 'CCL4L1', 'NR4A3', 'TNFSF14', 'CD82', 'PIGT', 'IRF8', 'IRF4', 'IRF2', 'RGCC', 'PD1', 'PDCD1', 'TNFAIP3', 'LOC100423131', 'LOC100430627', 'ENSMMUG00000013779', 'XCL1', 'ENSMMUG00000060218', 'CCL4', 'ENSMMUG00000008111', 'CCL3', 'PLEK', 'NR4A2', 'LOC100426537', 'LOC114673087', 'KLF10', 'GADD45B', 'CD154', 'LAMP1', 'LOC703222', 'LOC701946', 'LOC100429751', 'LOC100423954'), 'CD8 Activation Markers')
 
 	# LEF1 = naive
 	# STAT1 = Th1 helper
@@ -44,70 +44,70 @@ PlotImmuneMarkers <- function(seuratObj, reductions = c('tsne', 'umap')) {
 	# FOXP3 = Treg
 	# AQP3, GPR183 = Tcm
 	# ANXA1, GPR183 = Tem
-	PlotMarkerSeries(seuratObj, reductions = reductions, features =  c('CD4', 'SELL', 'LEF1', 'STAT1', 'CD40LG', 'GATA3', 'FOXP3', 'AQP3', 'GPR183', 'HOPX', 'ITGB2'), 'CD4 Phenotypic Markers')
+	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('CD4', 'SELL', 'LEF1', 'STAT1', 'CD40LG', 'GATA3', 'FOXP3', 'AQP3', 'GPR183', 'HOPX', 'ITGB2'), 'CD4 Phenotypic Markers')
 
-	PlotMarkerSeries(seuratObj, reductions = reductions, features =  c('PRF1', 'GNLY', 'NKG7', 'GZMA','GZMB','GZMH','GZMK','GZMM'), 'Cytotoxicity')
+	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('PRF1', 'GNLY', 'NKG7', 'GZMA','GZMB','GZMH','GZMK','GZMM'), 'Cytotoxicity')
 
-	PlotMarkerSet(seuratObj, reductions = reductions, features =  'B-cell Markers', c('MS4A1', 'CD79A', 'CD74', 'DRA'))
+	PlotMarkerSet(seuratObj, reductions = reductions, 'B-cell Markers', features = c('MS4A1', 'CD79A', 'CD74', 'DRA'))
 
 	# Also: CD19-, MS4A1-, CD79B-
-	PlotMarkerSet(seuratObj, reductions = reductions, features =  'Plasma Cells', c('CD79A', 'JCHAIN', 'MZB1', 'XBP1', 'CD79A'))
+	PlotMarkerSet(seuratObj, reductions = reductions, 'Plasma Cells', features = c('CD79A', 'JCHAIN', 'MZB1', 'XBP1', 'CD79A'))
 
-	PlotMarkerSet(seuratObj, reductions = reductions, features =  'Monocyte', c('LYZ', 'CST3', 'S100A6', 'VIM'))
+	PlotMarkerSet(seuratObj, reductions = reductions, 'Monocyte', features = c('LYZ', 'CST3', 'S100A6', 'VIM'))
 
 	# ITGB3 = CD61
-	PlotMarkerSet(seuratObj, reductions = reductions, features =  'Platelet/MK', c('ITGB3', 'PPBP'))
+	PlotMarkerSet(seuratObj, reductions = reductions, 'Platelet/MK', features = c('ITGB3', 'PPBP'))
 
-	PlotMarkerSeries(seuratObj, reductions = reductions, features =  c('PPBP', 'PF4'), 'Megakaryocytes')
+	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('PPBP', 'PF4'), 'Megakaryocytes')
 
-	PlotMarkerSet(seuratObj, reductions = reductions, features =  'Stemness', c('CD34'))
+	PlotMarkerSet(seuratObj, reductions = reductions, 'Stemness', features = c('CD34'))
 
 	# MRC1 = CD206
 	# ITGAM = CD11b, AM=CD11b-, Non-AM=CD11b+
 	# Non-AMs: CD16+/CD206-/HLA-DR+/CD11b+
 	# M1/M2: CCR7 (M1), CD163 (M2), https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7050058/
 	# CD163, CD68 = macrophage markers
-	PlotMarkerSeries(seuratObj, reductions = reductions, features =  c('CD14', 'FCGR3A', 'S100A8', 'S100A6', 'MARCO', 'MRC1', 'CD163', 'CHIT1', 'APOBEC3A', 'ITGAM', 'HLA-DRB1', 'CCR7', 'CD68'), 'Myeloid')
+	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('CD14', 'FCGR3A', 'S100A8', 'S100A6', 'MARCO', 'MRC1', 'CD163', 'CHIT1', 'APOBEC3A', 'ITGAM', 'HLA-DRB1', 'CCR7', 'CD68'), 'Myeloid')
 
 	# IL3RA = CD123 / pDC
 	# CLEC4C = CD303 / pDC
 	# CD1c = mDC
 	# THBD = CD141 / mDC
 	# CD80, CD86 = co-stimulatory. low expression = tolerogenic
-	PlotMarkerSeries(seuratObj, reductions = reductions, features =  c('CD14', 'FCGR3A', 'IL3RA', 'CLEC4C', 'CD1C', 'THBD', 'CD80', 'CD86', 'TGFB1'), 'DCs')
+	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('CD14', 'FCGR3A', 'IL3RA', 'CLEC4C', 'CD1C', 'THBD', 'CD80', 'CD86', 'TGFB1'), 'DCs')
 
-	PlotMarkerSet(seuratObj, reductions = reductions, features =  'Regulatory Markers', c('CD4', 'FOXP3', 'IL2RA', 'NR4A1'))
+	PlotMarkerSet(seuratObj, reductions = reductions, 'Regulatory Markers', features = c('CD4', 'FOXP3', 'IL2RA', 'NR4A1'))
 
-	PlotMarkerSet(seuratObj, reductions = reductions, features =  'Treg17', c('RORA', 'RORB', 'RORC', 'IL4', 'STAT3'))
-
-	# ZBTB16 = PLZF
-	PlotMarkerSeries(seuratObj, reductions = reductions, features =  c('HAVCR2'), 'Th1')
+	PlotMarkerSet(seuratObj, reductions = reductions, 'Treg17', features = c('RORA', 'RORB', 'RORC', 'IL4', 'STAT3'))
 
 	# ZBTB16 = PLZF
-	PlotMarkerSeries(seuratObj, reductions = reductions, features =  c('ZBTB16', 'DPP4'), 'MAIT')
+	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('HAVCR2'), 'Th1')
 
-	PlotMarkerSeries(seuratObj, reductions = reductions, features =  c('TBX21', 'GATA3', 'RORC', 'FOXP3', 'BCL6', 'EOMES', 'TOX', 'GATA2', 'TCF7', 'KLF2', 'NR4A1', 'LEF1', 'PRDM1', 'ID2', 'ID3'), 'Transcription Factors')
+	# ZBTB16 = PLZF
+	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('ZBTB16', 'DPP4'), 'MAIT')
 
-	PlotMarkerSeries(seuratObj, reductions = reductions, features =  c('TIGIT', 'CTLA4', 'BTLA', 'PDCD1', 'CD274'), 'Inhibitory Markers')
+	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('TBX21', 'GATA3', 'RORC', 'FOXP3', 'BCL6', 'EOMES', 'TOX', 'GATA2', 'TCF7', 'KLF2', 'NR4A1', 'LEF1', 'PRDM1', 'ID2', 'ID3'), 'Transcription Factors')
+
+	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('TIGIT', 'CTLA4', 'BTLA', 'PDCD1', 'CD274'), 'Inhibitory Markers')
 
 	# https://www.frontiersin.org/articles/10.3389/fimmu.2016.00076/full#:~:text=The%20three%20main%20pathways%20activated,activation%20(1%2C%202).
 
-	PlotMarkerSet(seuratObj, reductions = reductions, features =  'NFATs', c('STAT1', 'STAT2', 'STAT3', 'STAT4'))
+	PlotMarkerSet(seuratObj, reductions = reductions, 'STATs', features = c('STAT1', 'STAT2', 'STAT3', 'STAT4'))
 
-	PlotMarkerSet(seuratObj, reductions = reductions, features =  'NFATs', c('NFATC1', 'NFATC2', 'NFAT3', 'NFATC4', 'NFAT5'))
+	PlotMarkerSet(seuratObj, reductions = reductions, 'NFATs', features = c('NFATC1', 'NFATC2', 'NFAT3', 'NFATC4', 'NFAT5'))
 
 	#DAP10/12
 	# LOC707555 = ZAP70
-	PlotMarkerSet(seuratObj, reductions = reductions, features =  'Signaling', c('HCST', 'TYROBP', 'SYK', 'ZAP70', 'LOC707555', 'ITK'))
+	PlotMarkerSet(seuratObj, reductions = reductions, 'Signaling', features = c('HCST', 'TYROBP', 'SYK', 'ZAP70', 'LOC707555', 'ITK'))
 
 	#LILR/KIR:
-	PlotMarkerSeries(seuratObj, reductions = reductions, features =  c('LILRA5','LILRA6','LILRB4','LILRB5','KIR2DL4','KIR3DX1', 'MAMU-KIR', 'KIR2DL4', 'KIR3DL2'), 'LILR/KIR')
+	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('LILRA5','LILRA6','LILRB4','LILRB5','KIR2DL4','KIR3DX1', 'MAMU-KIR', 'KIR2DL4', 'KIR3DL2'), 'LILR/KIR')
 
-	PlotMarkerSeries(seuratObj, reductions = reductions, features =  c('FCGR1A','FCGR2A','FCGR2B','FCGR3', 'FCGR3A'), 'FCGR')
+	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('FCGR1A','FCGR2A','FCGR2B','FCGR3', 'FCGR3A'), 'FCGR')
 
-	PlotMarkerSeries(seuratObj, reductions = reductions, features =  GetGeneSet('EffectorCytokines'), 'Effector Cytokines')
+	PlotMarkerSeries(seuratObj, reductions = reductions, features = GetGeneSet('EffectorCytokines'), 'Effector Cytokines')
 
-	PlotMarkerSeries(seuratObj, reductions = reductions, features =  GetGeneSet('ExhaustionOrInhibitory'), 'Exhaustion Or Inhibitory')
+	PlotMarkerSeries(seuratObj, reductions = reductions, features = GetGeneSet('ExhaustionOrInhibitory'), 'Exhaustion Or Inhibitory')
 
 	#Cytokines
 	cytokines <- c('IL1A','IL1B','IL1R1','IL1R2','IL1RAP','IL1RAPL1','IL1RAPL2','IL1RL1','IL1RL2','IL1RN','IL2','IL2RA','IL2RB','IL2RG','IL3','IL3RA','IL4','IL4I1','IL4R','IL5','IL5RA','IL6','IL6R','IL6ST','IL7','IL7R','IL9','IL10','IL10RA','IL11','IL12A','IL12B','IL12RB1','IL12RB2','IL13','IL13RA2','IL15','IL15RA','IL16','IL17A','IL17B','IL17C','IL17D','IL17F','IL17RA','IL17RB','IL17RC','IL17RD','IL17RE','IL18BP','IL18R1','IL18RAP','IL19','IL20','IL20RA','IL20RB','IL21','IL21R','IL22','IL22RA2','IL23A','IL24','IL25','IL26','IL27','IL27RA','IL31','IL31RA','IL33','IL34','IL36A','IL36B','IL36G','IL37','ILDR1','ILDR2','ILF2','ILF3','ILK','ILKAP','ILVBL')
@@ -115,55 +115,55 @@ PlotImmuneMarkers <- function(seuratObj, reductions = c('tsne', 'umap')) {
 	# LOC114675718	interleukin-3 receptor subunit alpha-like
 	# LOC100426853	interleukin-9 receptor-like
 	cytokines <- c(cytokines, c('LOC114675338', 'LOC114675718', 'LOC100426853'))
-	PlotMarkerSeries(seuratObj, reductions = reductions, features =  cytokines, 'Cytokines/Receptors')
+	PlotMarkerSeries(seuratObj, reductions = reductions, features = cytokines, 'Cytokines/Receptors')
 
 	# KLRC2 = ENSMMUG00000050862
 	klrs <- c('KLRB1', 'KLRC1', 'KLRD1', 'KLRF1', 'KLRF2', 'KLRG1', 'KLRG2', 'KLRC2', 'KLRC3', 'KLRK1', 'ENSMMUG00000050862')
-	PlotMarkerSeries(seuratObj, reductions = reductions, features =  klrs, 'KLRs')
+	PlotMarkerSeries(seuratObj, reductions = reductions, features = klrs, 'KLRs')
 
 	# NCR1 = NKp46
 	# NCR2 = NKp44
 	# NCR3 = NKp30
-	PlotMarkerSeries(seuratObj, reductions = reductions, features =  c('NCR1', 'NCR2', 'NCR3'), 'NCRs')
+	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('NCR1', 'NCR2', 'NCR3'), 'NCRs')
 
 	# ITGAE = CD103
-	PlotMarkerSet(seuratObj, reductions = reductions, features =  'Resident Memory', c('ITGAE', 'ITGB7', 'CD69', 'CXCR6', 'TYROBP'))
+	PlotMarkerSet(seuratObj, reductions = reductions, 'Resident Memory', features = c('ITGAE', 'ITGB7', 'CD69', 'CXCR6', 'TYROBP'))
 
 	#chemokines
 	chemokines <- c('CCL1','CCL11','CCL13','CCL16','CCL17','CCL18','CCL19','CCL2','CCL20','CCL21','CCL22','CCL24','CCL25','CCL26','CCL27','CCL28','CCL5','CCL7','CCL8')
 	chemokines <- c(chemokines, c('CCR1','CCR2','CCR3','CCR4','CCR5','CCR6','CCR7','CCR8','CCR9','CCR10','CCRL2'))
 	chemokines <- c(chemokines, c('CXCL1','CXCL10','CXCL11','CXCL12','CXCL13','CXCL14','CXCL16','CXCL17','CXCL5','CXCL6','CXCL8','CXCL9','CXCR1','CXCR2','CXCR3','CXCR4','CXCR5','CXCR6','XCR1'))
 
-	PlotMarkerSeries(seuratObj, reductions = reductions, features =  chemokines, 'Chemokines/Receptors')
+	PlotMarkerSeries(seuratObj, reductions = reductions, features = chemokines, 'Chemokines/Receptors')
 
-	PlotMarkerSeries(seuratObj, reductions = reductions, features =  c('MKI67', 'TOP2A'), 'Cell Proliferation')
+	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('MKI67', 'TOP2A'), 'Cell Proliferation')
 
-	#PlotMarkerSeries(seuratObj, reductions = reductions, features =  c('EPCAM'), 'Epithelial Cells')
+	#PlotMarkerSeries(seuratObj, reductions = reductions, features = c('EPCAM'), 'Epithelial Cells')
 
 	# LOC710951 = TRAC
 	# LOC114677140 = TRBC1
 	# LOC711031 = TRDC
 	# LOC720538 = TRGC1
 	# LOC705095 = TRGC2
-	PlotMarkerSeries(seuratObj, reductions = reductions, features =  c('LOC710951', 'LOC114677140', 'LOC711031', 'LOC720538', 'LOC705095'), 'TCR Constant Region')
+	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('LOC710951', 'LOC114677140', 'LOC711031', 'LOC720538', 'LOC705095'), 'TCR Constant Region')
 
-	PlotMarkerSeries(seuratObj, reductions = reductions, features =  c('MMP2','COL1A1','COL1A2','COL5A1','LUM','PDGFRA'), 'Stromal')
+	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('MMP2','COL1A1','COL1A2','COL5A1','LUM','PDGFRA'), 'Stromal')
 
-	PlotMarkerSeries(seuratObj, reductions = reductions, features =  c('CCR9','LILRA4'), 'pDC')
+	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('CCR9','LILRA4'), 'pDC')
 
-	PlotMarkerSeries(seuratObj, reductions = reductions, features =  c('CD1C','THBD'), 'pDC')
+	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('CD1C','THBD'), 'pDC')
 
-	PlotMarkerSeries(seuratObj, reductions = reductions, features =  c('CDH1','FLT1'), 'Epithelial')
+	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('CDH1','FLT1'), 'Epithelial')
 
-	PlotMarkerSeries(seuratObj, reductions = reductions, features =  c('LYZ','CSF1R','MSR1','MAFB','CD300E'), 'MoMacDC')
+	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('LYZ','CSF1R','MSR1','MAFB','CD300E'), 'MoMacDC')
 
-	PlotMarkerSeries(seuratObj, reductions = reductions, features =  c('CSF3R','FCGR3B'), 'Neutrophils')
+	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('CSF3R','FCGR3B'), 'Neutrophils')
 
-	PlotMarkerSeries(seuratObj, reductions = reductions, features =  c('HBB','HBA2','HBA1'), 'Erythrocyte')
+	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('HBB','HBA2','HBA1'), 'Erythrocyte')
 
-	PlotMarkerSeries(seuratObj, reductions = reductions, features =  GetGeneSet('MemoryAndNaive'), 'Putative Memory and Naive')
+	PlotMarkerSeries(seuratObj, reductions = reductions, features = GetGeneSet('MemoryAndNaive'), 'Putative Memory and Naive')
 
-	PlotMarkerSeries(seuratObj, reductions = reductions, features =  GetGeneSet('TandNK_Activation.1'), 'TandNK_Activation.1')
+	PlotMarkerSeries(seuratObj, reductions = reductions, features = GetGeneSet('TandNK_Activation.1'), 'TandNK_Activation.1')
 
 	# IGHD, IGHM = naive B and geminal center?
 	# IGHA1 = plasma cells
@@ -421,7 +421,7 @@ MakePhenotypingDotPlot <- function(seuratObj,
   meta_gene_vector <- unique(unlist(sapply(gene_lists, FUN = GetGeneSet)))
   
   #Get initial plotting and expression data from Seurat's version of the DotPlot
-  plt <- Seurat::DotPlot(seuratObj, features =  meta_gene_vector, group.by = yField, assay = assay)
+  plt <- Seurat::DotPlot(seuratObj, features = meta_gene_vector, group.by = yField, assay = assay)
   dotplot_df <- plt$data
   
   #Begin Phenotyping

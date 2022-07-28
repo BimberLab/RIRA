@@ -10,7 +10,7 @@ test_that("scGates load", {
   expect_equal(length(gates), 17)
 
   gate <- GetScGateModel('demo_gate')
-  expect_equal(length(gate$levels), 61)
+  expect_equal(length(gate$levels), 59)
 })
 
 test_that("scGate runs with custom models", {

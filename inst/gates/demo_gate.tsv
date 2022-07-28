@@ -58,5 +58,3 @@ level6	positive	Tcell	CD3D;CD3E;CD3G;CD7;MAMU-DRB1-;IFI30-
 level7	negative	TReg	FOXP3
 level7	positive	PreB	HBB;CD14-;CD8A-;CD8B-;CD4-;CD3D-;CD3E-;CD3G-
 level7	positive	Tcell	CD3D;CD3E;CD3G;CD7;MAMU-DRB1-;IFI30-
-level8	negative	Tcell	CD3D;CD3E;CD3G;CD7;MAMU-DRB1-;IFI30-
-level8	positive	PreB	HBB;CD14-;CD8A-;CD8B-;CD4-;CD3D-;CD3E-;CD3G-
