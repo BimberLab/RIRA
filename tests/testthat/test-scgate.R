@@ -34,14 +34,14 @@ test_that("scGate Runs", {
   
   # Try without reductions present:
   seuratObj <- RunScGate(seuratObj, gate)
-  expect_equal(sum(seuratObj$is.pure == 'Pure'), 1478, info = 'Before DimRedux')
+  expect_equal(sum(seuratObj$is.pure == 'Pure'), 1480, info = 'Before DimRedux')
 
   # Try with aliasing of models:
   seuratObj <- RIRA::RunScGateForModels(seuratObj, modelNames = c('Bcell', 'Tcell', 'NK', 'Myeloid'), labelRename = list(Tcell = 'T_NK', NK = 'T_NK'))
   print(sort(table(seuratObj$scGateConsensus)))
   dat <- table(seuratObj$scGateConsensus)
-  expect_equal(unname(dat[['Bcell']]), 240, info = 'With aliasing')
-  expect_equal(unname(dat[['T_NK']]), 1660, info = 'With aliasing')
+  expect_equal(unname(dat[['Bcell']]), 244, info = 'With aliasing')
+  expect_equal(unname(dat[['T_NK']]), 1659, info = 'With aliasing')
 
   expect_false('Tcell' %in% names(dat), info = 'With aliasing')
   expect_false('NK' %in% names(dat), info = 'With aliasing')
@@ -56,7 +56,7 @@ test_that("scGate Runs", {
   seuratObj <- Seurat::FindClusters(seuratObj, resolution = 0.5, random.seed = GetSeed())
 
   seuratObj <- RunScGate(seuratObj, gate)
-  expect_equal(sum(seuratObj$is.pure == 'Pure'), 1478, info = 'After DimRedux')
+  expect_equal(sum(seuratObj$is.pure == 'Pure'), 1488, info = 'After DimRedux')
 
   #At least execute this code once, so overt errors are caught
   seuratObj <- Seurat::RunUMAP(seuratObj, dims = 1:10)
@@ -70,7 +70,7 @@ test_that("scGate works with built-in gates", {
   suppressWarnings(data("pbmc3k"))
   seuratObj <- suppressWarnings(pbmc3k)
   seuratObj <- RunScGate(seuratObj, model = 'Bcell')
-  expect_equal(sum(seuratObj$is.pure == 'Pure'), 242)
+  expect_equal(sum(seuratObj$is.pure == 'Pure'), 245)
   
 })
 
@@ -85,8 +85,8 @@ test_that("scGates runs on all", {
   dat <- table(seuratObj$scGateConsensus)
   dat
   
-  expect_equal(unname(dat[['Bcell,PanBcell']]), 239)
-  expect_equal(unname(dat[['NK']]), 69)
+  expect_equal(unname(dat[['Bcell,PanBcell']]), 243)
+  expect_equal(unname(dat[['NK']]), 67)
   
   # Now with ambiguous cleanup:
   seuratObj <- RunScGateWithDefaultModels(seuratObj, dropAmbiguousConsensusValues = TRUE)
