@@ -110,7 +110,7 @@ GetScGateModel <- function(modelName, allowSCGateDB = TRUE) {
     stop(paste0('Unable to find model: ', modelName))
   }
 
-  print(paste0('Using build-in model: ', modelName))
+  print(paste0('Using built-in model: ', modelName))
   return(models.DB$human$generic[[modelName]])
 }
 
@@ -234,8 +234,10 @@ RunScGateForModels <- function(seuratObj, modelNames, min.cells = 30, assay = 'R
 
   # Remove intermediate fields:
   toDrop <- names(seuratObj@meta.data)[grepl(names(seuratObj@meta.data), pattern = 'is.pure.level')]
-  for (fn in toDrop) {
-    seuratObj@meta.data[fn] <- NULL
+  if (length(toDrop) > 0) {
+    for (fn in toDrop) {
+      seuratObj@meta.data[fn] <- NULL
+    }
   }
 
   .PlotUCellScores(seuratObj)

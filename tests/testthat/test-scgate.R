@@ -10,7 +10,7 @@ test_that("scGates load", {
   expect_equal(length(gates), 17)
 
   gate <- GetScGateModel('demo_gate')
-  expect_equal(length(gate$levels), 61)
+  expect_equal(length(gate$levels), 59)
 })
 
 test_that("scGate runs with custom models", {
@@ -34,7 +34,7 @@ test_that("scGate Runs", {
   
   # Try without reductions present:
   seuratObj <- RunScGate(seuratObj, gate)
-  expect_equal(sum(seuratObj$is.pure.level1 == 'Pure'), 2336, info = 'Before DimRedux')
+  expect_equal(sum(seuratObj$is.pure == 'Pure'), 1480, info = 'Before DimRedux')
 
   # Try with aliasing of models:
   seuratObj <- RIRA::RunScGateForModels(seuratObj, modelNames = c('Bcell', 'Tcell', 'NK', 'Myeloid'), labelRename = list(Tcell = 'T_NK', NK = 'T_NK'))
@@ -56,7 +56,7 @@ test_that("scGate Runs", {
   seuratObj <- Seurat::FindClusters(seuratObj, resolution = 0.5, random.seed = GetSeed())
 
   seuratObj <- RunScGate(seuratObj, gate)
-  expect_equal(sum(seuratObj$is.pure.level1 == 'Pure'), 2343, info = 'After DimRedux')
+  expect_equal(sum(seuratObj$is.pure == 'Pure'), 1488, info = 'After DimRedux')
 
   #At least execute this code once, so overt errors are caught
   seuratObj <- Seurat::RunUMAP(seuratObj, dims = 1:10)
@@ -64,13 +64,13 @@ test_that("scGate Runs", {
 })
 
 
-test_that("scGate works with build-in gates", {
+test_that("scGate works with built-in gates", {
   # Use with built-in gate:
   suppressWarnings(SeuratData::InstallData("pbmc3k"))
   suppressWarnings(data("pbmc3k"))
   seuratObj <- suppressWarnings(pbmc3k)
   seuratObj <- RunScGate(seuratObj, model = 'Bcell')
-  expect_equal(sum(seuratObj$is.pure.level4 == 'Pure'), 245)
+  expect_equal(sum(seuratObj$is.pure == 'Pure'), 245)
   
 })
 
