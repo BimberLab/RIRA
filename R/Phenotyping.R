@@ -44,7 +44,7 @@ PlotImmuneMarkers <- function(seuratObj, reductions = c('tsne', 'umap')) {
 	# FOXP3 = Treg
 	# AQP3, GPR183 = Tcm
 	# ANXA1, GPR183 = Tem
-	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('CD4', 'SELL', 'LEF1', 'STAT1', 'CD40LG', 'GATA3', 'FOXP3', 'AQP3', 'GPR183', 'HOPX', 'ITGB2'), 'CD4 Phenotypic Markers')
+	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('CD4', 'SELL', 'LEF1', 'STAT1', 'CD40LG', 'GATA3', 'FOXP3', 'AQP3', 'GPR183', 'HOPX', 'ITGB2', 'AHNAK', 'ANXA1'), 'CD4 Phenotypic Markers')
 
 	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('PRF1', 'GNLY', 'NKG7', 'GZMA','GZMB','GZMH','GZMK','GZMM'), 'Cytotoxicity')
 
@@ -278,9 +278,19 @@ GetGeneSet <- function(name) {
 .RegisterGeneSet('TandNK_Activation.1', c('CCL4L1','MIR155HG','RGCC','NFKBIA','IFNG','NR4A3','TNFSF14','CCL3'))
 
 # This is based on T-cell analysis from lung T/NK cells. This my not be precisely Memory/Naive.
-.RegisterGeneSet('MemoryAndNaive', c('SELL', 'IL7R', 'LTB', 'SPOCK2', 'COTL1', 'JUNB', 'GPR183'))
+.RegisterGeneSet('MemoryAndNaive', c('SELL', 'IL7R', 'LTB', 'SPOCK2', 'COTL1', 'JUNB', 'GPR183', 'CCR7', 'FUOM', 'CD7', 'PECAM1'))
 
 .RegisterGeneSet('Cytotoxicity', c('PRF1', 'GNLY', 'NKG7', 'GZMA','GZMB','GZMH','GZMK','GZMM'))
+
+.RegisterGeneSet('EffectorT', c('CCL4L1','CCL5','CCR7-','CD7-','FUOM-','GNLY','GZMB','GZMH','HOPX','LTB-','NKG7','PECAM1-','PRF1','RGS9','S100A4','SELL-','SPOCK2-','JUNB-'))
+
+.RegisterGeneSet('CentralMemT', c('CCR7', 'CLDND1', 'GPR183'))
+
+# Note: 'CD7', 'CCR7' excluded since they are in Tcm as well
+.RegisterGeneSet('NaiveT', c('CTSH', 'CA6', 'GSTT1', 'LEF1','RGS10', 'TMIGD2'))
+
+.RegisterGeneSet('CD8Memory', c('CD8A', 'CST7', 'CTSW', 'GNLY', 'GZMK'))
+
 .RegisterGeneSet('EffectorCytokines', c('GZMA','GZMB','GZMH','GZMK', 'GZMM', 'PRF1', 'NKG7', 'GNLY', 'IFNG', 'FASLG', 'TNF', 'IL17A', 'IL2'))
 .RegisterGeneSet('ExhaustionOrInhibitory', c('PDCD1', 'TIGIT', 'HAVCR2', 'LAG3', 'CTLA4', 'VTCN1', 'CD244', 'KLRG1', 'TNFRSF14', 'BTLA', 'CD160'))
 
@@ -419,6 +429,9 @@ MakePhenotypingDotPlot <- function(seuratObj,
   }
   #Parse gene_lists and coerce into a vector of genes to be plotted
   meta_gene_vector <- unique(unlist(sapply(gene_lists, FUN = GetGeneSet)))
+
+  # drop trailing '-', in case the signature has a negative marker
+  meta_gene_vector <- gsub(meta_gene_vector, pattern = '-$', replacement = '')
   
   #Get initial plotting and expression data from Seurat's version of the DotPlot
   plt <- Seurat::DotPlot(seuratObj, features = meta_gene_vector, group.by = yField, assay = assay)
