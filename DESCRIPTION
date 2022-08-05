@@ -43,8 +43,8 @@ Suggests:
     SeuratData
 Remotes:
     pengminshi/cFIT,
-    bioc::UCell,
-    carmonalab/scGate@v1.2.0,
+    carmonalab/UCell,
+    carmonalab/scGate,
     bioc::SingleCellExperiment,
     bioc::DropletUtils,
     satijalab/seurat-data,
