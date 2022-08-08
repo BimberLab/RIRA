@@ -18,9 +18,19 @@ test_that("ScoreUsingSavedComponent works", {
   suppressWarnings(SeuratData::InstallData("pbmc3k"))
   suppressWarnings(data("pbmc3k"))
   seuratObj <- suppressWarnings(pbmc3k)
+  seuratObj <- Seurat::FindVariableFeatures(seuratObj, nfeatures = 2000)
+  seuratObj <- Seurat::ScaleData(seuratObj)
+  seuratObj <- Seurat::RunPCA(seuratObj, features = Seurat::VariableFeatures(object = seuratObj))
 
   df <- ExtractGeneWeights(seuratObj, componentNum = 1)
+  expect_equal(nrow(df), 200)
 
   seuratObj <- ScoreUsingSavedComponent(seuratObj, componentOrName = df, fieldName = 'Test1')
+  expect_equal(round(min(seuratObj$Test1), 2), -2.52)
+  expect_equal(round(max(seuratObj$Test1), 2), 199.21)
+  
   seuratObj <- ScoreUsingSavedComponent(seuratObj, componentOrName = 'Tcell_NaiveToEffector', fieldName = 'Test2')
+  expect_equal(round(min(seuratObj$Test2), 2), -41.61)
+  expect_equal(round(max(seuratObj$Test2), 2), 6.69)
+  
 })

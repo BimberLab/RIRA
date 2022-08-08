@@ -27,7 +27,15 @@ ScoreUsingSavedComponent <- function(seuratObj, componentOrName, fieldName) {
   geneWeights <- savedComponent$weight
   names(geneWeights) <- savedComponent$feature
 
-  cellScores <- Matrix::t(Matrix::as.matrix(Seurat::GetAssayData(seuratObj)[names(geneWeights), ]))  %*%  geneWeights
+  ad <- Seurat::GetAssayData(seuratObj)
+  toDrop <- names(geneWeights)[!names(geneWeights) %in% rownames(ad)]
+  if (length(toDrop) > 0) {
+    print(paste0('The following ', length(toDrop), ' genes were in the component but not the assay, skipping: ', paste0(toDrop, collapse = ',')))
+    geneWeights <- geneWeights[!names(geneWeights) %in% toDrop]
+    print(paste0('Remaining: ', length(geneWeights)))
+  }
+
+  cellScores <- Matrix::t(Matrix::as.matrix(ad[names(geneWeights), ]))  %*%  geneWeights
   seuratObj <- Seurat::AddMetaData(seuratObj, cellScores, col.name = fieldName)
 
   print(FeaturePlot(seuratObj, features=fieldName, order = T, cols = c("navy", "dodgerblue", "gold", "red")))
