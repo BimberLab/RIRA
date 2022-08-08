@@ -54,6 +54,7 @@ Collate:
     'Utils.R'
     'Atlas.R'
     'CellTypist.R'
+    'ComponentScores.R'
     'Phenotyping.R'
     'GeneModules.R'
     'Pipeline_Seurat.R'
