@@ -51,7 +51,7 @@ PlotImmuneMarkers <- function(seuratObj, reductions = c('tsne', 'umap')) {
 	PlotMarkerSet(seuratObj, reductions = reductions, 'B-cell Markers', features = c('MS4A1', 'CD79A', 'CD74', 'DRA'))
 
 	# Also: CD19-, MS4A1-, CD79B-
-	PlotMarkerSet(seuratObj, reductions = reductions, 'Plasma Cells', features = c('CD79A', 'JCHAIN', 'MZB1', 'XBP1', 'CD79A'))
+	PlotMarkerSet(seuratObj, reductions = reductions, 'Plasma Cells', features = c('CD79A', 'JCHAIN', 'MZB1', 'XBP1'))
 
 	PlotMarkerSet(seuratObj, reductions = reductions, 'Monocyte', features = c('LYZ', 'CST3', 'S100A6', 'VIM'))
 
@@ -98,7 +98,7 @@ PlotImmuneMarkers <- function(seuratObj, reductions = c('tsne', 'umap')) {
 
 	#DAP10/12
 	# LOC707555 = ZAP70
-	PlotMarkerSet(seuratObj, reductions = reductions, 'Signaling', features = c('HCST', 'TYROBP', 'SYK', 'ZAP70', 'LOC707555', 'ITK'))
+	PlotMarkerSeries(seuratObj, reductions = reductions, title = 'Signaling', features = c('HCST', 'TYROBP', 'SYK', 'ZAP70', 'LOC707555', 'ITK'))
 
 	#LILR/KIR:
 	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('LILRA5','LILRA6','LILRB4','LILRB5','KIR2DL4','KIR3DX1', 'MAMU-KIR', 'KIR2DL4', 'KIR3DL2'), 'LILR/KIR')
