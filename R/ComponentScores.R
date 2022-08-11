@@ -37,12 +37,9 @@ ScoreUsingSavedComponent <- function(seuratObj, componentOrName, fieldName) {
 
   cellScores <- Matrix::t(Matrix::as.matrix(ad[names(geneWeights), ]))  %*%  geneWeights
   seuratObj <- Seurat::AddMetaData(seuratObj, cellScores, col.name = fieldName)
-
-  print(FeaturePlot(seuratObj, features=fieldName, order = T, cols = c("navy", "dodgerblue", "gold", "red")))
-  print(FeaturePlot(seuratObj, features = fieldName, order = T))
-  print(hist(SerObj[[fieldName]], breaks = 300))
   
-
+  suppressMessages(print(FeaturePlot(seuratObj, features = fieldName, order = T) & ggplot2::scale_colour_gradientn(colours = c("navy", "dodgerblue", "gold", "red"))))  
+  print(hist(seuratObj[[fieldName]][,1], breaks = 300, main = fieldName))
 
   return(seuratObj)
 }
