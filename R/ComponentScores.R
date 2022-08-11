@@ -39,6 +39,10 @@ ScoreUsingSavedComponent <- function(seuratObj, componentOrName, fieldName) {
   seuratObj <- Seurat::AddMetaData(seuratObj, cellScores, col.name = fieldName)
 
   print(FeaturePlot(seuratObj, features=fieldName, order = T, cols = c("navy", "dodgerblue", "gold", "red")))
+  print(FeaturePlot(seuratObj, features = fieldName, order = T))
+  print(hist(SerObj[[fieldName]], breaks = 300))
+  
+
 
   return(seuratObj)
 }
