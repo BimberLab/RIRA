@@ -82,7 +82,7 @@ SeuratToAnnData <- function(seuratObj, outFileBaseName, assayName = NULL, doDiet
       stop('Not all columns requested in allowableMetaCols exist in the seurat object')
     }
 
-    seuratObj@meta.data <- seuratObj@meta.data[,allowableMetaCols]
+    seuratObj@meta.data <- seuratObj@meta.data[,allowableMetaCols, drop = FALSE]
   }
 
   SeuratDisk::SaveH5Seurat(seuratObj, filename = tmpFile)
