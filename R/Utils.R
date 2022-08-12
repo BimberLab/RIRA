@@ -63,7 +63,7 @@ SetAtlasDir <- function(folderPath) {
   return(parentFolder)
 }
 
-SeuratToAnnData <- function(seuratObj, outFileBaseName, assayName = NULL, doDiet = FALSE) {
+SeuratToAnnData <- function(seuratObj, outFileBaseName, assayName = NULL, doDiet = FALSE, allowableMetaCols = NULL) {
   tmpFile <- outFileBaseName
   if (!is.null(assayName)) {
     for (an in names(seuratObj@assays)) {
@@ -75,6 +75,14 @@ SeuratToAnnData <- function(seuratObj, outFileBaseName, assayName = NULL, doDiet
 
   if (doDiet) {
     seuratObj <- Seurat::DietSeurat(seuratObj)
+  }
+
+  if (!all(is.null(allowableMetaCols))) {
+    if (!all(allowableMetaCols %in% names(seuratObj@meta.data))) {
+      stop('Not all columns requested in allowableMetaCols exist in the seurat object')
+    }
+
+    seuratObj@meta.data <- seuratObj@meta.data[,allowableMetaCols, drop = FALSE]
   }
 
   SeuratDisk::SaveH5Seurat(seuratObj, filename = tmpFile)

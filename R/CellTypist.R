@@ -166,7 +166,7 @@ TrainCellTypist <- function(seuratObj, labelField, modelFile, minCellsPerClass =
     seuratObj <- .DropLowCountClasses(seuratObj, labelField, minCellsPerClass)
   }
 
-  trainData <- SeuratToAnnData(seuratObj, paste0(outFile, '-seurat-annData'), assayName = assayName, doDiet = TRUE)
+  trainData <- SeuratToAnnData(seuratObj, paste0(outFile, '-seurat-annData'), assayName = assayName, doDiet = TRUE, allowableMetaCols = labelField)
 
   # potentially replace windows slashes with forward slash
   trainData <- gsub(trainData, pattern = '\\\\', replacement = '/')
