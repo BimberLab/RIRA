@@ -77,7 +77,11 @@ SeuratToAnnData <- function(seuratObj, outFileBaseName, assayName = NULL, doDiet
     seuratObj <- Seurat::DietSeurat(seuratObj)
   }
 
-  if (!all(is.null(allowableMetaCols))) {
+  if (all(is.na(allowableMetaCols))) {
+    print('Removing all metadata prior to save')
+    seuratObj@meta.data <- seuratObj@meta.data[,NULL, drop = FALSE]
+    seuratObj@meta.data$CellBarcode <- rownames(seuratObj@meta.data)
+  } else if (!all(is.null(allowableMetaCols))) {
     if (!all(allowableMetaCols %in% names(seuratObj@meta.data))) {
       stop('Not all columns requested in allowableMetaCols exist in the seurat object')
     }
@@ -85,8 +89,10 @@ SeuratToAnnData <- function(seuratObj, outFileBaseName, assayName = NULL, doDiet
     seuratObj@meta.data <- seuratObj@meta.data[,allowableMetaCols, drop = FALSE]
   }
 
+  print('Saving to H5Seurat')
   SeuratDisk::SaveH5Seurat(seuratObj, filename = tmpFile)
   h5seurat <- paste0(tmpFile, ".h5seurat")
+  print('Converting from H5Seurat to AnnData')
   SeuratDisk::Convert(source = h5seurat, dest = "h5ad", overwrite = T)
   unlink(h5seurat)
 
