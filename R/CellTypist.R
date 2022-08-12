@@ -36,7 +36,8 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
   print(paste0('Running celltypist using model: ', modelName))
   outFile <- tempfile()
   outDir <- dirname(outFile)
-  seuratAnnData <- SeuratToAnnData(seuratObj, paste0(outFile, '-seurat-annData'), assayName, doDiet = TRUE)
+  # NOTE: metadata is not needed for scoring and is can contain invalid characters, so drop it during conversion
+  seuratAnnData <- SeuratToAnnData(seuratObj, paste0(outFile, '-seurat-annData'), assayName, doDiet = TRUE, allowableMetaCols = NA)
 
   # Ensure models present:
   system2(reticulate::py_exe(), c("-m", "celltypist.command_line", "--update-models", "--quiet"))
