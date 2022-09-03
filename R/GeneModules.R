@@ -17,7 +17,7 @@ CalculateUCellScores <- function(seuratObj, forceRecalculate = FALSE) {
   )
 
   if (forceRecalculate || any(!paste0(names(toCalculate), '_UCell') %in% names(seuratObj@meta.data))) {
-    seuratObj <- UCell::AddModuleScore_UCell(seuratObj, features = toCalculate)
+    seuratObj <- UCell::AddModuleScore_UCell(seuratObj, features = toCalculate, seed = GetSeed())
   } else {
     print('UCell score already present, will not recalculate')
   }
