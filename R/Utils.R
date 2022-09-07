@@ -77,6 +77,8 @@ SeuratToAnnData <- function(seuratObj, outFileBaseName, assayName = NULL, doDiet
     seuratObj <- Seurat::DietSeurat(seuratObj)
   }
 
+  seuratObj@misc <- list()
+
   if (all(is.na(allowableMetaCols))) {
     print('Removing all metadata prior to save')
     seuratObj@meta.data <- seuratObj@meta.data[,NULL, drop = FALSE]
