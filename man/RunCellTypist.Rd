@@ -13,7 +13,9 @@ RunCellTypist(
     "--min-prop", minProp),
   assayName = "RNA",
   columnPrefix = NULL,
-  convertAmbiguousToNA = FALSE
+  convertAmbiguousToNA = FALSE,
+  maxAllowableClasses = 6,
+  minFractionToPlot = 0.01
 )
 }
 \arguments{
@@ -32,6 +34,10 @@ RunCellTypist(
 \item{columnPrefix}{A prefix that will be added to the beginning of the resulting columns, added the seurat@meta.data}
 
 \item{convertAmbiguousToNA}{If true, any values for majority_voting with commas (indicating they are ambiguous) will be converted to NA}
+
+\item{maxAllowableClasses}{Celltypist can assign a cell to many classes, creating extremely long labels. Any cell with more than this number of labels will be set to NA}
+
+\item{minFractionToPlot}{If non-null, any labels with fewer than this fraction of cells will be set to 'Low Freq' for the purposes of generating the summary barplot.}
 }
 \description{
 Runs celltypist on a seurat object and stores the calls as metadata

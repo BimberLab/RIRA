@@ -17,9 +17,11 @@ utils::globalVariables(
 #' @param convertAmbiguousToNA If true, any values for majority_voting with commas (indicating they are ambiguous) will be converted to NA
 #' @param pThreshold By default, this would be passed to the --p-thres argument. However, if you also provide extraArgs, this is ignored.
 #' @param minProp By default, this would be passed to the --min-prop argument. However, if you also provide extraArgs, this is ignored.
+#' @param maxAllowableClasses Celltypist can assign a cell to many classes, creating extremely long labels. Any cell with more than this number of labels will be set to NA
+#' @param minFractionToPlot If non-null, any labels with fewer than this fraction of cells will be set to 'Low Freq' for the purposes of generating the summary barplot.
 #'
 #' @export
-RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshold = 0.5, minProp = 0, extraArgs = c("--majority-voting", "--mode", "prob_match", "--p-thres", pThreshold, "--min-prop", minProp), assayName = 'RNA', columnPrefix = NULL, convertAmbiguousToNA = FALSE) {
+RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshold = 0.5, minProp = 0, extraArgs = c("--majority-voting", "--mode", "prob_match", "--p-thres", pThreshold, "--min-prop", minProp), assayName = 'RNA', columnPrefix = NULL, convertAmbiguousToNA = FALSE, maxAllowableClasses = 6, minFractionToPlot = 0.01) {
   if (!reticulate::py_available(initialize = TRUE)) {
     stop(paste0('Python/reticulate not configured. Run "reticulate::py_config()" to initialize python'))
   }
@@ -56,32 +58,61 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
 
   system2(reticulate::py_exe(), args)
 
-  labels <- paste0(outDir, '/celltypist.predicted_labels.csv')
-  if (!file.exists(labels)) {
-    stop(paste0('Missing file: ', labels, '. files present: ', paste0(list.files(outDir), collapse = ', ')))
+  labelFile <- paste0(outDir, '/celltypist.predicted_labels.csv')
+  if (!file.exists(labelFile)) {
+    stop(paste0('Missing file: ', labelFile, '. files present: ', paste0(list.files(outDir), collapse = ', ')))
   }
 
-  labels <- utils::read.csv(labels, header = T, row.names = 1)
+  labels <- utils::read.csv(labelFile, header = T, row.names = 1)
   labels$majority_voting[labels$majority_voting == 'Unassigned'] <- NA
 
-  if (convertAmbiguousToNA) {
-    toDrop <- grepl(labels$majority_voting, pattern = ',')
+  if (convertAmbiguousToNA && 'majority_voting' %in% names(labels)) {
+    toDrop <- grepl(labels$majority_voting, pattern = '\\|')
     if (sum(toDrop) > 0) {
       print(paste0('Converting ', sum(toDrop), ' cells with ambiguous values for majority_voting to NAs'))
       labels$majority_voting[toDrop] <- NA
     }
   }
 
+  if (!is.na(maxAllowableClasses)) {
+    for (fieldName in c('majority_voting', 'predicted_labels')) {
+      dat <- unique(labels[[fieldName]])
+      toDrop <- dat[lengths(regmatches(x = dat, gregexpr("\\|", dat))) > maxAllowableClasses]
+      toDrop <- toDrop[!is.na(toDrop)]
+      if (length(toDrop) > 0) {
+        print(paste0('Dropping cells with more than ', maxAllowableClasses, ' calls for: ', fieldName, '. These were:'))
+        print(paste0(toDrop, collapse = ', '))
+      }
+
+      # NOTE: %in% doesnt handle NAs well
+      labels[[fieldName]][is.na(labels[[fieldName]]) | labels[[fieldName]] %in% toDrop] <- NA
+    }
+  }
+
+  plotColname <- ifelse('majority_voting' %in% names(labels), yes = 'majority_voting', no = 'predicted_labels')
   if (!is.null(columnPrefix)) {
     names(labels) <- paste0(columnPrefix, names(labels))
+    plotColname <- paste0(columnPrefix, plotColname)
   }
 
   seuratObj <- Seurat::AddMetaData(seuratObj, labels)
 
   unlink(seuratAnnData)
-  unlink(labels)
+  unlink(labelFile)
 
-  print(ggplot(seuratObj@meta.data, aes(x = majority_voting, fill = majority_voting)) +
+  toPlot <- seuratObj[[plotColname]]
+  names(toPlot) <- c('x')
+  if (!is.null(minFractionToPlot)) {
+    d <- data.frame(table(Label = unlist(seuratObj[[plotColname, drop = T]])))
+    names(d) <- c('Label', 'Count')
+    d$Fraction <- d$Count / sum(d$Count)
+    toRemove <- d$Label[d$Fraction < minFractionToPlot]
+    if (length(toRemove) > 0) {
+      print(paste0('Will remove from barplot: ', paste0(toRemove, collapse = ', ')))
+      toPlot$x[toPlot$x %in% toRemove] <- 'Low. Freq'
+    }
+  }
+  print(ggplot(toPlot, aes(x = x, fill = x)) +
           geom_bar(color = 'black') +
           egg::theme_presentation(base_size = 12) +
           ggtitle('Celltypist Call') +
