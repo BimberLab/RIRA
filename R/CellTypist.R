@@ -56,12 +56,12 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
 
   system2(reticulate::py_exe(), args)
 
-  labels <- paste0(outDir, '/celltypist.predicted_labels.csv')
-  if (!file.exists(labels)) {
-    stop(paste0('Missing file: ', labels, '. files present: ', paste0(list.files(outDir), collapse = ', ')))
+  labelFile <- paste0(outDir, '/celltypist.predicted_labels.csv')
+  if (!file.exists(labelFile)) {
+    stop(paste0('Missing file: ', labelFile, '. files present: ', paste0(list.files(outDir), collapse = ', ')))
   }
 
-  labels <- utils::read.csv(labels, header = T, row.names = 1)
+  labels <- utils::read.csv(labelFile, header = T, row.names = 1)
   labels$majority_voting[labels$majority_voting == 'Unassigned'] <- NA
 
   if (convertAmbiguousToNA) {
@@ -72,16 +72,18 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
     }
   }
 
+  majorityVotingColname <- 'majority_voting'
   if (!is.null(columnPrefix)) {
     names(labels) <- paste0(columnPrefix, names(labels))
+    majorityVotingColname <- paste0(columnPrefix, majorityVotingColname)
   }
 
   seuratObj <- Seurat::AddMetaData(seuratObj, labels)
 
   unlink(seuratAnnData)
-  unlink(labels)
+  unlink(labelFile)
 
-  print(ggplot(seuratObj@meta.data, aes(x = majority_voting, fill = majority_voting)) +
+  print(ggplot(seuratObj@meta.data, aes_string(x = majorityVotingColname, fill = majorityVotingColname)) +
           geom_bar(color = 'black') +
           egg::theme_presentation(base_size = 12) +
           ggtitle('Celltypist Call') +
