@@ -18,9 +18,10 @@ utils::globalVariables(
 #' @param pThreshold By default, this would be passed to the --p-thres argument. However, if you also provide extraArgs, this is ignored.
 #' @param minProp By default, this would be passed to the --min-prop argument. However, if you also provide extraArgs, this is ignored.
 #' @param maxAllowableClasses Celltypist can assign a cell to many classes, creating extremely long labels. Any cell with more than this number of labels will be set to NA
+#' @param minFractionToPlot If non-null, any labels with fewer than this fraction of cells will be set to 'Low Freq' for the purposes of generating the summary barplot.
 #'
 #' @export
-RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshold = 0.5, minProp = 0, extraArgs = c("--majority-voting", "--mode", "prob_match", "--p-thres", pThreshold, "--min-prop", minProp), assayName = 'RNA', columnPrefix = NULL, convertAmbiguousToNA = FALSE, maxAllowableClasses = 6) {
+RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshold = 0.5, minProp = 0, extraArgs = c("--majority-voting", "--mode", "prob_match", "--p-thres", pThreshold, "--min-prop", minProp), assayName = 'RNA', columnPrefix = NULL, convertAmbiguousToNA = FALSE, maxAllowableClasses = 6, minFractionToPlot = 0.01) {
   if (!reticulate::py_available(initialize = TRUE)) {
     stop(paste0('Python/reticulate not configured. Run "reticulate::py_config()" to initialize python'))
   }
@@ -84,7 +85,7 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
       }
 
       # NOTE: %in% doesnt handle NAs well
-      labels[fieldName][is.na(labels[[fieldName]]) | labels[[fieldName]] %in% toDrop] <- NA
+      labels[[fieldName]][is.na(labels[[fieldName]]) | labels[[fieldName]] %in% toDrop] <- NA
     }
   }
 
@@ -99,7 +100,19 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
   unlink(seuratAnnData)
   unlink(labelFile)
 
-  print(ggplot(seuratObj@meta.data, aes_string(x = plotColname, fill = plotColname)) +
+  toPlot <- seuratObj[[plotColname]]
+  names(toPlot) <- c('x')
+  if (!is.null(minFractionToPlot)) {
+    d <- data.frame(table(Label = unlist(seuratObj[[plotColname, drop = T]])))
+    names(d) <- c('Label', 'Count')
+    d$Fraction <- d$Count / sum(d$Count)
+    toRemove <- d$Label[d$Fraction < minFractionToPlot]
+    if (length(toRemove) > 0) {
+      print(paste0('Will remove from barplot: ', paste0(toRemove, collapse = ', ')))
+      toPlot$x[toPlot$x %in% toRemove] <- 'Low. Freq'
+    }
+  }
+  print(ggplot(toPlot, aes(x = x, fill = x)) +
           geom_bar(color = 'black') +
           egg::theme_presentation(base_size = 12) +
           ggtitle('Celltypist Call') +
