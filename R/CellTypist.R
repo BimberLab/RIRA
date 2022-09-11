@@ -69,7 +69,7 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
     toDrop <- grepl(labels$majority_voting, pattern = '\\|')
     if (sum(toDrop) > 0) {
       print(paste0('Converting ', sum(toDrop), ' cells with ambiguous values for majority_voting to NAs'))
-      labels$majority_voting[!is.na(labels$majority_voting) & toDrop] <- NA
+      labels$majority_voting[toDrop] <- NA
     }
   }
 
@@ -83,7 +83,8 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
         print(paste0(toDrop, collapse = ', '))
       }
 
-      labels[fieldName][!is.na(labels[[fieldName]]) & labels[[fieldName]] %in% toDrop] <- NA
+      # NOTE: %in% doesnt handle NAs well
+      labels[fieldName][is.na(labels[[fieldName]]) | labels[[fieldName]] %in% toDrop] <- NA
     }
   }
 
