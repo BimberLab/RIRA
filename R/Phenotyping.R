@@ -333,6 +333,19 @@ igLambdaVariable <-c("LOC107000570", "LOC106992425", "LOC701976", "LOC708547", "
 	GetGeneSet('MMul10_Ig_Variable')
 )))
 
+# Lists provided by Rebecca Skalsky. NOTE: CD24, CD27 and CEACAM21 not annotated in MMul10
+.RegisterGeneSet('B cells', c('MS4A1', 'CD79A', 'CD79B'))
+.RegisterGeneSet('Follicular B cells', c('CD19', 'MS4A1', 'CR2', 'CD22', 'FCER2', 'CXCR5', 'MAMU-DRA', 'PAX5'))  # Also 'CD24'
+.RegisterGeneSet('Activated B cell', c('CD19', 'CD69', 'MS4A1', 'IL2RA', 'CD86', 'FLT3', 'PAX5', 'BACH2', 'IRF4')) # Also CD27
+.RegisterGeneSet('Germinal Center B cell', c('CD38', 'CD37', 'FCER2')) # Also CD27
+.RegisterGeneSet('Dark zone (centroblast)', c('CD38', 'CXCR4', 'A4GALT', 'AICDA', 'FOXO1', 'MKI67', 'CDK1', 'CCND3', 'PAX5', 'BCL6', 'MEF2B'))
+.RegisterGeneSet('Light zone (centrocyte)', c('CD38', 'CXCR5', 'CD83', 'BATF', 'BCL2A1'))
+.RegisterGeneSet('Memory B cell precursor in LZ', c('CCR6', 'GPR183', 'PLAC8', 'MAML2', 'IL23A'))
+.RegisterGeneSet('Memory B cells', c('CD19', 'MS4A1', 'CR2', 'CD40', 'CD80', 'CD86', 'MAMU-DRA', 'POU2AF1', 'PAX5')) # Also CEACAM21, CD27
+.RegisterGeneSet('Plasma cell', c('SDC1', 'CD38', 'TNFRSF17', 'CXCR4', 'TNFRSF17', 'PRDM1', 'IRF4', 'XBP1')) # Also CD27
+.RegisterGeneSet('Short-lived plasmablast', c('CD19', 'CD38', 'TNFRSF17', 'CXCR4')) # Also CD27
+.RegisterGeneSet('Marginal Zone B cells (spleen)', c('CD19', 'MS4A1', 'CR2', 'FCER2', 'FCRL3', 'CD1C', 'EBF1', 'TCF3', 'PAX5')) # Also CD27
+
 #' @title GetMMul10TcrGenes
 #'
 #' @description Returns a vector with MMul10 gene IDs (NCBI build) for TCR genes.

@@ -15,7 +15,7 @@ RunCellTypist(
   columnPrefix = NULL,
   convertAmbiguousToNA = FALSE,
   maxAllowableClasses = 6,
-  minFractionToPlot = 0.01
+  minFractionToInclude = 0.01
 )
 }
 \arguments{
@@ -37,7 +37,7 @@ RunCellTypist(
 
 \item{maxAllowableClasses}{Celltypist can assign a cell to many classes, creating extremely long labels. Any cell with more than this number of labels will be set to NA}
 
-\item{minFractionToPlot}{If non-null, any labels with fewer than this fraction of cells will be set to 'Low Freq' for the purposes of generating the summary barplot.}
+\item{minFractionToInclude}{If non-null, any labels with fewer than this fraction of cells will be set to NA.}
 }
 \description{
 Runs celltypist on a seurat object and stores the calls as metadata
