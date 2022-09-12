@@ -38,10 +38,12 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
   print(paste0('Running celltypist using model: ', modelName))
 
   # Try to find within RIRA:
-  mf <- system.file(paste0("models/", modelName, '.pkl', package = "RIRA"))
+  mf <- system.file(paste0("models/", modelName, '.pkl'), package = "RIRA")
   if (file.exists(mf)) {
     print(paste0('Using RIRA model: ', modelName))
     modelName <- mf
+  } else {
+    print(paste0('Not found: ', mf))
   }
 
   outFile <- tempfile()
