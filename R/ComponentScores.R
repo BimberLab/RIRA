@@ -3,7 +3,7 @@
 .GetSavedComponent <- function(componentName) {
   savedFile <- system.file(paste0("components/", componentName, ".tsv"), package = "RIRA")
   if (file.exists(savedFile)) {
-    return(read.table(savedFile, header = T, sep = '\t'))
+    return(utils::read.table(savedFile, header = T, sep = '\t'))
   }
 
   stop(paste0('Unknown component: ', componentName))
@@ -38,8 +38,8 @@ ScoreUsingSavedComponent <- function(seuratObj, componentOrName, fieldName) {
   cellScores <- Matrix::t(Matrix::as.matrix(ad[names(geneWeights), ]))  %*%  geneWeights
   seuratObj <- Seurat::AddMetaData(seuratObj, cellScores, col.name = fieldName)
   
-  suppressMessages(print(FeaturePlot(seuratObj, features = fieldName, order = T) & ggplot2::scale_colour_gradientn(colours = c("navy", "dodgerblue", "gold", "red"))))  
-  hist(seuratObj[[fieldName]][,1], breaks = 300, main = fieldName)
+  suppressMessages(print(FeaturePlot(seuratObj, features = fieldName, order = T) & ggplot2::scale_colour_gradientn(colours = c("navy", "dodgerblue", "gold", "red"))))
+  graphics::hist(seuratObj[[fieldName]][,1], breaks = 300, main = fieldName)
 
   return(seuratObj)
 }

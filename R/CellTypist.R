@@ -1,7 +1,7 @@
 #' @include Utils.R
 
 utils::globalVariables(
-  names = c('majority_voting'),
+  names = c('majority_voting', 'Fraction'),
   package = 'RIRA',
   add = TRUE
 )

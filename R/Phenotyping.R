@@ -1,3 +1,11 @@
+#' @include Utils.R
+#'
+utils::globalVariables(
+	names = c('gene', 'set'),
+	package = 'RIRA',
+	add = TRUE
+)
+
 #' @title PlotImmuneMarkers
 #'
 #' @description Generate a set of Seurat FeaturePlots for common immune cell markers
