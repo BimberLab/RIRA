@@ -18,6 +18,14 @@ test_that("celltypist runs", {
   expect_equal(110, length(unique(seuratObj$predicted_labels)))
   expect_equal(289, unname(table(seuratObj$predicted_labels)['B cells']))
 
+  # ensure the RIRA model works:
+  seuratObj <- RIRA::RunCellTypist(seuratObj, modelName = 'RIRA_Immune_v1')
+  expect_equal(11, length(unique(seuratObj$majority_voting)), info = 'using RIRA model', tolerance = 1)
+  expect_equal(110, length(unique(seuratObj$predicted_labels)))
+  expect_equal(289, unname(table(seuratObj$predicted_labels)['Bcell']))
+  expect_equal(289, unname(table(seuratObj$predicted_labels)['T_NK']))
+  expect_equal(289, unname(table(seuratObj$predicted_labels)['MoMacDC']))
+
   # NOTE: this is very slow, so skip in automated testing for now
   modelFile <- 'myModel.pkl'
   cells <- rownames(seuratObj@meta.data)[!is.na(seuratObj$majority_voting)]
