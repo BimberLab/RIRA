@@ -42,8 +42,6 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
   if (file.exists(mf)) {
     print(paste0('Using RIRA model: ', modelName))
     modelName <- mf
-  } else {
-    print(paste0('Not found: ', mf))
   }
 
   outFile <- tempfile()
