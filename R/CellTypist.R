@@ -101,7 +101,11 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
   unlink(labelFile)
 
   seuratObj <- .FilterLowCalls(seuratObj, plotColname, minFractionToInclude)
-  print(DimPlot(seuratObj, group.by = plotColname, shuffle = TRUE))
+  if (length(seuratObj@reductions) == 0) {
+    print('No reductions calculated, cannot plot tSNE/UMAP')
+  } else {
+    print(DimPlot(seuratObj, group.by = plotColname, shuffle = TRUE))
+  }
 
   toPlot <- seuratObj[[plotColname]]
   print(ggplot(toPlot, aes_string(x = plotColname, fill = plotColname)) +
