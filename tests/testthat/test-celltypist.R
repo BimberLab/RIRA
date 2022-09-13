@@ -11,12 +11,20 @@ test_that("celltypist runs", {
   print(seuratObj)
 
   seuratObj <- Seurat::NormalizeData(seuratObj, verbose = FALSE)
-  seuratObj <- RIRA::RunCellTypist(seuratObj)
+  seuratObj <- RunCellTypist(seuratObj)
 
   # This appears to differ in bioconductor 3.15 vs devel
   expect_equal(11, length(unique(seuratObj$majority_voting)), info = 'using default model', tolerance = 1)
   expect_equal(110, length(unique(seuratObj$predicted_labels)))
   expect_equal(289, unname(table(seuratObj$predicted_labels)['B cells']))
+
+  # ensure the RIRA model works:
+  seuratObj <- RunCellTypist(seuratObj, modelName = 'RIRA_Immune_v1', columnPrefix = 'RIRA.')
+  print(sort(table(seuratObj$RIRA.majority_voting)))
+  expect_equal(4, length(unique(seuratObj$RIRA.majority_voting)), info = 'using RIRA model', tolerance = 1)
+  expect_equal(346, unname(table(seuratObj$RIRA.majority_voting)['Bcell']), tolerance = 1)
+  expect_equal(1653, unname(table(seuratObj$RIRA.majority_voting)['T_NK']), tolerance = 1)
+  expect_equal(686, unname(table(seuratObj$RIRA.majority_voting)['MoMacDC']))
 
   # NOTE: this is very slow, so skip in automated testing for now
   modelFile <- 'myModel.pkl'
@@ -29,7 +37,7 @@ test_that("celltypist runs", {
   # A bit circular, but this is just a test case:
   seuratObj <- suppressWarnings(pbmc3k)
   seuratObj <- Seurat::NormalizeData(seuratObj, verbose = FALSE)
-  seuratObj <- RIRA::RunCellTypist(seuratObj, modelName = modelFile)
+  seuratObj <- RunCellTypist(seuratObj, modelName = modelFile)
 
   print(table(seuratObj$majority_voting))
   print(table(seuratObj$predicted_labels))

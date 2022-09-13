@@ -1,7 +1,7 @@
 #' @include Utils.R
 
 utils::globalVariables(
-  names = c('majority_voting'),
+  names = c('majority_voting', 'Fraction'),
   package = 'RIRA',
   add = TRUE
 )
@@ -36,6 +36,14 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
   }
 
   print(paste0('Running celltypist using model: ', modelName))
+
+  # Try to find within RIRA:
+  mf <- system.file(paste0("models/", modelName, '.pkl'), package = "RIRA")
+  if (file.exists(mf)) {
+    print(paste0('Using RIRA model: ', modelName))
+    modelName <- mf
+  }
+
   outFile <- tempfile()
   outDir <- dirname(outFile)
   # NOTE: metadata is not needed for scoring and is can contain invalid characters, so drop it during conversion
