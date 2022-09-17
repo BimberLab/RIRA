@@ -397,10 +397,10 @@ PredictCellTypeProbability <- function(seuratObj, models, fieldName = 'RIRA_Cons
     print(paste0('Scoring with model: ', modelName))
     probColName <- paste0(modelName, '_probability')
     fieldNames <- c(fieldNames, probColName)
-    seuratObj <- ScoreCellsWithSavedModel(seuratObj, model = models[[modelName]], fieldName = probColName, ...)
+    seuratObj <- ScoreCellsWithSavedModel(seuratObj, model = models[[modelName]], fieldName = probColName, batchSize = batchSize, assayName = assayName)
   }
 
-  seuratObj <- AssignCellType(seuratObj, probabilityColumns = fieldNames, ...)
+  seuratObj <- AssignCellType(seuratObj, probabilityColumns = fieldNames, fieldName = fieldName, minimum_probability = minimum_probability, minimum_delta = minimum_delta)
 
   return(seuratObj)
 }
