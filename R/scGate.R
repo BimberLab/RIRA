@@ -206,10 +206,6 @@ RunScGateForModels <- function(seuratObj, modelNames, min.cells = 30, assay = 'R
   for (modelName in modelNames){
     print(paste0('Running model: ', modelName))
     cellLabel <- modelName
-    if (!all(is.null(labelRename)) && modelName %in% names(labelRename)) {
-      cellLabel <- labelRename[[modelName]]
-      print(paste0('cells will be labeled as: ', cellLabel))
-    }
 
     fn <- paste0(modelName, '.is.pure')
     seuratObj <- RunScGate(seuratObj = seuratObj,
@@ -244,7 +240,7 @@ RunScGateForModels <- function(seuratObj, modelNames, min.cells = 30, assay = 'R
 
   # TODO: should we consider UCell thresholds or the delta between the top two calls?
   dat <- seuratObj@meta.data[,fieldsToConsiderForConsensus, drop = FALSE]
-  seuratObj$scGateConsensus <- sapply(1:nrow(dat), function(idx) {
+  seuratObj$scGateRaw <- sapply(1:nrow(dat), function(idx) {
     vals <- unlist(dat[idx, fieldsToConsiderForConsensus, drop = T])
     vals <- unique(vals[!is.na(vals)])
     if (length(vals) == 0) {
@@ -253,7 +249,45 @@ RunScGateForModels <- function(seuratObj, modelNames, min.cells = 30, assay = 'R
 
     return(paste0(sort(unique(vals)), collapse = ','))
   })
-  seuratObj$scGateRaw <- seuratObj$scGateConsensus
+
+  if (!all(is.null(labelRename))) {
+    uniqueValues <- unique(seuratObj$scGateRaw)
+    updatedValues <- sapply(uniqueValues, function(vals){
+      vals <- unlist(strsplit(vals, split = ','))
+      vals <- sapply(vals, function(x){
+        if (x %in% names(labelRename)) {
+          x <- labelRename[[x]]
+        }
+
+        return(x)
+      })
+
+      vals <- unique(vals[!is.na(vals)])
+      if (length(vals) == 0) {
+        return(NA)
+      }
+
+      return(paste0(sort(unique(vals)), collapse = ','))
+    })
+
+    seuratObj$scGateRaw <- naturalsort::naturalfactor(seuratObj$scGateRaw)
+    seuratObj$scGateConsensus <- as.character(seuratObj$scGateRaw)
+    #TODO: remove
+    print('debug!')
+    print(uniqueValues)
+    print(updatedValues)
+    for (x in 1:length(uniqueValues)) {
+      if (is.na(uniqueValues[[x]]) || uniqueValues[[x]] == updatedValues[[x]]) {
+        next
+      }
+
+      print(paste0('Renaming: ', uniqueValues[x], ' to ', updatedValues[x]))
+      seuratObj$scGateConsensus[seuratObj$scGateConsensus == uniqueValues[[x]]] <- updatedValues[[x]]
+    }
+    seuratObj$scGateConsensus <- naturalsort::naturalfactor(seuratObj$scGateConsensus)
+  } else {
+    seuratObj$scGateConsensus <- seuratObj$scGateRaw
+  }
 
   if (dropAmbiguousConsensusValues) {
     toDrop <- grepl(seuratObj$scGateConsensus, pattern = ',')
