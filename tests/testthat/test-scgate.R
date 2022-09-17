@@ -123,10 +123,10 @@ test_that("scGate Runs", {
   dat <- table(seuratObj$scGateConsensus)
 
   expected <- c(
-    Bcell = 338,
-    MoMacDC = 653,
-    T_NK = 1647,
-    'Bcell,T_NK' = 14
+    NK.RM = 73,
+    Myeloid.RM = 652,
+    Tcell.RM = 1302,
+    'Bcell.RM,Myeloid.RM' = 6
   )
 
   for (pop in names(expected)) {
