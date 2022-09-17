@@ -272,13 +272,17 @@ RunScGateForModels <- function(seuratObj, modelNames, min.cells = 30, assay = 'R
 
     seuratObj$scGateRaw <- naturalsort::naturalfactor(seuratObj$scGateRaw)
     seuratObj$scGateConsensus <- as.character(seuratObj$scGateRaw)
+    #TODO: remove
+    print('debug!')
+    print(uniqueValues)
+    print(updatedValues)
     for (x in 1:length(uniqueValues)) {
-      if (uniqueValues[x] == updatedValues[x]) {
+      if (is.na(uniqueValues[[x]]) || uniqueValues[[x]] == updatedValues[[x]]) {
         next
       }
 
       print(paste0('Renaming: ', uniqueValues[x], ' to ', updatedValues[x]))
-      seuratObj$scGateConsensus[seuratObj$scGateConsensus == uniqueValues[x]] <- updatedValues[x]
+      seuratObj$scGateConsensus[seuratObj$scGateConsensus == uniqueValues[[x]]] <- updatedValues[[x]]
     }
     seuratObj$scGateConsensus <- naturalsort::naturalfactor(seuratObj$scGateConsensus)
   } else {
