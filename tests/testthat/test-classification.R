@@ -68,7 +68,7 @@ test_that("Cell type classification works", {
   expect_equal(length(modelFiles), 3)
 
   names(modelFiles) <- sapply(modelFiles, function(x){
-    return(tools::file_path_sans_ext(basename(x)))
+    return(paste0("./testClassifiers/models/", tools::file_path_sans_ext(basename(x))))
   })
 
   print(modelFiles)
