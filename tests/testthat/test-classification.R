@@ -1,4 +1,3 @@
-library(RIRA)
 library(Seurat)
 library(SeuratData)
 
@@ -14,7 +13,7 @@ getBaseSeuratData <- function(){
 
 prepareTrainingData <- function(){
   seuratObj <- getBaseSeuratData()
-  set.seed(RIRA::GetSeed())
+  set.seed(GetSeed())
   toKeep <- sample(1:ncol(seuratObj), size = 2000)[1:1000]
   seuratObj <- subset(seuratObj, cells = colnames(seuratObj)[toKeep])
   
@@ -48,13 +47,12 @@ prepareTrainingData <- function(){
 
 prepareTestData <- function(){
   seuratObj <- getBaseSeuratData()
-  set.seed(RIRA::GetSeed())
+  set.seed(GetSeed())
   toKeep <- sample(1:ncol(seuratObj), size = 2000)[1001:2000]
   seuratObj <- subset(seuratObj, cells = colnames(seuratObj)[toKeep])
   
   return(seuratObj)
 }
-
 
 test_that("Cell type classification works", {
   fn <- 'seurat3k.rds'
@@ -64,15 +62,22 @@ test_that("Cell type classification works", {
     seuratObjTrain <- prepareTrainingData()  
     saveRDS(seuratObjTrain, file = fn)
   }
-  
-  RIRA::TrainAllModels(seuratObj = seuratObjTrain, celltype_column = 'CellType', n_cores = 2)
-  
+
+  TrainModelsFromSeurat(seuratObj = seuratObjTrain, celltype_column = 'CellType', n_cores = 2, output_dir = "./testClassifiers")
+  modelFiles <- paste0("./testClassifiers/models/", list.files("./testClassifiers/models/"))
+  expect_equal(length(modelFiles), 3)
+
+  names(modelFiles) <- sapply(modelFiles, function(x){
+    return(tools::file_path_sans_ext(basename(x)))
+  })
+
+  print(modelFiles)
+
   # Use new data:
   seuratObj <- prepareTestData()
-  seuratObj <- PredictCellTypeProbability(seuratObj = seuratObj)
-  seuratObj <- AssignCellType(seuratObj = seuratObj)
+  seuratObj <- PredictCellTypeProbability(seuratObj = seuratObj, models = modelFiles)
   
-  table(seuratObj$Classifier_Consensus_Celltype)
+  print(sort(table(seuratObj$RIRA_Consensus)))
   expected <- list(
     'B' = 104,
     'TorNK' = 609,
@@ -81,19 +86,26 @@ test_that("Cell type classification works", {
   )
   
   for (cellType in names(expected)) {
-    testthat::expect_equal(sum(seuratObj$Classifier_Consensus_Celltype == cellType), expected[[cellType]])
+    testthat::expect_equal(sum(seuratObj$RIRA_Consensus == cellType), expected[[cellType]])
   }
 
   # Test batchSize:
   seuratObj2 <- prepareTestData()
-  seuratObj2 <- PredictCellTypeProbability(seuratObj = seuratObj2, batchSize = 38)
-  seuratObj2 <- AssignCellType(seuratObj = seuratObj2)
-  testthat::expect_equal(0, sum(seuratObj$Classifier_Consensus_Celltype != seuratObj2$Classifier_Consensus_Celltype))
+  seuratObj2 <- PredictCellTypeProbability(seuratObj = seuratObj2, models = modelFiles, batchSize = 38)
+  testthat::expect_equal(0, sum(seuratObj$RIRA_Consensus != seuratObj2$RIRA_Consensus))
   
   feats <- c("IFI30", "CD7", "CD3E",   "MS4A1", "CD79A",   "VCAN", "MNDA",   "C1QB", "C1QA")
-  RIRA::TrainAllModels(seuratObj = seuratObjTrain, celltype_column = 'CellType', n_cores = 2, output_dir = './classifiers2', gene_list = feats)
+  TrainModelsFromSeurat(seuratObj = seuratObjTrain, celltype_column = 'CellType', n_cores = 2, output_dir = './classifiers2', gene_list = feats)
   
   # Note: this is incredibly slow, so use the feature-limited version:
-  RIRA::InterpretModels(output_dir = './classifiers2')
+  InterpretModels(output_dir = './classifiers2')
 })
 
+# test_that("Built-in models work", {
+#   seuratObj <- prepareTestData()
+#   seuratObj <- PredictCellTypeProbability(seuratObj = seuratObj, models = list(
+#     'T_LR' = 'RIRA_CD4vCD8_LR'
+#   ), fieldName = 'RIRA_TCell')
+# 
+#   print(sort(table(seuratObj$RIRA_TCell)))
+# })

@@ -19,7 +19,7 @@ test_that("scGate runs with custom models", {
   seuratObj <- suppressWarnings(pbmc3k)
 
   # Try with aliasing of models:
-  seuratObj <- RIRA::RunScGateForModels(seuratObj, modelNames = c('Bcell', 'Tcell', 'NK', 'Myeloid', 'Stromal', 'pDC', 'Erythrocyte', 'Epithelial', 'Platelet_MK'), labelRename = list(Tcell = 'T_NK', NK = 'T_NK'))
+  seuratObj <- RunScGateForModels(seuratObj, modelNames = c('Bcell', 'Tcell', 'NK', 'Myeloid', 'Stromal', 'pDC', 'Erythrocyte', 'Epithelial', 'Platelet_MK'), labelRename = list(Tcell = 'T_NK', NK = 'T_NK'))
   print(table(seuratObj$scGateConsensus))
   dat <- table(seuratObj$scGateConsensus)
   expect_equal(unname(dat[['pDC']]), 1)
@@ -37,7 +37,7 @@ test_that("scGate Runs", {
   expect_equal(sum(seuratObj$is.pure == 'Pure'), 1480, info = 'Before DimRedux')
 
   # Try with aliasing of models:
-  seuratObj <- RIRA::RunScGateForModels(seuratObj, modelNames = c('Bcell', 'Tcell', 'NK', 'Myeloid'), labelRename = list(Tcell = 'T_NK', NK = 'T_NK'))
+  seuratObj <- RunScGateForModels(seuratObj, modelNames = c('Bcell', 'Tcell', 'NK', 'Myeloid'), labelRename = list(Tcell = 'T_NK', NK = 'T_NK'))
   print(sort(table(seuratObj$scGateConsensus)))
   dat <- table(seuratObj$scGateConsensus)
   expect_equal(unname(dat[['Bcell']]), 244, info = 'With aliasing')
@@ -102,7 +102,7 @@ test_that("scGate Runs", {
   seuratObj <- suppressWarnings(pbmc3k)
 
   # Try with aliasing of models:
-  seuratObj <- RIRA::RunScGateForModels(seuratObj, modelNames = c('Bcell.RM', 'Tcell.RM', 'NK.RM', 'Myeloid.RM', 'AvEp.RM', 'Epithelial.RM', 'Erythrocyte.RM', 'pDC.RM', 'Stromal.RM'), labelRename = list(Tcell.RM = 'T_NK', NK.RM = 'T_NK'))
+  seuratObj <- RunScGateForModels(seuratObj, modelNames = c('Bcell.RM', 'Tcell.RM', 'NK.RM', 'Myeloid.RM', 'AvEp.RM', 'Epithelial.RM', 'Erythrocyte.RM', 'pDC.RM', 'Stromal.RM'), labelRename = list(Tcell.RM = 'T_NK', NK.RM = 'T_NK'))
   print(sort(table(seuratObj$scGateConsensus)))
   dat <- table(seuratObj$scGateConsensus)
 
@@ -114,11 +114,11 @@ test_that("scGate Runs", {
   )
 
   for (pop in names(expected)) {
-    expect_equal(unname(dat[[pop]]), expected[[pop]], info = 'RM models')
+    expect_equal(unname(dat[[pop]]), expected[[pop]], info = paste0('RM models: ', pop))
   }
 
   # Now use wrapper
-  seuratObj <- RIRA::RunScGateWithRhesusModels(seuratObj)
+  seuratObj <- RunScGateWithRhesusModels(seuratObj)
   print(sort(table(seuratObj$scGateConsensus)))
   dat <- table(seuratObj$scGateConsensus)
 
@@ -136,4 +136,14 @@ test_that("scGate Runs", {
   print(sort(table(seuratObj$scGateRaw)))
   dat <- table(seuratObj$scGateRaw)
 
+  expected <- c(
+    NK.RM = 73,
+    Myeloid.RM = 652,
+    Tcell.RM = 1302,
+    'Bcell.RM,Myeloid.RM' = 6
+  )
+
+  for (pop in names(expected)) {
+    expect_equal(unname(dat[[pop]]), expected[[pop]], info = 'RM models, raw calls')
+  }
 })
