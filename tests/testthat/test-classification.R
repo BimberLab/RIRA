@@ -1,4 +1,3 @@
-library(RIRA)
 library(Seurat)
 library(SeuratData)
 
@@ -14,7 +13,7 @@ getBaseSeuratData <- function(){
 
 prepareTrainingData <- function(){
   seuratObj <- getBaseSeuratData()
-  set.seed(RIRA::GetSeed())
+  set.seed(GetSeed())
   toKeep <- sample(1:ncol(seuratObj), size = 2000)[1:1000]
   seuratObj <- subset(seuratObj, cells = colnames(seuratObj)[toKeep])
   
@@ -48,7 +47,7 @@ prepareTrainingData <- function(){
 
 prepareTestData <- function(){
   seuratObj <- getBaseSeuratData()
-  set.seed(RIRA::GetSeed())
+  set.seed(GetSeed())
   toKeep <- sample(1:ncol(seuratObj), size = 2000)[1001:2000]
   seuratObj <- subset(seuratObj, cells = colnames(seuratObj)[toKeep])
   
@@ -65,7 +64,7 @@ test_that("Cell type classification works", {
   }
 
   TrainModelsFromSeurat(seuratObj = seuratObjTrain, celltype_column = 'CellType', n_cores = 2, output_dir = "./testClassifiers")
-  modelFiles <- list.files("./testClassifiers")
+  modelFiles <- list.files("./testClassifiers/models/")
   expect_equal(length(modelFiles), 3)
 
   names(modelFiles) <- sapply(modelFiles, function(x){
