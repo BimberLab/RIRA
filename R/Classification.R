@@ -431,10 +431,7 @@ AssignCellType <- function(seuratObj, probabilityColumns, fieldName = 'RIRA_Cons
     max_probability_column <- which.max(probabilities_matrix[cell,])
     max_probability <- max(probabilities_matrix[cell,])
     top_label <- strsplit(names(max_probability_column),"_")[[1]][[1]]
-
-    #Grab the second highest probability to compare with the max probability
-    #the frustrating negated grepl expressions in these lines bypass the inability to evaluate a variable name as a column identifier in r (e.g. top_label would be parsed as literally the column name "top_label")
-    second_highest_probability <- max(probabilities_matrix[cell, !grepl(top_label, names(probabilities_matrix))])
+    second_highest_probability <- max(probabilities_matrix[cell, names(probabilities_matrix) != names(max_probability_column)])
 
     #Check if the cell's highest probability classification exceeds the minimum probabilty set for a confident call.
     #Additionally check if the highest probability and second highest probability are at least minimum_delta apart. If not, assign Unknown.

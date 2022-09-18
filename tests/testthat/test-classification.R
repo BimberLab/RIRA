@@ -64,11 +64,11 @@ test_that("Cell type classification works", {
   }
 
   TrainModelsFromSeurat(seuratObj = seuratObjTrain, celltype_column = 'CellType', n_cores = 2, output_dir = "./testClassifiers")
-  modelFiles <- list.files("./testClassifiers/models/")
+  modelFiles <- paste0("./testClassifiers/models/", list.files("./testClassifiers/models/"))
   expect_equal(length(modelFiles), 3)
 
   names(modelFiles) <- sapply(modelFiles, function(x){
-    return(paste0("./testClassifiers/models/", tools::file_path_sans_ext(basename(x))))
+    return(tools::file_path_sans_ext(basename(x)))
   })
 
   print(modelFiles)
