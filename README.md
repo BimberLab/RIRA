@@ -2,8 +2,6 @@
 
 ## Rhesus Immunome Reference Atlas (RIRA): A multi-tissue single-cell landscape of immune cells
 
-Code for utility of RIRA such as classification of cell types/phenotypes
-
 ## Table of Contents
 * [Overview](#overview)
 * [Example Usage](#usage)
@@ -12,30 +10,33 @@ Code for utility of RIRA such as classification of cell types/phenotypes
 
 ### <a name = "overview">Overview</a>
 
-### <a name = "usage">Usage</a>
+RIRA is a multi-tissue single-cell RNAseq atlas from Rhesus macaque cells. 
+It provides highly annotated reference data, and a number of pipelines to assign cell type to your data using RIRA's built-in models.
+Finally, it includes pipelines to replicate the process used to generate RIRA's reference labels, which might be useful for generating a similar reference for another species.      
 
-RIRA currently requires you to specify a local folder holding RIRA data. This is accomplished using:
+### <a name = "usage">Data</a>
+
+RIRA's data was generated and labeled using the following process:
+1) Merge data from XX 10x Genomics datasets, representing 8 tissues and XX rhesus macaques
+2) Perform strict QC and filtration, based on metrics such as per-cell RNA saturation
+3) For initial phenotyping, we used scGate with a set of rhesus-adapted gates to divide cells. This initial pass is lossy, and will not label all cells.
+4) Cells labeled by scGate were downsampled to equalize cells per class, and then fed as training data to celltypist. The resulting model (RIRA_Immune_v1) is available through this R package.
+5) The above model will classify cells into course bins (T/NK, Bcell, MoMacDC, and Other). For many analyses we find it useful to subdivide a dataset into these categories and then perform dimensionality reduction on these more homogenous subsets.
+6) RIRA provides a handful of models trained to identify more specific subsets (such as differentiating CD4 vs CD8 T cells)
+
+### <a name = "usage">Usage Examples</a>
 
 ```
-SetAtlasDir('/path/to/RIRA')
+# Use the built-in celltypist model to score cells according to course phenotypes (T/NK, Bcell, MoMacDC, Other):
+seuratObj <- RIRA::RunCellTypist(seuratObj, modelName = ‘RIRA_Immune_v1’)
+
+# Use the built-in celltypist model for course phenotypes, followed by higher-resolution labeling of T/NK cells:
+seuratObj <- RIRA::ClassifyCells(seuratObj, primaryModel = ‘RIRA_Immune_v1’, subsetModels = list(
+    T_NK = 'RIRA_CD4vCD8_LR'
+)
+
 ```
 
-Within this folder, there should be top-level folders corresponding to each version. Within each of these, it expects the following:
-
-```
-RIRA_Data/
-    1.0.0/
-        counts/
-            barcodes.tsv.gz
-            features.tsv.gz
-            matrix.mtx.gz
-        meta.csv
-        cFIT/
-            ref.rds
-        
-```
-
-The counts folder is passed to DropletUtils::read10xCounts to create the raw count data. meta.csv is the meta.data data frame. The file ref.rds in ./cFIT is the integrated cFIT reference.
 
 ### <a name="installation">Installation</a>
 
