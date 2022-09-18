@@ -351,6 +351,12 @@ ScoreCellsWithSavedModel <- function(seuratObj, model, fieldName, batchSize = 20
   # NOTE: makeNames() will convert hyphen to period, and also prefix genes with numeric starts, like 7SK.2 -> X7SK.2
   colnames(gene_expression_matrix) <- make.names(colnames(gene_expression_matrix))
 
+  modelFeats <- colnames(classifier$model$W)
+  missing <- modelFeats[!modelFeats %in% colnames(gene_expression_matrix)]
+  if (length(missing) > 0) {
+    warning(paste0('The following features are used in the model and missing from the input: ', paste0(sort(missing), collapse = ',')))
+  }
+
   nBatches <- ifelse(is.na(batchSize), yes = 1, no = ceiling(nrow(gene_expression_matrix) / batchSize))
   probability_vector <- NULL
   for (batchIdx in 1:nBatches){
@@ -410,13 +416,12 @@ PredictCellTypeProbability <- function(seuratObj, models, fieldName = 'RIRA_Cons
 #'
 #' @description Assigns celltype label based on probabilities in the metadata
 #' @param seuratObj The Seurat Object to be updated
-#' @param probabilityColumns Any column ending with this value will be assumed to be a cell type probability column
+#' @param probabilityColumns The set of columns containing probabilities for each classifier to include
 #' @param fieldName The name of the metadata column to store the result
 #' @param minimum_probability The minimum probability for a confident cell type assignment
 #' @param minimum_delta The minimum difference in probabilities necessary to call one celltype over another.
 #' @export
 AssignCellType <- function(seuratObj, probabilityColumns, fieldName = 'RIRA_Consensus', minimum_probability = 0.5, minimum_delta = 0.25){
-  #This grabs each column in the metadata with the suffix "_probability"
   probabilities_matrix <- seuratObj@meta.data[,probabilityColumns, drop = F]
   if (ncol(probabilities_matrix) == 0) {
     stop('Unable to find cell type probability columns!')

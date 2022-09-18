@@ -101,11 +101,11 @@ test_that("Cell type classification works", {
   InterpretModels(output_dir = './classifiers2')
 })
 
-test_that("Built-in models work", {
-  seuratObj <- prepareTestData()
-  seuratObj <- PredictCellTypeProbability(seuratObj = seuratObj, models = list(
-    'T_LR' = 'RIRA_CD4vCD8_LR'
-  ), fieldName = 'RIRA_TCell')
-
-  print(sort(table(seuratObj$RIRA_TCell)))
-})
+# test_that("Built-in models work", {
+#   seuratObj <- prepareTestData()
+#   seuratObj <- PredictCellTypeProbability(seuratObj = seuratObj, models = list(
+#     'T_LR' = 'RIRA_CD4vCD8_LR'
+#   ), fieldName = 'RIRA_TCell')
+# 
+#   print(sort(table(seuratObj$RIRA_TCell)))
+# })

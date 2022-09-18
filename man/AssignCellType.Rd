@@ -15,7 +15,7 @@ AssignCellType(
 \arguments{
 \item{seuratObj}{The Seurat Object to be updated}
 
-\item{probabilityColumns}{Any column ending with this value will be assumed to be a cell type probability column}
+\item{probabilityColumns}{The set of columns containing probabilities for each classifier to include}
 
 \item{fieldName}{The name of the metadata column to store the result}
 
