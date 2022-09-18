@@ -114,7 +114,7 @@ test_that("scGate Runs", {
   )
 
   for (pop in names(expected)) {
-    expect_equal(unname(dat[[pop]]), expected[[pop]], info = 'RM models')
+    expect_equal(unname(dat[[pop]]), expected[[pop]], info = paste0('RM models: ', pop))
   }
 
   # Now use wrapper
