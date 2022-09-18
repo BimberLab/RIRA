@@ -473,7 +473,7 @@ AssignCellType <- function(seuratObj, probabilityColumns, fieldName = 'RIRA_Cons
     stop(paste0('Unable to find model: ', modelFile))
   }
 
-  return(readRDS(file = modelFile))
+  return(readRDS(file = savedModel))
 }
 
 #' @title Interprets the feature importance of each model
