@@ -174,10 +174,11 @@ TrainModel <- function(training_matrix, celltype, hyperparameter_tuning = F, lea
 #' @param n_models The number of models to be trained during hyperparameter tuning. The model with the highest accuracy will be selected and returned.
 #' @param n_cores If non-null, this number of workers will be used with future::plan
 #' @param gene_list If non-null, the input count matrix will be subset to these features
+#' @param gene_exclusion_list If non-null, the input count matrix will be subset to drop these features
 #' @param verbose Whether or not to print the metrics data for each model after training.
 #' @param min_cells_per_class If provided, any classes (and corresponding cells) with fewer than this many cells will be dropped from the training data
 #' @export
-TrainModelsFromSeurat <- function(seuratObj, celltype_column, assay = "RNA", slot = "data", output_dir = "./classifiers", hyperparameter_tuning = F, learner = "classif.ranger", inner_resampling = "cv", outer_resampling = "cv", inner_folds = 4, inner_ratio = 0.8,  outer_folds = 3, outer_ratio = 0.8, n_models = 20, n_cores = NULL, gene_list = NULL, verbose = TRUE, min_cells_per_class = 20){
+TrainModelsFromSeurat <- function(seuratObj, celltype_column, assay = "RNA", slot = "data", output_dir = "./classifiers", hyperparameter_tuning = F, learner = "classif.ranger", inner_resampling = "cv", outer_resampling = "cv", inner_folds = 4, inner_ratio = 0.8,  outer_folds = 3, outer_ratio = 0.8, n_models = 20, n_cores = NULL, gene_list = NULL, verbose = TRUE, min_cells_per_class = 20, geneExclusionList = NULL){
   if (methods::missingArg(celltype_column)) {
     stop('Must provide the celltype_column argument')
   }
@@ -203,6 +204,10 @@ TrainModelsFromSeurat <- function(seuratObj, celltype_column, assay = "RNA", slo
     }
 
     raw_data_matrix <- raw_data_matrix[gene_list,]
+  }
+
+  if (!all(is.null(gene_exclusion_list))) {
+    raw_data_matrix <- raw_data_matrix[!rownames(raw_data_matrix) %in% gene_exclusion_list,]
   }
 
   training_matrix <- as.data.frame(Matrix::t(as.matrix(raw_data_matrix)))
@@ -336,16 +341,17 @@ TrainModelsFromSeurat <- function(seuratObj, celltype_column, assay = "RNA", slo
 }
 
 
-#' @title Applies a trained model to get per-cell probabilities.
+#' @title Applies a trained binary classifier to get per-cell probabilities.
 #'
 #' @description Applies a trained model to get per-cell probabilities.
 #' @param seuratObj The Seurat Object to be updated
 #' @param model Either the full filepath to a model RDS file, or the name of a built-in model.
-#' @param fieldName The name of the field used to store the results in the seurat object
+#' @param fieldName The name of the field used to store the results in the seurat object (for cells scored 1 by the binary classifier)
+#' @param fieldNameNegative The name of the field used to store probabilities of cells scored '0'
 #' @param batchSize To conserve memory, data will be chunked into batches of at most this many cells
 #' @param assayName The assay holding gene expression data
 #' @export
-ScoreCellsWithSavedModel <- function(seuratObj, model, fieldName, batchSize = 20000, assayName = 'RNA') {
+ScoreCellsWithSavedModel <- function(seuratObj, model, fieldName, fieldNameNegative = NULL, batchSize = 20000, assayName = 'RNA') {
   classifier <- .ResolveModel(modelFile = model)
 
   #De-sparse and transpose seuratObj normalized data & make names unique
@@ -354,35 +360,51 @@ ScoreCellsWithSavedModel <- function(seuratObj, model, fieldName, batchSize = 20
   # NOTE: makeNames() will convert hyphen to period, and also prefix genes with numeric starts, like 7SK.2 -> X7SK.2
   colnames(gene_expression_matrix) <- make.names(colnames(gene_expression_matrix))
 
-  # TODO: do all models have this? Maybe mlr3 has some method to pull out features from the classifier instead?
+  # TODO: Is there is more universal way to get the model to report its features?
   # See: https://mlr3.mlr-org.com/reference/LearnerClassif.html
-  modelFeats <- colnames(classifier$model$W)
-  modelFeats <- modelFeats[modelFeats != 'Bias']
-
-  missing <- modelFeats[!modelFeats %in% colnames(gene_expression_matrix)]
-  if (length(missing) > 0) {
-    # TODO: unsure if this is actually a good idea or not?
-    warning(paste0('The following features are used in the model and missing from the input: ', paste0(sort(missing), collapse = ',')))
-    print('Adding zeros for these features')
-    missingMat <- matrix(data = 0, nrow = nrow(gene_expression_matrix), ncol = length(missing))
-    rownames(missingMat) <- rownames(gene_expression_matrix)
-    colnames(missingMat) <- missing
-    gene_expression_matrix <- cbind(gene_expression_matrix, missingMat)
+  modelFeats <- NULL
+  if ('importance' %in% classifier$properties) {
+    modelFeats <- names(classifier$importance())
+  } else if (!is.null(classifier$model) && grepl(x = classifier$model$TypeDetail, pattern = 'logistic regression')) {
+    modelFeats <- colnames(classifier$model$W)
+    toRemove <- names(classifier2$param_set$levels)
+    modelFeats <- modelFeats[!modelFeats %in% toRemove]
   }
-  
-  gene_expression_matrix <- gene_expression_matrix[,colnames(gene_expression_matrix) %in% modelFeats, drop = FALSE]
+
+  if (!all(is.null(modelFeats))){
+    missing <- modelFeats[!modelFeats %in% colnames(gene_expression_matrix)]
+    if (length(missing) > 0) {
+      stop(paste0('The following features are used in the model and missing from the input: ', paste0(sort(missing), collapse = ',')))
+    }
+
+    # Subset input data to match model:
+    gene_expression_matrix <- gene_expression_matrix[,colnames(gene_expression_matrix) %in% modelFeats, drop = FALSE]
+  } else {
+    warning(paste0('Unable to infer features from model, type: ', classifier$model$TypeDetail))
+  }
 
   nBatches <- ifelse(is.na(batchSize), yes = 1, no = ceiling(nrow(gene_expression_matrix) / batchSize))
   probability_vector <- NULL
+  probability_vector_neg <- NULL
   for (batchIdx in 1:nBatches){
     start <- 1 + ((batchIdx-1) * batchSize)
     end <- min((batchIdx * batchSize), nrow(gene_expression_matrix))
     print(paste0("Iteration ", batchIdx, " of ", nBatches, ", (", start, "-", end, ")"))
-    dat <- stats::predict(classifier, newdata = data.frame(gene_expression_matrix[start:end,]), predict_type = 'prob')[,2] #columns are named '0','1', so second column is '1'
+
+    #columns are named '0','1', so the first column is '0' and the second column is '1'
+    dat <- stats::predict(classifier, newdata = data.frame(gene_expression_matrix[start:end,]), predict_type = 'prob')
+
     if (batchIdx == 1) {
-      probability_vector <- dat
+      probability_vector <- dat[,2]
+      if (!is.null(fieldNameNegative)) {
+        # transform probabilities:
+        probability_vector_neg <- 1 - dat[,1]
+      }
     } else {
-      probability_vector <- c(probability_vector, dat)
+      probability_vector <- c(probability_vector, dat[,2])
+      if (!is.null(fieldNameNegative)) {
+        probability_vector_neg <- c(probability_vector_neg, 1 - dat[,1])
+      }
     }
   }
 
@@ -392,9 +414,15 @@ ScoreCellsWithSavedModel <- function(seuratObj, model, fieldName, batchSize = 20
 
   #append probabilities to seurat metadata
   seuratObj@meta.data[[fieldName]] <- probability_vector
+  if (!is.null(fieldNameNegative)) {
+    seuratObj@meta.data[[fieldNameNegative]] <- probability_vector_neg
+  }
 
   if (length(names(seuratObj@reductions)) > 0) {
     print(Seurat::FeaturePlot(seuratObj, features = fieldName))
+    if (!is.null(fieldNameNegative)) {
+      print(Seurat::FeaturePlot(seuratObj, features = fieldNameNegative))
+    }
   }
 
   return(seuratObj)

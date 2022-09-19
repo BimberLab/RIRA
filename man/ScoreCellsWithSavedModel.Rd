@@ -2,12 +2,13 @@
 % Please edit documentation in R/Classification.R
 \name{ScoreCellsWithSavedModel}
 \alias{ScoreCellsWithSavedModel}
-\title{Applies a trained model to get per-cell probabilities.}
+\title{Applies a trained binary classifier to get per-cell probabilities.}
 \usage{
 ScoreCellsWithSavedModel(
   seuratObj,
   model,
   fieldName,
+  fieldNameNegative = NULL,
   batchSize = 20000,
   assayName = "RNA"
 )
@@ -17,7 +18,9 @@ ScoreCellsWithSavedModel(
 
 \item{model}{Either the full filepath to a model RDS file, or the name of a built-in model.}
 
-\item{fieldName}{The name of the field used to store the results in the seurat object}
+\item{fieldName}{The name of the field used to store the results in the seurat object (for cells scored 1 by the binary classifier)}
+
+\item{fieldNameNegative}{The name of the field used to store probabilities of cells scored '0'}
 
 \item{batchSize}{To conserve memory, data will be chunked into batches of at most this many cells}
 

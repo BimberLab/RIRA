@@ -22,7 +22,8 @@ TrainModelsFromSeurat(
   n_cores = NULL,
   gene_list = NULL,
   verbose = TRUE,
-  min_cells_per_class = 20
+  min_cells_per_class = 20,
+  geneExclusionList = NULL
 )
 }
 \arguments{
@@ -61,6 +62,8 @@ TrainModelsFromSeurat(
 \item{verbose}{Whether or not to print the metrics data for each model after training.}
 
 \item{min_cells_per_class}{If provided, any classes (and corresponding cells) with fewer than this many cells will be dropped from the training data}
+
+\item{gene_exclusion_list}{If non-null, the input count matrix will be subset to drop these features}
 }
 \description{
 Wrapper function for TrainModel to train a suite of binary classifiers for each cell type present in the data
