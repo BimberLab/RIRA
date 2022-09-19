@@ -178,7 +178,7 @@ TrainModel <- function(training_matrix, celltype, hyperparameter_tuning = F, lea
 #' @param verbose Whether or not to print the metrics data for each model after training.
 #' @param min_cells_per_class If provided, any classes (and corresponding cells) with fewer than this many cells will be dropped from the training data
 #' @export
-TrainModelsFromSeurat <- function(seuratObj, celltype_column, assay = "RNA", slot = "data", output_dir = "./classifiers", hyperparameter_tuning = F, learner = "classif.ranger", inner_resampling = "cv", outer_resampling = "cv", inner_folds = 4, inner_ratio = 0.8,  outer_folds = 3, outer_ratio = 0.8, n_models = 20, n_cores = NULL, gene_list = NULL, verbose = TRUE, min_cells_per_class = 20, geneExclusionList = NULL){
+TrainModelsFromSeurat <- function(seuratObj, celltype_column, assay = "RNA", slot = "data", output_dir = "./classifiers", hyperparameter_tuning = F, learner = "classif.ranger", inner_resampling = "cv", outer_resampling = "cv", inner_folds = 4, inner_ratio = 0.8,  outer_folds = 3, outer_ratio = 0.8, n_models = 20, n_cores = NULL, gene_list = NULL, gene_exclusion_list = NULL, verbose = TRUE, min_cells_per_class = 20){
   if (methods::missingArg(celltype_column)) {
     stop('Must provide the celltype_column argument')
   }
@@ -198,6 +198,7 @@ TrainModelsFromSeurat <- function(seuratObj, celltype_column, assay = "RNA", slo
   #Read the raw data from a seurat object and parse into an mlr3-compatible labeled matrix
   raw_data_matrix <- attr(x = seuratObj@assays[[assay]], which = slot)
   if (!all(is.null(gene_list))) {
+    gene_list <- ExpandGeneList(gene_list)
     if (!all(gene_list %in% rownames(raw_data_matrix))) {
       missing <- gene_list[!gene_list %in% rownames(raw_data_matrix)]
       stop(paste0('All features in gene_list must be present in the Seurat object features. Missing: ', paste0(missing, collapse = ',')))
@@ -207,6 +208,7 @@ TrainModelsFromSeurat <- function(seuratObj, celltype_column, assay = "RNA", slo
   }
 
   if (!all(is.null(gene_exclusion_list))) {
+    gene_exclusion_list <- ExpandGeneList(gene_exclusion_list)
     raw_data_matrix <- raw_data_matrix[!rownames(raw_data_matrix) %in% gene_exclusion_list,]
   }
 
@@ -346,12 +348,11 @@ TrainModelsFromSeurat <- function(seuratObj, celltype_column, assay = "RNA", slo
 #' @description Applies a trained model to get per-cell probabilities.
 #' @param seuratObj The Seurat Object to be updated
 #' @param model Either the full filepath to a model RDS file, or the name of a built-in model.
-#' @param fieldName The name of the field used to store the results in the seurat object (for cells scored 1 by the binary classifier)
-#' @param fieldNameNegative The name of the field used to store probabilities of cells scored '0'
+#' @param fieldToClass A list mapping the target field name in the seurat object to the classifier level. The latter is either numeric, or the string label. For example: list('CD4_T' = 0, 'CD8_T' = 1))
 #' @param batchSize To conserve memory, data will be chunked into batches of at most this many cells
 #' @param assayName The assay holding gene expression data
 #' @export
-ScoreCellsWithSavedModel <- function(seuratObj, model, fieldName, fieldNameNegative = NULL, batchSize = 20000, assayName = 'RNA') {
+ScoreCellsWithSavedModel <- function(seuratObj, model, fieldToClass, batchSize = 20000, assayName = 'RNA') {
   classifier <- .ResolveModel(modelFile = model)
 
   #De-sparse and transpose seuratObj normalized data & make names unique
@@ -384,8 +385,7 @@ ScoreCellsWithSavedModel <- function(seuratObj, model, fieldName, fieldNameNegat
   }
 
   nBatches <- ifelse(is.na(batchSize), yes = 1, no = ceiling(nrow(gene_expression_matrix) / batchSize))
-  probability_vector <- NULL
-  probability_vector_neg <- NULL
+  probability_vectors <- list()
   for (batchIdx in 1:nBatches){
     start <- 1 + ((batchIdx-1) * batchSize)
     end <- min((batchIdx * batchSize), nrow(gene_expression_matrix))
@@ -394,34 +394,39 @@ ScoreCellsWithSavedModel <- function(seuratObj, model, fieldName, fieldNameNegat
     #columns are named '0','1', so the first column is '0' and the second column is '1'
     dat <- stats::predict(classifier, newdata = data.frame(gene_expression_matrix[start:end,]), predict_type = 'prob')
 
-    if (batchIdx == 1) {
-      probability_vector <- dat[,2]
-      if (!is.null(fieldNameNegative)) {
-        # transform probabilities:
-        probability_vector_neg <- 1 - dat[,1]
+    for (fieldName in names(fieldToClass)) {
+      idx <- fieldToClass[[fieldName]]
+      if (is.na(as.numeric(idx))) {
+        # Try to resolve from model:
+        if (idx %in% levels(classifier$model$ClassNames)) {
+          idx <- which(levels(classifier$model$ClassNames) == idx)
+        } else {
+          stop(paste0('Unknown class: ', idx))
+        }
+      } else {
+        idx <- as.numeric(idx)
       }
-    } else {
-      probability_vector <- c(probability_vector, dat[,2])
-      if (!is.null(fieldNameNegative)) {
-        probability_vector_neg <- c(probability_vector_neg, 1 - dat[,1])
+
+      if (batchIdx == 1) {
+        probability_vectors[[fieldName]] <- dat[,idx]
+      } else {
+        probability_vectors[[fieldName]] <- c(probability_vectors[[fieldName]], dat[,2])
       }
     }
   }
 
-  if (length(probability_vector) != ncol(seuratObj)) {
-    stop(paste0('Error calculating probability_vector. Length was: ', length(probability_vector)))
-  }
+  for (fieldName in names(probability_vectors)) {
+    probability_vector <- probability_vectors[[fieldName]]
 
-  #append probabilities to seurat metadata
-  seuratObj@meta.data[[fieldName]] <- probability_vector
-  if (!is.null(fieldNameNegative)) {
-    seuratObj@meta.data[[fieldNameNegative]] <- probability_vector_neg
-  }
+    if (length(probability_vector) != ncol(seuratObj)) {
+      stop(paste0('Error calculating probability_vector. Length was: ', length(probability_vector)))
+    }
 
-  if (length(names(seuratObj@reductions)) > 0) {
-    print(Seurat::FeaturePlot(seuratObj, features = fieldName))
-    if (!is.null(fieldNameNegative)) {
-      print(Seurat::FeaturePlot(seuratObj, features = fieldNameNegative))
+    #append probabilities to seurat metadata
+    seuratObj@meta.data[[fieldName]] <- probability_vector
+
+    if (length(names(seuratObj@reductions)) > 0) {
+      print(Seurat::FeaturePlot(seuratObj, features = fieldName))
     }
   }
 
@@ -446,7 +451,9 @@ PredictCellTypeProbability <- function(seuratObj, models, fieldName = 'RIRA_Cons
     print(paste0('Scoring with model: ', modelName))
     probColName <- paste0(modelName, '_probability')
     fieldNames <- c(fieldNames, probColName)
-    seuratObj <- ScoreCellsWithSavedModel(seuratObj, model = models[[modelName]], fieldName = probColName, batchSize = batchSize, assayName = assayName)
+    fieldToClass <- list()
+    fieldToClass[[probColName]] <- 1
+    seuratObj <- ScoreCellsWithSavedModel(seuratObj, model = models[[modelName]], fieldToClass = fieldToClass, batchSize = batchSize, assayName = assayName)
   }
 
   seuratObj <- AssignCellType(seuratObj, probabilityColumns = fieldNames, fieldName = fieldName, minimum_probability = minimum_probability, minimum_delta = minimum_delta)

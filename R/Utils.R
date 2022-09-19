@@ -123,3 +123,35 @@ SeuratToAnnData <- function(seuratObj, outFileBaseName, assayName = NULL, doDiet
 .HasNormalizationBeenPerformed <- function(seuratObj, assayName = 'RNA'){
   return(!identical(seuratObj@assays[[assayName]]@counts, seuratObj@assays[[assayName]]@data))
 }
+
+.FilterLowCalls <- function(seuratObj, label, minFraction) {
+  if (is.null(minFraction)){
+    return(seuratObj)
+  }
+
+  print(paste0('Filtering ', label, ' below: ', minFraction))
+  d <- data.frame(table(Label = unlist(seuratObj[[label]])))
+  names(d) <- c('Label', 'Count')
+  d$Fraction <- d$Count / sum(d$Count)
+
+  d <- d %>% dplyr::arrange(dplyr::desc(Fraction))
+  print(d)
+  toRemove <- d$Label[d$Fraction < minFraction]
+  if (length(toRemove) > 0) {
+    print(paste0('Will remove: ', paste0(toRemove, collapse = ', ')))
+  }
+
+  if (length(toRemove) > 0) {
+    l <- unlist(seuratObj[[label]])
+    names(l) <- colnames(seuratObj)
+    l[l %in% toRemove] <- 'Unknown'
+    seuratObj[[label]] <- l
+  }
+
+  print('After filter:')
+  d <- data.frame(table(Label = unlist(seuratObj[[label]])))
+  names(d) <- c('Label', 'Count')
+  print(d)
+
+  return(seuratObj)
+}

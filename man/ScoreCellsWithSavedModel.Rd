@@ -7,8 +7,7 @@
 ScoreCellsWithSavedModel(
   seuratObj,
   model,
-  fieldName,
-  fieldNameNegative = NULL,
+  fieldToClass,
   batchSize = 20000,
   assayName = "RNA"
 )
@@ -18,9 +17,7 @@ ScoreCellsWithSavedModel(
 
 \item{model}{Either the full filepath to a model RDS file, or the name of a built-in model.}
 
-\item{fieldName}{The name of the field used to store the results in the seurat object (for cells scored 1 by the binary classifier)}
-
-\item{fieldNameNegative}{The name of the field used to store probabilities of cells scored '0'}
+\item{fieldToClass}{A list mapping the target field name in the seurat object to the classifier level. The latter is either numeric, or the string label. For example: list('CD4_T' = 0, 'CD8_T' = 1))}
 
 \item{batchSize}{To conserve memory, data will be chunked into batches of at most this many cells}
 
