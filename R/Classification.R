@@ -1,3 +1,6 @@
+#' @include Utils.R
+#' @include CellTypist.R
+
 #' @import mlr3
 #' @import mlr3learners
 #' @import ranger
@@ -351,11 +354,23 @@ ScoreCellsWithSavedModel <- function(seuratObj, model, fieldName, batchSize = 20
   # NOTE: makeNames() will convert hyphen to period, and also prefix genes with numeric starts, like 7SK.2 -> X7SK.2
   colnames(gene_expression_matrix) <- make.names(colnames(gene_expression_matrix))
 
+  # TODO: do all models have this? Maybe mlr3 has some method to pull out features from the classifier instead?
+  # See: https://mlr3.mlr-org.com/reference/LearnerClassif.html
   modelFeats <- colnames(classifier$model$W)
+  modelFeats <- modelFeats[modelFeats != 'Bias']
+
   missing <- modelFeats[!modelFeats %in% colnames(gene_expression_matrix)]
   if (length(missing) > 0) {
+    # TODO: unsure if this is actually a good idea or not?
     warning(paste0('The following features are used in the model and missing from the input: ', paste0(sort(missing), collapse = ',')))
+    print('Adding zeros for these features')
+    missingMat <- matrix(data = 0, nrow = nrow(gene_expression_matrix), ncol = length(missing))
+    rownames(missingMat) <- rownames(gene_expression_matrix)
+    colnames(missingMat) <- missing
+    gene_expression_matrix <- cbind(gene_expression_matrix, missingMat)
   }
+  
+  gene_expression_matrix <- gene_expression_matrix[,colnames(gene_expression_matrix) %in% modelFeats, drop = FALSE]
 
   nBatches <- ifelse(is.na(batchSize), yes = 1, no = ceiling(nrow(gene_expression_matrix) / batchSize))
   probability_vector <- NULL
@@ -514,4 +529,28 @@ InterpretModels <- function(output_dir= "./classifiers", plot_type = "ratio"){
     print(plot(parts, max_vars=12, show_boxplots = FALSE))
 
   }
+}
+
+ClassifyCells <- function(seuratObj, primaryModel = 'RIRA_Immune_v1', subsetModels = list()) {
+  primaryLabelField <- 'RIRA_Level1'
+  secondaryLabelField <- 'RIRA_Level2'
+
+  seuratObj <- RunCellTypist(seuratObj, modelName = primaryModel)
+  seuratObj[primaryLabelField] <- seuratObj$majority_voting
+  seuratObj$majority_voting <- NULL
+
+  if (!all(is.null(subsetModels))){
+    seuratObj[[secondaryLabelField]] <- seuratObj[[primaryLabelField]]
+    for (cellType in names(subsetModels)) {
+      if (cellType %in% seuratObj[[primaryLabelField]]) {
+        toSubset <- colnames(seuratObj)[seuratObj[[primaryLabelField]] == cellType]
+        ss <- subset(seuratObj, cells = toSubset)
+        ss <- PredictCellTypeProbability(ss, models = list())
+
+
+      }
+    }
+  }
+
+  return(seuratObj)
 }
