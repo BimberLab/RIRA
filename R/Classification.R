@@ -348,7 +348,7 @@ TrainModelsFromSeurat <- function(seuratObj, celltype_column, assay = "RNA", slo
 #' @description Applies a trained model to get per-cell probabilities.
 #' @param seuratObj The Seurat Object to be updated
 #' @param model Either the full filepath to a model RDS file, or the name of a built-in model.
-#' @param fieldToClass A list mapping the target field name in the seurat object to the classifier level. The latter is either numeric, or the string label. For example: list('CD4_T' = 0, 'CD8_T' = 1))
+#' @param fieldToClass A list mapping the target field name in the seurat object to the classifier level. The latter is either numeric, or the string label. For example: list('CD4_T' = 1, 'CD8_T' = 2))
 #' @param batchSize To conserve memory, data will be chunked into batches of at most this many cells
 #' @param assayName The assay holding gene expression data
 #' @export
