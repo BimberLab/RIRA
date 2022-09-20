@@ -1,3 +1,6 @@
+#' @include Utils.R
+#' @include CellTypist.R
+
 #' @import mlr3
 #' @import mlr3learners
 #' @import ranger
@@ -171,10 +174,11 @@ TrainModel <- function(training_matrix, celltype, hyperparameter_tuning = F, lea
 #' @param n_models The number of models to be trained during hyperparameter tuning. The model with the highest accuracy will be selected and returned.
 #' @param n_cores If non-null, this number of workers will be used with future::plan
 #' @param gene_list If non-null, the input count matrix will be subset to these features
+#' @param gene_exclusion_list If non-null, the input count matrix will be subset to drop these features
 #' @param verbose Whether or not to print the metrics data for each model after training.
 #' @param min_cells_per_class If provided, any classes (and corresponding cells) with fewer than this many cells will be dropped from the training data
 #' @export
-TrainModelsFromSeurat <- function(seuratObj, celltype_column, assay = "RNA", slot = "data", output_dir = "./classifiers", hyperparameter_tuning = F, learner = "classif.ranger", inner_resampling = "cv", outer_resampling = "cv", inner_folds = 4, inner_ratio = 0.8,  outer_folds = 3, outer_ratio = 0.8, n_models = 20, n_cores = NULL, gene_list = NULL, verbose = TRUE, min_cells_per_class = 20){
+TrainModelsFromSeurat <- function(seuratObj, celltype_column, assay = "RNA", slot = "data", output_dir = "./classifiers", hyperparameter_tuning = F, learner = "classif.ranger", inner_resampling = "cv", outer_resampling = "cv", inner_folds = 4, inner_ratio = 0.8,  outer_folds = 3, outer_ratio = 0.8, n_models = 20, n_cores = NULL, gene_list = NULL, gene_exclusion_list = NULL, verbose = TRUE, min_cells_per_class = 20){
   if (methods::missingArg(celltype_column)) {
     stop('Must provide the celltype_column argument')
   }
@@ -194,12 +198,18 @@ TrainModelsFromSeurat <- function(seuratObj, celltype_column, assay = "RNA", slo
   #Read the raw data from a seurat object and parse into an mlr3-compatible labeled matrix
   raw_data_matrix <- attr(x = seuratObj@assays[[assay]], which = slot)
   if (!all(is.null(gene_list))) {
+    gene_list <- ExpandGeneList(gene_list)
     if (!all(gene_list %in% rownames(raw_data_matrix))) {
       missing <- gene_list[!gene_list %in% rownames(raw_data_matrix)]
       stop(paste0('All features in gene_list must be present in the Seurat object features. Missing: ', paste0(missing, collapse = ',')))
     }
 
     raw_data_matrix <- raw_data_matrix[gene_list,]
+  }
+
+  if (!all(is.null(gene_exclusion_list))) {
+    gene_exclusion_list <- ExpandGeneList(gene_exclusion_list)
+    raw_data_matrix <- raw_data_matrix[!rownames(raw_data_matrix) %in% gene_exclusion_list,]
   }
 
   training_matrix <- as.data.frame(Matrix::t(as.matrix(raw_data_matrix)))
@@ -333,16 +343,16 @@ TrainModelsFromSeurat <- function(seuratObj, celltype_column, assay = "RNA", slo
 }
 
 
-#' @title Applies a trained model to get per-cell probabilities.
+#' @title Applies a trained binary classifier to get per-cell probabilities.
 #'
 #' @description Applies a trained model to get per-cell probabilities.
 #' @param seuratObj The Seurat Object to be updated
 #' @param model Either the full filepath to a model RDS file, or the name of a built-in model.
-#' @param fieldName The name of the field used to store the results in the seurat object
+#' @param fieldToClass A list mapping the target field name in the seurat object to the classifier level. The latter is either numeric, or the string label. For example: list('CD4_T' = 1, 'CD8_T' = 2))
 #' @param batchSize To conserve memory, data will be chunked into batches of at most this many cells
 #' @param assayName The assay holding gene expression data
 #' @export
-ScoreCellsWithSavedModel <- function(seuratObj, model, fieldName, batchSize = 20000, assayName = 'RNA') {
+ScoreCellsWithSavedModel <- function(seuratObj, model, fieldToClass, batchSize = 20000, assayName = 'RNA') {
   classifier <- .ResolveModel(modelFile = model)
 
   #De-sparse and transpose seuratObj normalized data & make names unique
@@ -351,35 +361,79 @@ ScoreCellsWithSavedModel <- function(seuratObj, model, fieldName, batchSize = 20
   # NOTE: makeNames() will convert hyphen to period, and also prefix genes with numeric starts, like 7SK.2 -> X7SK.2
   colnames(gene_expression_matrix) <- make.names(colnames(gene_expression_matrix))
 
-  modelFeats <- colnames(classifier$model$W)
-  missing <- modelFeats[!modelFeats %in% colnames(gene_expression_matrix)]
-  if (length(missing) > 0) {
-    warning(paste0('The following features are used in the model and missing from the input: ', paste0(sort(missing), collapse = ',')))
+  # TODO: Is there is more universal way to get the model to report its features?
+  # See: https://mlr3.mlr-org.com/reference/LearnerClassif.html
+  modelFeats <- NULL
+  if ('importance' %in% classifier$properties) {
+    modelFeats <- names(classifier$importance())
+  } else if (!is.null(classifier$model) && grepl(x = classifier$model$TypeDetail, pattern = 'logistic regression')) {
+    modelFeats <- colnames(classifier$model$W)
+    toRemove <- names(classifier2$param_set$levels)
+    modelFeats <- modelFeats[!modelFeats %in% toRemove]
   }
 
+  if (!all(is.null(modelFeats))){
+    missing <- modelFeats[!modelFeats %in% colnames(gene_expression_matrix)]
+    if (length(missing) > 0) {
+      stop(paste0('The following features are used in the model and missing from the input: ', paste0(sort(missing), collapse = ',')))
+    }
+
+    # Subset input data to match model:
+    toDrop <- !(colnames(gene_expression_matrix) %in% modelFeats)
+    if (sum(toDrop) > 0) {
+      print(paste0('Dropping features not present in model: ', sum(toDrop), ' of ', ncol(gene_expression_matrix)))
+      gene_expression_matrix <- gene_expression_matrix[,!toDrop, drop = FALSE]
+    }
+  } else {
+    warning(paste0('Unable to infer features from model, type: ', classifier$model$TypeDetail))
+  }
+
+  print(paste0('Features shared between gene matrix and model: ', ncol(gene_expression_matrix)))
+
   nBatches <- ifelse(is.na(batchSize), yes = 1, no = ceiling(nrow(gene_expression_matrix) / batchSize))
-  probability_vector <- NULL
+  probability_vectors <- list()
   for (batchIdx in 1:nBatches){
     start <- 1 + ((batchIdx-1) * batchSize)
     end <- min((batchIdx * batchSize), nrow(gene_expression_matrix))
     print(paste0("Iteration ", batchIdx, " of ", nBatches, ", (", start, "-", end, ")"))
-    dat <- stats::predict(classifier, newdata = data.frame(gene_expression_matrix[start:end,]), predict_type = 'prob')[,2] #columns are named '0','1', so second column is '1'
-    if (batchIdx == 1) {
-      probability_vector <- dat
-    } else {
-      probability_vector <- c(probability_vector, dat)
+
+    #columns are named '0','1', so the first column is '0' and the second column is '1'
+    dat <- stats::predict(classifier, newdata = data.frame(gene_expression_matrix[start:end,]), predict_type = 'prob')
+
+    for (fieldName in names(fieldToClass)) {
+      idx <- fieldToClass[[fieldName]]
+      if (is.na(as.numeric(idx))) {
+        # Try to resolve from model:
+        if (idx %in% levels(classifier$model$ClassNames)) {
+          idx <- which(levels(classifier$model$ClassNames) == idx)
+        } else {
+          stop(paste0('Unknown class: ', idx))
+        }
+      } else {
+        idx <- as.numeric(idx)
+      }
+
+      if (batchIdx == 1) {
+        probability_vectors[[fieldName]] <- dat[,idx]
+      } else {
+        probability_vectors[[fieldName]] <- c(probability_vectors[[fieldName]], dat[,idx])
+      }
     }
   }
 
-  if (length(probability_vector) != ncol(seuratObj)) {
-    stop(paste0('Error calculating probability_vector. Length was: ', length(probability_vector)))
-  }
+  for (fieldName in names(probability_vectors)) {
+    probability_vector <- probability_vectors[[fieldName]]
 
-  #append probabilities to seurat metadata
-  seuratObj@meta.data[[fieldName]] <- probability_vector
+    if (length(probability_vector) != ncol(seuratObj)) {
+      stop(paste0('Error calculating probability_vector. Length was: ', length(probability_vector)))
+    }
 
-  if (length(names(seuratObj@reductions)) > 0) {
-    print(Seurat::FeaturePlot(seuratObj, features = fieldName))
+    #append probabilities to seurat metadata
+    seuratObj@meta.data[[fieldName]] <- probability_vector
+
+    if (length(names(seuratObj@reductions)) > 0) {
+      print(Seurat::FeaturePlot(seuratObj, features = fieldName))
+    }
   }
 
   return(seuratObj)
@@ -403,7 +457,9 @@ PredictCellTypeProbability <- function(seuratObj, models, fieldName = 'RIRA_Cons
     print(paste0('Scoring with model: ', modelName))
     probColName <- paste0(modelName, '_probability')
     fieldNames <- c(fieldNames, probColName)
-    seuratObj <- ScoreCellsWithSavedModel(seuratObj, model = models[[modelName]], fieldName = probColName, batchSize = batchSize, assayName = assayName)
+    fieldToClass <- list()
+    fieldToClass[[probColName]] <- 2 # Assume binary classifier for now
+    seuratObj <- ScoreCellsWithSavedModel(seuratObj, model = models[[modelName]], fieldToClass = fieldToClass, batchSize = batchSize, assayName = assayName)
   }
 
   seuratObj <- AssignCellType(seuratObj, probabilityColumns = fieldNames, fieldName = fieldName, minimum_probability = minimum_probability, minimum_delta = minimum_delta)
@@ -514,4 +570,28 @@ InterpretModels <- function(output_dir= "./classifiers", plot_type = "ratio"){
     print(plot(parts, max_vars=12, show_boxplots = FALSE))
 
   }
+}
+
+ClassifyCells <- function(seuratObj, primaryModel = 'RIRA_Immune_v1', subsetModels = list()) {
+  primaryLabelField <- 'RIRA_Level1'
+  secondaryLabelField <- 'RIRA_Level2'
+
+  seuratObj <- RunCellTypist(seuratObj, modelName = primaryModel)
+  seuratObj[primaryLabelField] <- seuratObj$majority_voting
+  seuratObj$majority_voting <- NULL
+
+  if (!all(is.null(subsetModels))){
+    seuratObj[[secondaryLabelField]] <- seuratObj[[primaryLabelField]]
+    for (cellType in names(subsetModels)) {
+      if (cellType %in% seuratObj[[primaryLabelField]]) {
+        toSubset <- colnames(seuratObj)[seuratObj[[primaryLabelField]] == cellType]
+        ss <- subset(seuratObj, cells = toSubset)
+        ss <- PredictCellTypeProbability(ss, models = list())
+
+
+      }
+    }
+  }
+
+  return(seuratObj)
 }

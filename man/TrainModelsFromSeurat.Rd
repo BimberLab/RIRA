@@ -21,6 +21,7 @@ TrainModelsFromSeurat(
   n_models = 20,
   n_cores = NULL,
   gene_list = NULL,
+  gene_exclusion_list = NULL,
   verbose = TRUE,
   min_cells_per_class = 20
 )
@@ -57,6 +58,8 @@ TrainModelsFromSeurat(
 \item{n_cores}{If non-null, this number of workers will be used with future::plan}
 
 \item{gene_list}{If non-null, the input count matrix will be subset to these features}
+
+\item{gene_exclusion_list}{If non-null, the input count matrix will be subset to drop these features}
 
 \item{verbose}{Whether or not to print the metrics data for each model after training.}
 
