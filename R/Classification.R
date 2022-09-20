@@ -379,10 +379,16 @@ ScoreCellsWithSavedModel <- function(seuratObj, model, fieldToClass, batchSize =
     }
 
     # Subset input data to match model:
-    gene_expression_matrix <- gene_expression_matrix[,colnames(gene_expression_matrix) %in% modelFeats, drop = FALSE]
+    toDrop <- !(colnames(gene_expression_matrix) %in% modelFeats)
+    if (sum(toDrop) > 0) {
+      print(paste0('Dropping features not present in model: ', sum(toDrop), ' of ', ncol(gene_expression_matrix)))
+      gene_expression_matrix <- gene_expression_matrix[,!toDrop, drop = FALSE]
+    }
   } else {
     warning(paste0('Unable to infer features from model, type: ', classifier$model$TypeDetail))
   }
+
+  print(paste0('Features shared between gene matrix and model: ', ncol(gene_expression_matrix)))
 
   nBatches <- ifelse(is.na(batchSize), yes = 1, no = ceiling(nrow(gene_expression_matrix) / batchSize))
   probability_vectors <- list()
@@ -410,7 +416,7 @@ ScoreCellsWithSavedModel <- function(seuratObj, model, fieldToClass, batchSize =
       if (batchIdx == 1) {
         probability_vectors[[fieldName]] <- dat[,idx]
       } else {
-        probability_vectors[[fieldName]] <- c(probability_vectors[[fieldName]], dat[,2])
+        probability_vectors[[fieldName]] <- c(probability_vectors[[fieldName]], dat[,idx])
       }
     }
   }
@@ -452,7 +458,7 @@ PredictCellTypeProbability <- function(seuratObj, models, fieldName = 'RIRA_Cons
     probColName <- paste0(modelName, '_probability')
     fieldNames <- c(fieldNames, probColName)
     fieldToClass <- list()
-    fieldToClass[[probColName]] <- 1
+    fieldToClass[[probColName]] <- 2 # Assume binary classifier for now
     seuratObj <- ScoreCellsWithSavedModel(seuratObj, model = models[[modelName]], fieldToClass = fieldToClass, batchSize = batchSize, assayName = assayName)
   }
 

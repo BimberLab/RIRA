@@ -71,8 +71,6 @@ test_that("Cell type classification works", {
     return(tools::file_path_sans_ext(basename(x)))
   })
 
-  print(modelFiles)
-
   # Use new data:
   seuratObj <- prepareTestData()
   seuratObj <- PredictCellTypeProbability(seuratObj = seuratObj, models = modelFiles)
