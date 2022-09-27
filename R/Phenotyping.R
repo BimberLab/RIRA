@@ -504,3 +504,12 @@ MakePhenotypingDotPlot <- function(seuratObj,
  
   return(P1)
 }
+
+
+#' @title ListGeneSets
+#'
+#' @description Prints a list of the gene sets registered in this package
+#' @export
+ListGeneSets <- function(){
+	print(sort(names(pkg.env$GENE_SETS)))
+}
