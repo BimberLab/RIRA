@@ -6,8 +6,9 @@
 #' @description This will calculate a handful of standardized UCell scores for a seurat object
 #' @param seuratObj The seurat object
 #' @param forceRecalculate If true, UCell will always be re-run, even if the field is already present.
+#' @param seed If non-null, set.seed() will be called prior to running UCell
 #' @export
-CalculateUCellScores <- function(seuratObj, forceRecalculate = FALSE) {
+CalculateUCellScores <- function(seuratObj, forceRecalculate = FALSE, seed = GetSeed()) {
   toCalculate <- list(
     TandNK_Activation = GetGeneSet('TandNK_Activation.1'),
     Cytotoxicity = GetGeneSet('Cytotoxicity'),
@@ -17,7 +18,12 @@ CalculateUCellScores <- function(seuratObj, forceRecalculate = FALSE) {
   )
 
   if (forceRecalculate || any(!paste0(names(toCalculate), '_UCell') %in% names(seuratObj@meta.data))) {
-    seuratObj <- UCell::AddModuleScore_UCell(seuratObj, features = toCalculate, seed = GetSeed())
+    if (!is.null(seed)) {
+      print(paste0('Setting random seed: ', seed))
+      set.seed(seed)
+    }
+
+    seuratObj <- UCell::AddModuleScore_UCell(seuratObj, features = toCalculate)
   } else {
     print('UCell score already present, will not recalculate')
   }
