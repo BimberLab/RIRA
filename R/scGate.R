@@ -250,8 +250,13 @@ RunScGateForModels <- function(seuratObj, modelNames, min.cells = 30, assay = 'R
     return(paste0(sort(unique(vals)), collapse = ','))
   })
 
-  if (!all(is.null(labelRename))) {
-    uniqueValues <- unique(seuratObj$scGateRaw)
+  uniqueValues <- unique(as.character(seuratObj$scGateRaw))
+  uniqueValues <- uniqueValues[!is.na(uniqueValues)]
+
+  seuratObj$scGateConsensus <- as.character(seuratObj$scGateRaw)
+  seuratObj$scGateRaw <- naturalsort::naturalfactor(seuratObj$scGateRaw)
+
+  if (!all(is.null(labelRename)) && length(uniqueValues) > 0) {
     updatedValues <- sapply(uniqueValues, function(vals){
       vals <- unlist(strsplit(vals, split = ','))
       vals <- sapply(vals, function(x){
@@ -270,12 +275,6 @@ RunScGateForModels <- function(seuratObj, modelNames, min.cells = 30, assay = 'R
       return(paste0(sort(unique(vals)), collapse = ','))
     })
 
-    seuratObj$scGateRaw <- naturalsort::naturalfactor(seuratObj$scGateRaw)
-    seuratObj$scGateConsensus <- as.character(seuratObj$scGateRaw)
-    #TODO: remove
-    print('debug!')
-    print(uniqueValues)
-    print(updatedValues)
     for (x in 1:length(uniqueValues)) {
       if (is.na(uniqueValues[[x]]) || uniqueValues[[x]] == updatedValues[[x]]) {
         next
