@@ -341,6 +341,9 @@ igLambdaVariable <-c("LOC107000570", "LOC106992425", "LOC701976", "LOC708547", "
 	GetGeneSet('MMul10_Ig_Variable')
 )))
 
+.RegisterGeneSet("Glycolysis", c("ALDOA", "BPGM", "ENO1", "ENO2", "GAPDH", "HK1", "HK2", "HKDC1", "PFKL", "PGAM1", "PGAM2", "PGK1", "PKLR", "PKM", "TPI1"))
+.RegisterGeneSet('Interferon_Response', c('IFI6','IFI27','MX1','ISG15','STAT1','LOC114672189','MX2','IFIT3'))
+
 # Lists provided by Rebecca Skalsky. NOTE: CD24, CD27 and CEACAM21 not annotated in MMul10
 .RegisterGeneSet('B cells', c('MS4A1', 'CD79A', 'CD79B'))
 .RegisterGeneSet('Follicular B cells', c('CD19', 'MS4A1', 'CR2', 'CD22', 'FCER2', 'CXCR5', 'MAMU-DRA', 'PAX5'))  # Also 'CD24'

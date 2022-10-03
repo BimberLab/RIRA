@@ -14,7 +14,9 @@ CalculateUCellScores <- function(seuratObj, forceRecalculate = FALSE, seed = Get
     Cytotoxicity = GetGeneSet('Cytotoxicity'),
     EffectorT = GetGeneSet('EffectorT'),
     CentralMemT = GetGeneSet('CentralMemT'),
-    NaiveT = GetGeneSet('NaiveT')
+    NaiveT = GetGeneSet('NaiveT'),
+    Glycolysis = GetGeneSet('Glycolysis'),
+    Interferon_Response = GetGeneSet('Interferon_Response')
   )
 
   if (forceRecalculate || any(!paste0(names(toCalculate), '_UCell') %in% names(seuratObj@meta.data))) {
@@ -33,6 +35,8 @@ CalculateUCellScores <- function(seuratObj, forceRecalculate = FALSE, seed = Get
   print(Seurat::FeaturePlot(seuratObj, features = 'EffectorT_UCell', min.cutoff = 'q05', max.cutoff = 'q95') + ggtitle('Effector T Score'))
   print(Seurat::FeaturePlot(seuratObj, features = 'NaiveT_UCell', min.cutoff = 'q05', max.cutoff = 'q95') + ggtitle('Naive T Score'))
   print(Seurat::FeaturePlot(seuratObj, features = 'CentralMemT_UCell', min.cutoff = 'q05', max.cutoff = 'q95') + ggtitle('Central Mem T Score'))
+  print(Seurat::FeaturePlot(seuratObj, features = 'Glycolysis_UCell', min.cutoff = 'q05', max.cutoff = 'q95') + ggtitle('Glycolysis'))
+  print(Seurat::FeaturePlot(seuratObj, features = 'Interferon_Response_UCell', min.cutoff = 'q05', max.cutoff = 'q95') + ggtitle('Interferon_Response'))
 
   return(seuratObj)
 }
