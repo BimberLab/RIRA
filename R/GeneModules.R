@@ -7,8 +7,9 @@
 #' @param seuratObj The seurat object
 #' @param forceRecalculate If true, UCell will always be re-run, even if the field is already present.
 #' @param seed If non-null, set.seed() will be called prior to running UCell
+#' @param ncores The number of core to use with UCell::AddModuleScore_UCell
 #' @export
-CalculateUCellScores <- function(seuratObj, forceRecalculate = FALSE, seed = GetSeed()) {
+CalculateUCellScores <- function(seuratObj, forceRecalculate = FALSE, seed = GetSeed(), ncores = 1) {
   toCalculate <- list(
     TandNK_Activation = GetGeneSet('TandNK_Activation.1'),
     Cytotoxicity = GetGeneSet('Cytotoxicity'),
@@ -25,7 +26,8 @@ CalculateUCellScores <- function(seuratObj, forceRecalculate = FALSE, seed = Get
       set.seed(seed)
     }
 
-    seuratObj <- UCell::AddModuleScore_UCell(seuratObj, features = toCalculate)
+    BPPARAM <- .InferBpParam(ncores, defaultValue = NULL)
+    seuratObj <- UCell::AddModuleScore_UCell(seuratObj, features = toCalculate, BPPARAM = BPPARAM)
   } else {
     print('UCell score already present, will not recalculate')
   }

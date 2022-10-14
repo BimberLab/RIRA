@@ -4,7 +4,12 @@
 \alias{CalculateUCellScores}
 \title{CalculateUCellScores}
 \usage{
-CalculateUCellScores(seuratObj, forceRecalculate = FALSE, seed = GetSeed())
+CalculateUCellScores(
+  seuratObj,
+  forceRecalculate = FALSE,
+  seed = GetSeed(),
+  ncores = 1
+)
 }
 \arguments{
 \item{seuratObj}{The seurat object}
@@ -12,6 +17,8 @@ CalculateUCellScores(seuratObj, forceRecalculate = FALSE, seed = GetSeed())
 \item{forceRecalculate}{If true, UCell will always be re-run, even if the field is already present.}
 
 \item{seed}{If non-null, set.seed() will be called prior to running UCell}
+
+\item{ncores}{The number of core to use with UCell::AddModuleScore_UCell}
 }
 \description{
 This will calculate a handful of standardized UCell scores for a seurat object

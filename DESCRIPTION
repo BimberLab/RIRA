@@ -36,7 +36,8 @@ Imports:
     reticulate,
     SeuratDisk,
     naturalsort,
-    patchwork
+    patchwork,
+    BiocParallel
 Suggests:
     devtools,
     testthat (>= 2.1.0),
