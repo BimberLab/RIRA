@@ -19,15 +19,30 @@ utils::globalVariables(
 #' @param minProp By default, this would be passed to the --min-prop argument. However, if you also provide extraArgs, this is ignored.
 #' @param maxAllowableClasses Celltypist can assign a cell to many classes, creating extremely long labels. Any cell with more than this number of labels will be set to NA
 #' @param minFractionToInclude If non-null, any labels with fewer than this fraction of cells will be set to NA.
+#' @param minCellsToRun If the input seurat object has fewer than this many cells, NAs will be added for all expected columns and celltypist will not be run.
 #'
 #' @export
-RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshold = 0.5, minProp = 0, extraArgs = c("--majority-voting", "--mode", "prob_match", "--p-thres", pThreshold, "--min-prop", minProp), assayName = 'RNA', columnPrefix = NULL, convertAmbiguousToNA = FALSE, maxAllowableClasses = 6, minFractionToInclude = 0.01) {
+RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshold = 0.5, minProp = 0, extraArgs = c("--majority-voting", "--mode", "prob_match", "--p-thres", pThreshold, "--min-prop", minProp), assayName = 'RNA', columnPrefix = NULL, convertAmbiguousToNA = FALSE, maxAllowableClasses = 6, minFractionToInclude = 0.01, minCellsToRun = 200) {
   if (!reticulate::py_available(initialize = TRUE)) {
     stop(paste0('Python/reticulate not configured. Run "reticulate::py_config()" to initialize python'))
   }
 
   if (!reticulate::py_module_available('celltypist')) {
     stop('The celltypist python package has not been installed! If you believe it has been installed, run reticulate::import("celltypist") to get more information and debug')
+  }
+
+  if (ncol(seuratObj) < minCellsToRun) {
+    warning('Too few cells, will not run celltypist. NAs will be added instead')
+    expectedCols <- c('predicted_labels', 'over_clustering', 'majority_voting')
+    if (!is.null(columnPrefix)) {
+      expectedCols <- paste0(columnPrefix, expectedCols)
+    }
+
+    for (colName in expectedCols) {
+      seuratObj[[colName]] <- NA
+    }
+
+    return(seuratObj)
   }
 
   if (!.HasNormalizationBeenPerformed(seuratObj, assayName)) {
