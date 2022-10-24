@@ -1,7 +1,7 @@
 #' @include Utils.R
 #'
 utils::globalVariables(
-	names = c('gene', 'set'),
+	names = c('gene', 'set', 'CellType', 'features.plot', 'id', 'pct.exp'),
 	package = 'RIRA',
 	add = TRUE
 )
