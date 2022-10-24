@@ -34,9 +34,9 @@ TrainCellTypist(
 
 \item{excludedClasses}{A vector of labels to discard.}
 
-\item{featureInclusionList}{If provided, the input count matrix will be subset to just these features.}
+\item{featureInclusionList}{If provided, the input count matrix will be subset to just these features. If used, Seurat::NormalizeData will be re-run.}
 
-\item{featureExclusionList}{If provided, the input count matrix will be subset to remove these features.}
+\item{featureExclusionList}{If provided, the input count matrix will be subset to remove these features. If used, Seurat::NormalizeData will be re-run.}
 }
 \description{
 Train celltypist using the data in a seurat object and saves the resulting model
