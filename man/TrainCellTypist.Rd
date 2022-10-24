@@ -12,7 +12,9 @@ TrainCellTypist(
   assayName = "RNA",
   tempFileLocation = NULL,
   dropAmbiguousLabelValues = TRUE,
-  excludedClasses = NULL
+  excludedClasses = NULL,
+  featureInclusionList = NULL,
+  featureExclusionList = NULL
 )
 }
 \arguments{
@@ -31,6 +33,10 @@ TrainCellTypist(
 \item{dropAmbiguousLabelValues}{If true, and label value with a comma will be dropped.}
 
 \item{excludedClasses}{A vector of labels to discard.}
+
+\item{featureInclusionList}{If provided, the input count matrix will be subset to just these features.}
+
+\item{featureExclusionList}{If provided, the input count matrix will be subset to remove these features.}
 }
 \description{
 Train celltypist using the data in a seurat object and saves the resulting model

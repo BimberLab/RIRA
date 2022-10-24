@@ -156,9 +156,11 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
 #' @param excludedClasses A vector of labels to discard.
 #' @param tempFileLocation The location where temporary files (like the annData version of the seurat object), will be written.
 #' @param dropAmbiguousLabelValues If true, and label value with a comma will be dropped.
+#' @param featureInclusionList If provided, the input count matrix will be subset to just these features.
+#' @param featureExclusionList If provided, the input count matrix will be subset to remove these features.
 #'
 #' @export
-TrainCellTypist <- function(seuratObj, labelField, modelFile, minCellsPerClass = 20, assayName = 'RNA', tempFileLocation = NULL, dropAmbiguousLabelValues = TRUE, excludedClasses = NULL) {
+TrainCellTypist <- function(seuratObj, labelField, modelFile, minCellsPerClass = 20, assayName = 'RNA', tempFileLocation = NULL, dropAmbiguousLabelValues = TRUE, excludedClasses = NULL, featureInclusionList = NULL, featureExclusionList = NULL) {
   if (!reticulate::py_available(initialize = TRUE)) {
     stop(paste0('Python/reticulate not configured. Run "reticulate::py_config()" to initialize python'))
   }
@@ -215,6 +217,26 @@ TrainCellTypist <- function(seuratObj, labelField, modelFile, minCellsPerClass =
   # Perform this after other filters are applied, so low-count classes are not binned into 'Other'
   if (!is.null(minCellsPerClass) && minCellsPerClass > 0) {
     seuratObj <- .DropLowCountClasses(seuratObj, labelField, minCellsPerClass)
+  }
+
+  if (!all(is.null(featureInclusionList))) {
+    ad <- seuratObj@assays[[assayName]]
+    featureInclusionList <- RIRA::ExpandGeneList(featureInclusionList)
+    preExisting <- intersect(rownames(ad), featureInclusionList)
+    print(paste0('Limiting to ', length(featureInclusionList), ' features, of which ', length(preExisting), ' exist in this assay'))
+    ad <- subset(ad, features = preExisting)
+    print(paste0('Total features after: ', nrow(ad)))
+    seuratObj@assays[[assayName]] <- ad
+  }
+
+  if (!all(is.null(featureExclusionList))){
+    ad <- seuratObj@assays[[assayName]]
+    featureExclusionList <- RIRA::ExpandGeneList(featureExclusionList)
+    preExisting <- intersect(rownames(ad), featureExclusionList)
+    print(paste0('Excluding ', length(featureExclusionList), ' features(s) from the input assay, of which ', length(preExisting), ' existing in this assay'))
+    ad <- subset(ad, features = preExisting, invert = TRUE)
+    print(paste0('Total features after: ', nrow(ad)))
+    seuratObj@assays[[assayName]] <- ad
   }
 
   trainData <- SeuratToAnnData(seuratObj, paste0(outFile, '-seurat-annData'), assayName = assayName, doDiet = TRUE, allowableMetaCols = labelField)
