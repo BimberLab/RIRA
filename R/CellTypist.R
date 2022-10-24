@@ -156,8 +156,8 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
 #' @param excludedClasses A vector of labels to discard.
 #' @param tempFileLocation The location where temporary files (like the annData version of the seurat object), will be written.
 #' @param dropAmbiguousLabelValues If true, and label value with a comma will be dropped.
-#' @param featureInclusionList If provided, the input count matrix will be subset to just these features.
-#' @param featureExclusionList If provided, the input count matrix will be subset to remove these features.
+#' @param featureInclusionList If provided, the input count matrix will be subset to just these features. If used, Seurat::NormalizeData will be re-run.
+#' @param featureExclusionList If provided, the input count matrix will be subset to remove these features. If used, Seurat::NormalizeData will be re-run.
 #'
 #' @export
 TrainCellTypist <- function(seuratObj, labelField, modelFile, minCellsPerClass = 20, assayName = 'RNA', tempFileLocation = NULL, dropAmbiguousLabelValues = TRUE, excludedClasses = NULL, featureInclusionList = NULL, featureExclusionList = NULL) {
@@ -219,6 +219,7 @@ TrainCellTypist <- function(seuratObj, labelField, modelFile, minCellsPerClass =
     seuratObj <- .DropLowCountClasses(seuratObj, labelField, minCellsPerClass)
   }
 
+  shouldNormalize <- FALSE
   if (!all(is.null(featureInclusionList))) {
     ad <- seuratObj@assays[[assayName]]
     featureInclusionList <- RIRA::ExpandGeneList(featureInclusionList)
@@ -227,6 +228,7 @@ TrainCellTypist <- function(seuratObj, labelField, modelFile, minCellsPerClass =
     ad <- subset(ad, features = preExisting)
     print(paste0('Total features after: ', nrow(ad)))
     seuratObj@assays[[assayName]] <- ad
+    shouldNormalize <- TRUE
   }
 
   if (!all(is.null(featureExclusionList))){
@@ -237,6 +239,11 @@ TrainCellTypist <- function(seuratObj, labelField, modelFile, minCellsPerClass =
     ad <- subset(ad, features = preExisting, invert = TRUE)
     print(paste0('Total features after: ', nrow(ad)))
     seuratObj@assays[[assayName]] <- ad
+    shouldNormalize <- TRUE
+  }
+
+  if (shouldNormalize) {
+    seuratObj <- Seurat::NormalizeData(seuratObj, verbose = FALSE)
   }
 
   trainData <- SeuratToAnnData(seuratObj, paste0(outFile, '-seurat-annData'), assayName = assayName, doDiet = TRUE, allowableMetaCols = labelField)
