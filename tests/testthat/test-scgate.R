@@ -92,7 +92,7 @@ test_that("scGates runs on all", {
   dat <- table(seuratObj$scGateConsensus)
   dat
   expect_false('MoMacDC,Myeloid' %in% names(dat))
-  expect_equal(unname(dat[['Myeloid']]), 0)
+  expect_equal(unname(dat[['Myeloid']]), 15)
 })
 
 test_that("scGate Runs", {
