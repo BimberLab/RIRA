@@ -4,7 +4,10 @@
 \alias{GetMMul10TcrGenes}
 \title{GetMMul10TcrGenes}
 \usage{
-GetMMul10TcrGenes()
+GetMMul10TcrGenes(includeConstantRegion = FALSE)
+}
+\arguments{
+\item{includeConstantRegion}{If true, the MMul10TcrConstantRegion GeneSet will be included.}
 }
 \description{
 Returns a vector with MMul10 gene IDs (NCBI build) for TCR genes.
