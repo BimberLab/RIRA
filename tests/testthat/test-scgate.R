@@ -83,16 +83,18 @@ test_that("scGates runs on all", {
   seuratObj <- RunScGateWithDefaultModels(seuratObj)
   expect_false('Bcell.is.pure.level4' %in% names(seuratObj@meta.data))
   dat <- table(seuratObj$scGateConsensus)
-  dat
+  print('RunScGateWithDefaultModels, using dropAmbiguousConsensusValues = FALSE')
+  print(dat)
   
   expect_equal(unname(dat[['Bcell,PanBcell']]), 242)
   
   # Now with ambiguous cleanup:
   seuratObj <- RunScGateWithDefaultModels(seuratObj, dropAmbiguousConsensusValues = TRUE)
   dat <- table(seuratObj$scGateConsensus)
-  dat
+  print('RunScGateWithDefaultModels, using dropAmbiguousConsensusValues = TRUE')
+  print(dat)
   expect_false('MoMacDC,Myeloid' %in% names(dat))
-  expect_equal(unname(dat[['Myeloid']]), 15)
+  expect_equal(unname(dat[['Myeloid']]), 18)
 })
 
 test_that("scGate Runs", {
