@@ -234,9 +234,14 @@ TrainCellTypist <- function(seuratObj, labelField, modelFile, minCellsPerClass =
   if (!all(is.null(featureExclusionList))){
     ad <- seuratObj@assays[[assayName]]
     featureExclusionList <- RIRA::ExpandGeneList(featureExclusionList)
-    preExisting <- intersect(rownames(ad), featureExclusionList)
-    print(paste0('Excluding ', length(featureExclusionList), ' features(s) from the input assay, of which ', length(preExisting), ' existing in this assay'))
-    ad <- subset(ad, features = preExisting, invert = TRUE)
+    toDrop <- intersect(rownames(ad), featureExclusionList)
+    print(paste0('Excluding ', length(featureExclusionList), ' features(s) from the input assay, of which ', length(toDrop), ' exist in this assay'))
+    if (length(toDrop) == 0) {
+      stop(paste0('None of the featureExclusionList features were found in this object: ', paste0(featureExclusionList, collapse = ',')))
+    }
+
+    featuresToKeep <- rownames(ad)[!rownames(ad) %in% toDrop]
+    ad <- subset(ad, features = featuresToKeep)
     print(paste0('Total features after: ', nrow(ad)))
     seuratObj@assays[[assayName]] <- ad
     shouldNormalize <- TRUE
