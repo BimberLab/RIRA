@@ -8,7 +8,9 @@ CalculateUCellScores(
   seuratObj,
   forceRecalculate = FALSE,
   seed = GetSeed(),
-  ncores = 1
+  ncores = 1,
+  assayName = "RNA",
+  storeRanks = FALSE
 )
 }
 \arguments{
@@ -19,6 +21,10 @@ CalculateUCellScores(
 \item{seed}{If non-null, set.seed() will be called prior to running UCell}
 
 \item{ncores}{The number of core to use with UCell::AddModuleScore_UCell}
+
+\item{assayName}{The assay from which to calculate UCell scores.}
+
+\item{storeRanks}{Passed directly to UCell::AddModuleScore_UCell. Increases object size but makes future calculations quicker.}
 }
 \description{
 This will calculate a handful of standardized UCell scores for a seurat object
