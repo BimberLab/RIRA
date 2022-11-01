@@ -47,7 +47,7 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
 
   if (!.HasNormalizationBeenPerformed(seuratObj, assayName)) {
     print('Seurat object does not appear to be normalized, running now:')
-    seuratObj <- Seurat::NormalizeData(seuratObj, verbose = FALSE)
+    seuratObj <- Seurat::NormalizeData(seuratObj, verbose = FALSE, assay = assayName)
   }
 
   print(paste0('Running celltypist using model: ', modelName))
