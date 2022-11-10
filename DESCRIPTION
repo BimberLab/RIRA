@@ -46,8 +46,6 @@ Remotes:
     pengminshi/cFIT,
     carmonalab/UCell,
     carmonalab/scGate,
-    bioc::SingleCellExperiment,
-    bioc::DropletUtils,
     satijalab/seurat-data,
     mojaveazure/seurat-disk
 RoxygenNote: 7.2.1
