@@ -9,8 +9,8 @@ RunCellTypist(
   modelName = "Immune_All_Low.pkl",
   pThreshold = 0.5,
   minProp = 0,
-  extraArgs = c("--majority-voting", "--mode", "prob_match", "--p-thres", pThreshold,
-    "--min-prop", minProp),
+  useMajorityVoting = TRUE,
+  extraArgs = c("--mode", "prob_match", "--p-thres", pThreshold, "--min-prop", minProp),
   assayName = "RNA",
   columnPrefix = NULL,
   convertAmbiguousToNA = FALSE,
@@ -27,6 +27,8 @@ RunCellTypist(
 \item{pThreshold}{By default, this would be passed to the --p-thres argument. However, if you also provide extraArgs, this is ignored.}
 
 \item{minProp}{By default, this would be passed to the --min-prop argument. However, if you also provide extraArgs, this is ignored.}
+
+\item{useMajorityVoting}{If true, the celltypist --majority-voting option will be added.}
 
 \item{extraArgs}{An optional list of additional arguments passed directly on the command line to cell typist}
 
