@@ -17,7 +17,8 @@ RunCellTypist(
   convertAmbiguousToNA = FALSE,
   maxAllowableClasses = 6,
   minFractionToInclude = 0.01,
-  minCellsToRun = 200
+  minCellsToRun = 200,
+  maxBatchSize = 6e+05
 )
 }
 \arguments{
@@ -46,6 +47,8 @@ RunCellTypist(
 \item{minFractionToInclude}{If non-null, any labels with fewer than this fraction of cells will be set to NA.}
 
 \item{minCellsToRun}{If the input seurat object has fewer than this many cells, NAs will be added for all expected columns and celltypist will not be run.}
+
+\item{maxBatchSize}{If more than this many cells are in the object,}
 }
 \description{
 Runs celltypist on a seurat object and stores the calls as metadata

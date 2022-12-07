@@ -14,6 +14,7 @@ test_that("celltypist runs", {
   seuratObj <- RunCellTypist(seuratObj)
 
   # This appears to differ in bioconductor 3.15 vs devel
+  # This should be identical to the test below
   expect_equal(11, length(unique(seuratObj$majority_voting)), info = 'using default model', tolerance = 1)
   expect_equal(110, length(unique(seuratObj$predicted_labels)))
   expect_equal(289, unname(table(seuratObj$predicted_labels)['B cells']))
@@ -44,4 +45,19 @@ test_that("celltypist runs", {
   expect_equal(10, length(unique(seuratObj$majority_voting)), info = 'using custom model', tolerance = 1)
   expect_equal(54, length(unique(seuratObj$predicted_labels)), tolerance = 3)
   expect_equal(356, unname(table(seuratObj$predicted_labels)['B cells']), tolerance = 2)
+})
+
+test_that("celltypist runs with batchSize", {
+  suppressWarnings(SeuratData::InstallData("pbmc3k"))
+  suppressWarnings(data("pbmc3k"))
+  seuratObj <- suppressWarnings(pbmc3k)
+  print(seuratObj)
+
+  seuratObj <- Seurat::NormalizeData(seuratObj, verbose = FALSE)
+  seuratObj <- RunCellTypist(seuratObj, maxBatchSize = 250)
+
+  # This should be identical to the test above
+  expect_equal(11, length(unique(seuratObj$majority_voting)), info = 'using default model', tolerance = 1)
+  expect_equal(110, length(unique(seuratObj$predicted_labels)))
+  expect_equal(289, unname(table(seuratObj$predicted_labels)['B cells']))
 })

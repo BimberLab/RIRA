@@ -167,3 +167,24 @@ SeuratToAnnData <- function(seuratObj, outFileBaseName, assayName = NULL, doDiet
     return(defaultValue)
   }
 }
+
+.SplitCellsIntoBatches <- function(seuratObj, nBatches, seed = GetSeed()) {
+  if (nBatches == 1) {
+    stop('It does not make sense to call this function with a single batch')
+  }
+
+  cellsPerBatch <- floor(ncol(seuratObj) / nBatches)
+  remainder <- ncol(seuratObj) - (cellsPerBatch * nBatches)
+
+  ret <- list()
+  set.seed(seed)
+  allCells <- colnames(seuratObj)
+  ret[[1]] <- sample(allCells, (cellsPerBatch + remainder), replace=FALSE)
+  allCells <- setdiff(allCells, ret[[1]])
+  for (i in 2:nBatches) {
+    ret[[i]] <- sample(allCells, cellsPerBatch, replace=FALSE)
+    allCells <- setdiff(allCells, ret[[i]])
+  }
+
+  return(ret)
+}

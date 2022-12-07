@@ -22,9 +22,10 @@ utils::globalVariables(
 #' @param maxAllowableClasses Celltypist can assign a cell to many classes, creating extremely long labels. Any cell with more than this number of labels will be set to NA
 #' @param minFractionToInclude If non-null, any labels with fewer than this fraction of cells will be set to NA.
 #' @param minCellsToRun If the input seurat object has fewer than this many cells, NAs will be added for all expected columns and celltypist will not be run.
+#' @param maxBatchSize If more than this many cells are in the object,
 #'
 #' @export
-RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshold = 0.5, minProp = 0, useMajorityVoting = TRUE, mode = "prob_match", extraArgs = c("--mode", mode, "--p-thres", pThreshold, "--min-prop", minProp), assayName = 'RNA', columnPrefix = NULL, convertAmbiguousToNA = FALSE, maxAllowableClasses = 6, minFractionToInclude = 0.01, minCellsToRun = 200) {
+RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshold = 0.5, minProp = 0, useMajorityVoting = TRUE, mode = "prob_match", extraArgs = c("--mode", mode, "--p-thres", pThreshold, "--min-prop", minProp), assayName = 'RNA', columnPrefix = NULL, convertAmbiguousToNA = FALSE, maxAllowableClasses = 6, minFractionToInclude = 0.01, minCellsToRun = 200, maxBatchSize = 600000) {
   if (!reticulate::py_available(initialize = TRUE)) {
     stop(paste0('Python/reticulate not configured. Run "reticulate::py_config()" to initialize python'))
   }
@@ -61,39 +62,35 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
     modelName <- mf
   }
 
-  outFile <- tempfile()
-  outDir <- dirname(outFile)
-  # NOTE: metadata is not needed for scoring and is can contain invalid characters, so drop it during conversion
-  seuratAnnData <- SeuratToAnnData(seuratObj, paste0(outFile, '-seurat-annData'), assayName, doDiet = TRUE, allowableMetaCols = NA)
-
-  # Ensure models present:
-  system2(reticulate::py_exe(), c("-m", "celltypist.command_line", "--update-models", "--quiet"))
-
-  # Now run celltypist itself:
-  args <- c("-m", "celltypist.command_line", "-i", seuratAnnData, "-m", modelName, "--outdir", outDir, "--prefix", "celltypist.", "--quiet")
-
-  # NOTE: this produces a series of PDFs, one per class. Consider either providing an argument on where to move these, or reading/printing them
-  #if (generatePlots) {
-  #  args <- c(args, "--plot-results")
-  #}
-
-  if (useMajorityVoting) {
-    args <- c(args, "--majority-voting")
-  }
-  
-  if (!all(is.na(extraArgs))) {
-    args <- c(args, extraArgs)
+  nBatches <- 1
+  if (ncol(seuratObj) > maxBatchSize) {
+    nBatches <- ceiling(ncol(seuratObj) / maxBatchSize)
+    print(paste0('The object will be split into ', nBatches, ', batches'))
   }
 
-  system2(reticulate::py_exe(), args)
-
-  labelFile <- paste0(outDir, '/celltypist.predicted_labels.csv')
-  if (!file.exists(labelFile)) {
-    stop(paste0('Missing file: ', labelFile, '. files present: ', paste0(list.files(outDir), collapse = ', ')))
+  labels <- NULL
+  if (nBatches == 1) {
+    labels <- .RunCelltypistOnSubset(seuratObj = seuratObj, assayName = assayName, modelName = modelName, useMajorityVoting = useMajorityVoting, extraArgs = extraArgs, updateModels = TRUE)
   }
+  else {
+    cellsPerBatch <- .SplitCellsIntoBatches(seuratObj, nBatches = nBatches)
+    for (i in 1:nBatches) {
+      print(paste0('Running batch ', i, ' of ', nBatches))
+      so <- subset(seuratObj, cells = cellsPerBatch[[i]])
+      df <- .RunCelltypistOnSubset(seuratObj = so, assayName = assayName, modelName = modelName, useMajorityVoting = useMajorityVoting, extraArgs = extraArgs, updateModels = (i==1))
+      rm(so)
 
-  labels <- utils::read.csv(labelFile, header = T, row.names = 1)
-  labels$majority_voting[labels$majority_voting == 'Unassigned'] <- NA
+      if (all(is.null(labels))) {
+        labels <- df
+      } else {
+        labels <- rbind(labels, df)
+      }
+    }
+
+    if (nrow(labels) != ncol(seuratObj)) {
+      stop('There was an error processing celltypist batches')
+    }
+  }
 
   if (convertAmbiguousToNA && 'majority_voting' %in% names(labels)) {
     toDrop <- grepl(labels$majority_voting, pattern = '\\|')
@@ -126,9 +123,6 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
 
   seuratObj <- Seurat::AddMetaData(seuratObj, labels)
 
-  unlink(seuratAnnData)
-  unlink(labelFile)
-
   seuratObj <- .FilterLowCalls(seuratObj, plotColname, minFractionToInclude)
   if (length(seuratObj@reductions) == 0) {
     print('No reductions calculated, cannot plot tSNE/UMAP')
@@ -149,6 +143,49 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
   )
 
   return(seuratObj)
+}
+
+.RunCelltypistOnSubset <- function(seuratObj, assayName, modelName, useMajorityVoting, extraArgs, updateModels = TRUE) {
+  outFile <- tempfile()
+  outDir <- dirname(outFile)
+  # NOTE: metadata is not needed for scoring and is can contain invalid characters, so drop it during conversion
+  seuratAnnData <- SeuratToAnnData(seuratObj, paste0(outFile, '-seurat-annData'), assayName, doDiet = TRUE, allowableMetaCols = NA)
+
+  # Ensure models present:
+  if (updateModels) {
+    system2(reticulate::py_exe(), c("-m", "celltypist.command_line", "--update-models", "--quiet"))
+  }
+
+  # Now run celltypist itself:
+  args <- c("-m", "celltypist.command_line", "-i", seuratAnnData, "-m", modelName, "--outdir", outDir, "--prefix", "celltypist.", "--quiet")
+
+  # NOTE: this produces a series of PDFs, one per class. Consider either providing an argument on where to move these, or reading/printing them
+  #if (generatePlots) {
+  #  args <- c(args, "--plot-results")
+  #}
+
+  if (useMajorityVoting) {
+    args <- c(args, "--majority-voting")
+  }
+
+  if (!all(is.na(extraArgs))) {
+    args <- c(args, extraArgs)
+  }
+
+  system2(reticulate::py_exe(), args)
+
+  labelFile <- paste0(outDir, '/celltypist.predicted_labels.csv')
+  if (!file.exists(labelFile)) {
+    stop(paste0('Missing file: ', labelFile, '. files present: ', paste0(list.files(outDir), collapse = ', ')))
+  }
+
+  labels <- utils::read.csv(labelFile, header = T, row.names = 1)
+  labels$majority_voting[labels$majority_voting == 'Unassigned'] <- NA
+
+  unlink(seuratAnnData)
+  unlink(labelFile)
+
+  return(labels)
 }
 
 #' @title Train Celltypist
