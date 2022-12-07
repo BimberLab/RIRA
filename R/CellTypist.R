@@ -115,9 +115,6 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
     }
   }
 
-  print(head(labels))
-  print(str(labels))
-
   plotColname <- ifelse('majority_voting' %in% names(labels), yes = 'majority_voting', no = 'predicted_labels')
   if (!is.null(columnPrefix)) {
     names(labels) <- paste0(columnPrefix, names(labels))
