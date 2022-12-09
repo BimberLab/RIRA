@@ -124,13 +124,18 @@ SeuratToAnnData <- function(seuratObj, outFileBaseName, assayName = NULL, doDiet
   return(!identical(seuratObj@assays[[assayName]]@counts, seuratObj@assays[[assayName]]@data))
 }
 
-.FilterLowCalls <- function(seuratObj, label, minFraction) {
+.FilterLowCalls <- function(seuratObj, label, minFraction, returnAsFactor = TRUE) {
   if (is.null(minFraction)){
     return(seuratObj)
   }
 
   print(paste0('Filtering ', label, ' below: ', minFraction))
   d <- data.frame(table(Label = unlist(seuratObj[[label]])))
+  if (nrow(d) == 0) {
+    print(paste0('All values for ', label, ', were NA, skipping filter'))
+    return(seuratObj)
+  }
+
   names(d) <- c('Label', 'Count')
   d$Fraction <- d$Count / sum(d$Count)
 
@@ -142,9 +147,13 @@ SeuratToAnnData <- function(seuratObj, outFileBaseName, assayName = NULL, doDiet
   }
 
   if (length(toRemove) > 0) {
-    l <- unlist(seuratObj[[label]])
+    l <- as.character(unlist(seuratObj[[label]]))
     names(l) <- colnames(seuratObj)
     l[l %in% toRemove] <- 'Unknown'
+    if (returnAsFactor) {
+      l <- as.factor(l)
+    }
+
     seuratObj[[label]] <- l
   }
 

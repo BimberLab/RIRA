@@ -48,7 +48,7 @@ Remotes:
     carmonalab/scGate,
     satijalab/seurat-data,
     mojaveazure/seurat-disk
-RoxygenNote: 7.2.1
+RoxygenNote: 7.2.3
 Collate: 
     'Utils.R'
     'Atlas.R'

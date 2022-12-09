@@ -75,8 +75,13 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
   else {
     cellsPerBatch <- .SplitCellsIntoBatches(seuratObj, nBatches = nBatches)
     for (i in 1:nBatches) {
-      print(paste0('Running batch ', i, ' of ', nBatches))
-      so <- subset(seuratObj, cells = cellsPerBatch[[i]])
+      toRun <- cellsPerBatch[[i]]
+      print(paste0('Running batch ', i, ' of ', nBatches, ' with ', length(toRun), ' cells'))
+      so <- subset(seuratObj, cells = toRun)
+      if (ncol(so) != length(toRun)) {
+        stop(paste0('Error subsetting seurat object, batch size does not match cells after subset: ', length(toRun), ' / ', ncol(seuratObj)))
+      }
+
       df <- .RunCelltypistOnSubset(seuratObj = so, assayName = assayName, modelName = modelName, useMajorityVoting = useMajorityVoting, extraArgs = extraArgs, updateModels = (i==1))
       rm(so)
 
@@ -126,22 +131,26 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
   seuratObj <- .FilterLowCalls(seuratObj, plotColname, minFractionToInclude)
   if (length(seuratObj@reductions) == 0) {
     print('No reductions calculated, cannot plot tSNE/UMAP')
+  }
+  else if (sum(!is.na(seuratObj[[plotColname]])) == 0) {
+    print('No values returned for majority_voting, skipping plot')
   } else {
     print(DimPlot(seuratObj, group.by = plotColname, shuffle = TRUE))
   }
 
   toPlot <- seuratObj[[plotColname]]
-  print(ggplot(toPlot, aes_string(x = plotColname, fill = plotColname)) +
-          geom_bar(color = 'black') +
-          egg::theme_presentation(base_size = 12) +
-          ggtitle('Celltypist Call') +
-          labs(x = 'Celltypist Call', y = '# Cells') +
-          theme(
-            legend.position = 'none',
-            axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)
-          )
-  )
-
+  if (sum(!is.na(toPlot)) != 0) {
+    print(ggplot(toPlot, aes_string(x = plotColname, fill = plotColname)) +
+            geom_bar(color = 'black') +
+            egg::theme_presentation(base_size = 12) +
+            ggtitle('Celltypist Call') +
+            labs(x = 'Celltypist Call', y = '# Cells') +
+            theme(
+              legend.position = 'none',
+              axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)
+            )
+    )
+  }
   return(seuratObj)
 }
 
