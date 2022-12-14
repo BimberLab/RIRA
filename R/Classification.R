@@ -571,27 +571,3 @@ InterpretModels <- function(output_dir= "./classifiers", plot_type = "ratio"){
 
   }
 }
-
-ClassifyCells <- function(seuratObj, primaryModel = 'RIRA_Immune_v1', subsetModels = list()) {
-  primaryLabelField <- 'RIRA_Level1'
-  secondaryLabelField <- 'RIRA_Level2'
-
-  seuratObj <- RunCellTypist(seuratObj, modelName = primaryModel)
-  seuratObj[primaryLabelField] <- seuratObj$majority_voting
-  seuratObj$majority_voting <- NULL
-
-  if (!all(is.null(subsetModels))){
-    seuratObj[[secondaryLabelField]] <- seuratObj[[primaryLabelField]]
-    for (cellType in names(subsetModels)) {
-      if (cellType %in% seuratObj[[primaryLabelField]]) {
-        toSubset <- colnames(seuratObj)[seuratObj[[primaryLabelField]] == cellType]
-        ss <- subset(seuratObj, cells = toSubset)
-        ss <- PredictCellTypeProbability(ss, models = list())
-
-
-      }
-    }
-  }
-
-  return(seuratObj)
-}

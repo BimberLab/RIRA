@@ -2,6 +2,7 @@
 
 export(AssignCellType)
 export(CalculateUCellScores)
+export(Classify_TNK)
 export(ExpandGeneList)
 export(ExtractGeneWeights)
 export(GenerateIntegratedReference)

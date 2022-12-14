@@ -30,10 +30,8 @@ RIRA's data was generated and labeled using the following process:
 # Use the built-in celltypist model to score cells according to course phenotypes (T/NK, Bcell, MoMacDC, Other):
 seuratObj <- RIRA::RunCellTypist(seuratObj, modelName = ‘RIRA_Immune_v1’)
 
-# Use the built-in celltypist model for course phenotypes, followed by higher-resolution labeling of T/NK cells:
-seuratObj <- RIRA::ClassifyCells(seuratObj, primaryModel = ‘RIRA_Immune_v1’, subsetModels = list(
-    T_NK = 'RIRA_CD4vCD8_LR'
-)
+# Also the built-in celltypist model for finer scope T/NK lineage:
+seuratObj <- RIRA::Classify_TNK(seuratObj)
 
 ```
 
