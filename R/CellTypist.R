@@ -349,7 +349,7 @@ TrainCellTypist <- function(seuratObj, labelField, modelFile, minCellsPerClass =
 #' @param maxBatchSize If more than this many cells are in the object,
 #'
 #' @export
-Classify_TNK <- function(seuratObj, assayName = 'RNA', columnPrefix = NULL, convertAmbiguousToNA = FALSE, maxAllowableClasses = 6, minFractionToInclude = 0.01, minCellsToRun = 200, maxBatchSize = 600000) {
+Classify_TNK <- function(seuratObj, assayName = 'RNA', columnPrefix = 'RIRA_TNK_v1.', convertAmbiguousToNA = FALSE, maxAllowableClasses = 6, minFractionToInclude = 0.01, minCellsToRun = 200, maxBatchSize = 600000) {
   return(RunCellTypist(seuratObj = seuratObj,
          modelName = "CD4vCD8vGDvNK.pkl"),
          # These are optimized for this model:
