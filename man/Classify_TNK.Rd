@@ -12,7 +12,8 @@ Classify_TNK(
   maxAllowableClasses = 6,
   minFractionToInclude = 0.01,
   minCellsToRun = 200,
-  maxBatchSize = 6e+05
+  maxBatchSize = 6e+05,
+  retainProbabilityMatrix = FALSE
 )
 }
 \arguments{
@@ -30,7 +31,9 @@ Classify_TNK(
 
 \item{minCellsToRun}{If the input seurat object has fewer than this many cells, NAs will be added for all expected columns and celltypist will not be run.}
 
-\item{maxBatchSize}{If more than this many cells are in the object,}
+\item{maxBatchSize}{If more than this many cells are in the object, it will be split into batches of this size and run in serial.}
+
+\item{retainProbabilityMatrix}{If true, the celltypist probability_matrix with per-class probabilities will be stored in meta.data}
 }
 \description{
 Runs celltypist using the RIRA T/NK 4-class model to score cells using CellTypist with optimized parameters.
