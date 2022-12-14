@@ -351,9 +351,9 @@ TrainCellTypist <- function(seuratObj, labelField, modelFile, minCellsPerClass =
 #' @export
 Classify_TNK <- function(seuratObj, assayName = 'RNA', columnPrefix = NULL, convertAmbiguousToNA = FALSE, maxAllowableClasses = 6, minFractionToInclude = 0.01, minCellsToRun = 200, maxBatchSize = 600000) {
   return(RunCellTypist(seuratObj = seuratObj,
-         modelName = "T_NK.pkl"),
+         modelName = "CD4vCD8vGDvNK.pkl"),
          # These are optimized for this model:
-         pThreshold = 0.5, minProp = 0, useMajorityVoting = TRUE, mode = "prob_match",
+         pThreshold = 0.5, minProp = 0, useMajorityVoting = FALSE, mode = "best_match",
 
          assayName = assayName,
          columnPrefix = columnPrefix,
