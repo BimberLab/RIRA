@@ -70,7 +70,7 @@ test_that("celltypist runs for RIRA models", {
 
   print(table(seuratObj$RIRA_TNK_v1.predicted_labels))
   
-  expect_equal(4, length(unique(seuratObj$seuratObj$RIRA_TNK_v1.predicted_labels)), info = 'using RIRA T_NK', tolerance = 1)
+  expect_equal(4, length(unique(seuratObj$RIRA_TNK_v1.predicted_labels)), info = 'using RIRA T_NK', tolerance = 1)
   expect_equal(688, unname(table(seuratObj$RIRA_TNK_v1.predicted_labels)['CD4+ T Cells']), tolerance = 1)
   expect_equal(745, unname(table(seuratObj$RIRA_TNK_v1.predicted_labels)['CD8+ T Cells']), tolerance = 1)
   expect_equal(74, unname(table(seuratObj$RIRA_TNK_v1.predicted_labels)['Gamma/Delta Cells']), tolerance = 1)
