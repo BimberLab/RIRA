@@ -61,3 +61,20 @@ test_that("celltypist runs with batchSize", {
   expect_equal(110, length(unique(seuratObj$predicted_labels)))
   expect_equal(289, unname(table(seuratObj$predicted_labels)['B cells']))
 })
+
+test_that("celltypist runs for RIRA models", {
+  suppressWarnings(SeuratData::InstallData("pbmc3k"))
+  seuratObj <- suppressWarnings(pbmc3k)
+  seuratObj <- Seurat::NormalizeData(seuratObj, verbose = FALSE)
+  seuratObj <- Classify_TNK(seuratObj, retainProbabilityMatrix = TRUE)
+
+  print(table(seuratObj$RIRA_TNK_v1.predicted_labels))
+  
+  expect_equal(4, length(unique(seuratObj$RIRA_TNK_v1.predicted_labels)), info = 'using RIRA T_NK', tolerance = 1)
+  expect_equal(688, unname(table(seuratObj$RIRA_TNK_v1.predicted_labels)['CD4+ T Cells']), tolerance = 1)
+  expect_equal(745, unname(table(seuratObj$RIRA_TNK_v1.predicted_labels)['CD8+ T Cells']), tolerance = 1)
+  expect_equal(74, unname(table(seuratObj$RIRA_TNK_v1.predicted_labels)['Gamma/Delta Cells']), tolerance = 1)
+  expect_equal(1193, unname(table(seuratObj$RIRA_TNK_v1.predicted_labels)['NK Cells']), tolerance = 1)
+  
+  expect_equal(0.000138548, min(seuratObj$RIRA_TNK_v1.prob.NK.Cells), tolerance = 0.00001)
+})

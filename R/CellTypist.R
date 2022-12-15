@@ -22,10 +22,11 @@ utils::globalVariables(
 #' @param maxAllowableClasses Celltypist can assign a cell to many classes, creating extremely long labels. Any cell with more than this number of labels will be set to NA
 #' @param minFractionToInclude If non-null, any labels with fewer than this fraction of cells will be set to NA.
 #' @param minCellsToRun If the input seurat object has fewer than this many cells, NAs will be added for all expected columns and celltypist will not be run.
-#' @param maxBatchSize If more than this many cells are in the object,
+#' @param maxBatchSize If more than this many cells are in the object, it will be split into batches of this size and run in serial.
+#' @param retainProbabilityMatrix If true, the celltypist probability_matrix with per-class probabilities will be stored in meta.data
 #'
 #' @export
-RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshold = 0.5, minProp = 0, useMajorityVoting = TRUE, mode = "prob_match", extraArgs = c("--mode", mode, "--p-thres", pThreshold, "--min-prop", minProp), assayName = 'RNA', columnPrefix = NULL, convertAmbiguousToNA = FALSE, maxAllowableClasses = 6, minFractionToInclude = 0.01, minCellsToRun = 200, maxBatchSize = 600000) {
+RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshold = 0.5, minProp = 0, useMajorityVoting = TRUE, mode = "prob_match", extraArgs = c("--mode", mode, "--p-thres", pThreshold, "--min-prop", minProp), assayName = 'RNA', columnPrefix = NULL, convertAmbiguousToNA = FALSE, maxAllowableClasses = 6, minFractionToInclude = 0.01, minCellsToRun = 200, maxBatchSize = 600000, retainProbabilityMatrix = FALSE) {
   if (!reticulate::py_available(initialize = TRUE)) {
     stop(paste0('Python/reticulate not configured. Run "reticulate::py_config()" to initialize python'))
   }
@@ -56,10 +57,12 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
   print(paste0('Running celltypist using model: ', modelName))
 
   # Try to find within RIRA:
+  shouldDownloadModels <- TRUE
   mf <- system.file(paste0("models/", modelName, '.pkl'), package = "RIRA")
   if (file.exists(mf)) {
     print(paste0('Using RIRA model: ', modelName))
     modelName <- mf
+    shouldDownloadModels <- FALSE
   }
 
   nBatches <- 1
@@ -70,7 +73,7 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
 
   labels <- NULL
   if (nBatches == 1) {
-    labels <- .RunCelltypistOnSubset(seuratObj = seuratObj, assayName = assayName, modelName = modelName, useMajorityVoting = useMajorityVoting, extraArgs = extraArgs, updateModels = TRUE)
+    labels <- .RunCelltypistOnSubset(seuratObj = seuratObj, assayName = assayName, modelName = modelName, useMajorityVoting = useMajorityVoting, extraArgs = extraArgs, updateModels = shouldDownloadModels, retainProbabilityMatrix = retainProbabilityMatrix)
   }
   else {
     cellsPerBatch <- .SplitCellsIntoBatches(seuratObj, nBatches = nBatches)
@@ -82,7 +85,11 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
         stop(paste0('Error subsetting seurat object, batch size does not match cells after subset: ', length(toRun), ' / ', ncol(seuratObj)))
       }
 
-      df <- .RunCelltypistOnSubset(seuratObj = so, assayName = assayName, modelName = modelName, useMajorityVoting = useMajorityVoting, extraArgs = extraArgs, updateModels = (i==1))
+      if (i > 1) {
+        shouldDownloadModels <- FALSE
+      }
+
+      df <- .RunCelltypistOnSubset(seuratObj = so, assayName = assayName, modelName = modelName, useMajorityVoting = useMajorityVoting, extraArgs = extraArgs, updateModels = shouldDownloadModels, retainProbabilityMatrix = retainProbabilityMatrix)
       rm(so)
 
       if (all(is.null(labels))) {
@@ -107,6 +114,10 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
 
   if (!is.na(maxAllowableClasses)) {
     for (fieldName in c('majority_voting', 'predicted_labels')) {
+      if (!fieldName %in% names(labels)) {
+        next
+      }
+
       dat <- unique(labels[[fieldName]])
       toDrop <- dat[lengths(regmatches(x = dat, gregexpr("\\|", dat))) > maxAllowableClasses]
       toDrop <- toDrop[!is.na(toDrop)]
@@ -154,7 +165,7 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
   return(seuratObj)
 }
 
-.RunCelltypistOnSubset <- function(seuratObj, assayName, modelName, useMajorityVoting, extraArgs, updateModels = TRUE) {
+.RunCelltypistOnSubset <- function(seuratObj, assayName, modelName, useMajorityVoting, extraArgs, retainProbabilityMatrix, updateModels = TRUE) {
   outFile <- tempfile()
   outDir <- dirname(outFile)
   # NOTE: metadata is not needed for scoring and is can contain invalid characters, so drop it during conversion
@@ -189,10 +200,26 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
   }
 
   labels <- utils::read.csv(labelFile, header = T, row.names = 1)
-  labels$majority_voting[labels$majority_voting == 'Unassigned'] <- NA
+
+  if ('majority_voting' %in% names(labels)) {
+    labels$majority_voting[labels$majority_voting == 'Unassigned'] <- NA
+  }
+
+  probabilityMatrixFile <- paste0(outDir, '/celltypist.probability_matrix.csv')
+  if (retainProbabilityMatrix) {
+    if (!file.exists(probabilityMatrixFile)) {
+      stop(paste0('Missing file: ', probabilityMatrixFile, '. files present: ', paste0(list.files(outDir), collapse = ', ')))
+    }
+
+    probabilityMatrix <- utils::read.csv(probabilityMatrixFile, header = T, row.names = 1, check.names = T)
+    names(probabilityMatrix) <- paste0('prob.', names(probabilityMatrix))
+    labels <- cbind(labels, probabilityMatrix)
+  }
 
   unlink(seuratAnnData)
   unlink(labelFile)
+  unlink(probabilityMatrixFile)
+  unlink(paste0(outDir, '/celltypist.decision_matrix.csv'))
 
   return(labels)
 }
@@ -346,12 +373,13 @@ TrainCellTypist <- function(seuratObj, labelField, modelFile, minCellsPerClass =
 #' @param maxAllowableClasses Celltypist can assign a cell to many classes, creating extremely long labels. Any cell with more than this number of labels will be set to NA
 #' @param minFractionToInclude If non-null, any labels with fewer than this fraction of cells will be set to NA.
 #' @param minCellsToRun If the input seurat object has fewer than this many cells, NAs will be added for all expected columns and celltypist will not be run.
-#' @param maxBatchSize If more than this many cells are in the object,
+#' @param maxBatchSize If more than this many cells are in the object, it will be split into batches of this size and run in serial.
+#' @param retainProbabilityMatrix If true, the celltypist probability_matrix with per-class probabilities will be stored in meta.data
 #'
 #' @export
-Classify_TNK <- function(seuratObj, assayName = 'RNA', columnPrefix = NULL, convertAmbiguousToNA = FALSE, maxAllowableClasses = 6, minFractionToInclude = 0.01, minCellsToRun = 200, maxBatchSize = 600000) {
+Classify_TNK <- function(seuratObj, assayName = 'RNA', columnPrefix = 'RIRA_TNK_v1.', convertAmbiguousToNA = FALSE, maxAllowableClasses = 6, minFractionToInclude = 0.01, minCellsToRun = 200, maxBatchSize = 600000, retainProbabilityMatrix = FALSE) {
   return(RunCellTypist(seuratObj = seuratObj,
-         modelName = "CD4vCD8vGDvNK.pkl"),
+         modelName = "CD4vCD8vGDvNK",
          # These are optimized for this model:
          pThreshold = 0.5, minProp = 0, useMajorityVoting = FALSE, mode = "best_match",
 
@@ -361,6 +389,7 @@ Classify_TNK <- function(seuratObj, assayName = 'RNA', columnPrefix = NULL, conv
          maxAllowableClasses = maxAllowableClasses,
          minFractionToInclude = minFractionToInclude,
          minCellsToRun = minCellsToRun,
-         maxBatchSize = maxBatchSize
-  )
+         maxBatchSize = maxBatchSize,
+         retainProbabilityMatrix = retainProbabilityMatrix
+  ))
 }
