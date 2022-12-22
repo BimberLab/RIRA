@@ -1,6 +1,6 @@
 FROM ghcr.io/bimberlabinternal/cellmembrane:latest
 
-ADD . /RIRA
+ARG GH_PAT='NOT_SET'
 
 ENV RETICULATE_PYTHON=/usr/bin/python3
 
@@ -16,6 +16,7 @@ RUN mkdir /userHome && chmod -R 777 /userHome
 ENV HOME=/userHome
 
 RUN cd /RIRA \
+    && if [ "${GH_PAT}" != 'NOT_SET' ];then echo 'Setting GITHUB_PAT to: '${GH_PAT}; export GITHUB_PAT="${GH_PAT}";fi \
 	&& R CMD build . \
 	&& Rscript -e "BiocManager::install(ask = F, upgrade = 'always');" \
 	&& Rscript -e "devtools::install_deps(pkg = '.', dependencies = TRUE, upgrade = 'always');" \
