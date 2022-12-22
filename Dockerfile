@@ -15,6 +15,8 @@ RUN pip3 install numba celltypist
 RUN mkdir /userHome && chmod -R 777 /userHome
 ENV HOME=/userHome
 
+ADD . /RIRA
+
 RUN cd /RIRA \
     && if [ "${GH_PAT}" != 'NOT_SET' ];then echo 'Setting GITHUB_PAT to: '${GH_PAT}; export GITHUB_PAT="${GH_PAT}";fi \
 	&& R CMD build . \
