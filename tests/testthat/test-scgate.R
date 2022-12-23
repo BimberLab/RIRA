@@ -23,7 +23,7 @@ test_that("scGate runs with custom models", {
   print('scGate runs with custom models')
   print(table(seuratObj$scGateConsensus))
   dat <- table(seuratObj$scGateConsensus)
-  expect_equal(unname(dat[['Myeloid']]), 677)
+  expect_equal(unname(dat[['Myeloid']]), 682)
 })
 
 test_that("scGate Runs", {
