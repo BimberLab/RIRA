@@ -19,6 +19,9 @@ test_that("scGate runs with custom models", {
   seuratObj <- suppressWarnings(pbmc3k)
 
   # Try with aliasing of models:
+  print(paste0('Future workers: ', future::nbrOfWorkers()))
+  print(paste0('Future plan: ', future::plan()))
+
   seuratObj <- RunScGateForModels(seuratObj, modelNames = c('Bcell', 'Tcell', 'NK', 'Myeloid', 'Stromal', 'pDC', 'Erythrocyte', 'Epithelial', 'Platelet_MK'), labelRename = list(Tcell = 'T_NK', NK = 'T_NK'))
   print('scGate runs with custom models')
   print(table(seuratObj$scGateConsensus))
