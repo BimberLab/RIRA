@@ -3,6 +3,9 @@ library(SeuratData)
 library(testthat)
 library(dplyr)
 
+# Note: the default of 2 workers is erroring on github actions
+future::plan(future::sequential)
+
 testthat::context("scGate")
 
 test_that("scGates load", {
@@ -17,11 +20,6 @@ test_that("scGate runs with custom models", {
   suppressWarnings(SeuratData::InstallData("pbmc3k"))
   suppressWarnings(data("pbmc3k"))
   seuratObj <- suppressWarnings(pbmc3k)
-
-  # Try with aliasing of models:
-  future::plan(future::sequential)
-  print(paste0('Future workers: ', future::nbrOfWorkers()))
-  print(future::plan())
 
   seuratObj <- RunScGateForModels(seuratObj, modelNames = c('Bcell', 'Tcell', 'NK', 'Myeloid', 'Stromal', 'pDC', 'Erythrocyte', 'Epithelial', 'Platelet_MK'), labelRename = list(Tcell = 'T_NK', NK = 'T_NK'))
   print('scGate runs with custom models')
