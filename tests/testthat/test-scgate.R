@@ -19,6 +19,7 @@ test_that("scGate runs with custom models", {
   seuratObj <- suppressWarnings(pbmc3k)
 
   # Try with aliasing of models:
+  future::plan(future::sequential)
   print(paste0('Future workers: ', future::nbrOfWorkers()))
   print(future::plan())
 
