@@ -7,7 +7,7 @@
 Classify_TNK(
   seuratObj,
   assayName = "RNA",
-  columnPrefix = "RIRA_TNK_v1.",
+  columnPrefix = "RIRA_TNK_v2.",
   convertAmbiguousToNA = FALSE,
   maxAllowableClasses = 6,
   minFractionToInclude = 0.01,

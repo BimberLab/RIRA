@@ -377,9 +377,9 @@ TrainCellTypist <- function(seuratObj, labelField, modelFile, minCellsPerClass =
 #' @param retainProbabilityMatrix If true, the celltypist probability_matrix with per-class probabilities will be stored in meta.data
 #'
 #' @export
-Classify_TNK <- function(seuratObj, assayName = 'RNA', columnPrefix = 'RIRA_TNK_v1.', convertAmbiguousToNA = FALSE, maxAllowableClasses = 6, minFractionToInclude = 0.01, minCellsToRun = 200, maxBatchSize = 600000, retainProbabilityMatrix = FALSE) {
+Classify_TNK <- function(seuratObj, assayName = 'RNA', columnPrefix = 'RIRA_TNK_v2.', convertAmbiguousToNA = FALSE, maxAllowableClasses = 6, minFractionToInclude = 0.01, minCellsToRun = 200, maxBatchSize = 600000, retainProbabilityMatrix = FALSE) {
   return(RunCellTypist(seuratObj = seuratObj,
-         modelName = "CD4vCD8vGDvNK",
+         modelName = "CD4vCD8vGDvNK_v2",
          # These are optimized for this model:
          pThreshold = 0.5, minProp = 0, useMajorityVoting = FALSE, mode = "best_match",
 
