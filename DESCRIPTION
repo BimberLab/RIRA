@@ -37,7 +37,8 @@ Imports:
     SeuratDisk,
     naturalsort,
     patchwork,
-    BiocParallel
+    BiocParallel,
+    ggcorrplot
 Suggests:
     devtools,
     testthat (>= 2.1.0),

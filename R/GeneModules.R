@@ -10,8 +10,9 @@
 #' @param ncores The number of core to use with UCell::AddModuleScore_UCell
 #' @param assayName The assay from which to calculate UCell scores.
 #' @param storeRanks Passed directly to UCell::AddModuleScore_UCell. Increases object size but makes future calculations quicker.
+#' @param plotCor If true, a plot of correlations between the UCell score and each component gene will be shown
 #' @export
-CalculateUCellScores <- function(seuratObj, forceRecalculate = FALSE, seed = GetSeed(), ncores = 1, assayName = 'RNA', storeRanks = FALSE) {
+CalculateUCellScores <- function(seuratObj, forceRecalculate = FALSE, seed = GetSeed(), ncores = 1, assayName = 'RNA', storeRanks = FALSE, plotCor = TRUE) {
   toCalculate <- list(
     TandNK_Activation = GetGeneSet('TandNK_Activation.1'),
     Cytotoxicity = GetGeneSet('Cytotoxicity'),
@@ -32,6 +33,43 @@ CalculateUCellScores <- function(seuratObj, forceRecalculate = FALSE, seed = Get
     seuratObj <- UCell::AddModuleScore_UCell(seuratObj, features = toCalculate, BPPARAM = BPPARAM, assay = assayName, storeRanks = storeRanks)
   } else {
     print('UCell score already present, will not recalculate')
+  }
+
+  if (plotCor) {
+    for (moduleName in names(toCalculate)) {
+      geneList <- gsub(toCalculate[[moduleName]], pattern = '-$', replacement = '')
+      missingGenes <- dplyr::setdiff(geneList, rownames(seuratObj@assays[[assayName]]))
+      if (length(missingGenes) > 0) {
+        print(paste0('The following genes were not present in the object: ', paste0(missingGenes, collapse = ',')))
+      }
+
+      geneList <- intersect(geneList, rownames(seuratObj@assays[[assayName]]))
+
+      # Drop any genes with all zeros
+      genesToSkip <- c()
+      for (gene in geneList) {
+        if (sum(seuratObj@assays[[assayName]]@data[gene,] > 0) == 0) {
+          genesToSkip <- c(genesToSkip, gene)
+        }
+      }
+
+      if (length(genesToSkip) > 0) {
+        print(paste0('Skipping genes with zero counts: ', paste0(genesToSkip, collapse = ',')))
+        geneList <- geneList[!geneList %in% genesToSkip]
+      }
+
+      if (length(geneList) == 0) {
+        stop(paste0('No shared genes: ', moduleName))
+      }
+
+      geneData <- as.data.frame(t(as.matrix(seuratObj@assays[[assayName]]@data[geneList,])))
+
+      geneData$UCell <- unlist(seuratObj[[paste0(moduleName, '_UCell')]])
+
+      ret <- stats::cor(geneData, method = "spearman")
+      p.mat <- ggcorrplot::cor_pmat(ret, method = 'spearman')
+      print(ggcorrplot::ggcorrplot(ret, hc.order = TRUE, type = "lower", p.mat = p.mat) + ggtitle(paste0(moduleName, " UCell-Gene Correlations")))
+    }
   }
 
   if (any(is.na(seuratObj[['TandNK_Activation_UCell']]))) {
