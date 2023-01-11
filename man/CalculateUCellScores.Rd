@@ -10,7 +10,8 @@ CalculateUCellScores(
   seed = GetSeed(),
   ncores = 1,
   assayName = "RNA",
-  storeRanks = FALSE
+  storeRanks = FALSE,
+  plotCor = TRUE
 )
 }
 \arguments{
@@ -25,6 +26,8 @@ CalculateUCellScores(
 \item{assayName}{The assay from which to calculate UCell scores.}
 
 \item{storeRanks}{Passed directly to UCell::AddModuleScore_UCell. Increases object size but makes future calculations quicker.}
+
+\item{plotCor}{If true, a plot of correlations between the UCell score and each component gene will be shown}
 }
 \description{
 This will calculate a handful of standardized UCell scores for a seurat object
