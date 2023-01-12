@@ -130,7 +130,7 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
 
   # Create a single output column that will be consistent no matter whether majority_voting used or not.
   # This will simplify some of the original values, but the source columns are also preserved:
-  consensusColName <- paste0(columnPrefix, 'label')
+  consensusColName <- paste0(columnPrefix, 'cellclass')
   labels[[consensusColName]] <- as.character(labels[[plotColname]])
   labels[[consensusColName]][grepl(labels[[consensusColName]], pattern = '\\|')] <- 'Ambiguous'
   if ('Heterogenous' %in% labels[[consensusColName]]) {
