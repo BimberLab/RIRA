@@ -8,7 +8,6 @@ Classify_TNK(
   seuratObj,
   assayName = "RNA",
   columnPrefix = "RIRA_TNK_v2.",
-  convertAmbiguousToNA = FALSE,
   maxAllowableClasses = 6,
   minFractionToInclude = 0.01,
   minCellsToRun = 200,
@@ -22,8 +21,6 @@ Classify_TNK(
 \item{assayName}{The name of the assay to use. Others will be dropped}
 
 \item{columnPrefix}{A prefix that will be added to the beginning of the resulting columns, added the seurat@meta.data}
-
-\item{convertAmbiguousToNA}{If true, any values for majority_voting with commas (indicating they are ambiguous) will be converted to NA}
 
 \item{maxAllowableClasses}{Celltypist can assign a cell to many classes, creating extremely long labels. Any cell with more than this number of labels will be set to NA}
 
