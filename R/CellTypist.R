@@ -14,7 +14,6 @@ utils::globalVariables(
 #' @param extraArgs An optional list of additional arguments passed directly on the command line to cell typist
 #' @param assayName The name of the assay to use. Others will be dropped
 #' @param columnPrefix A prefix that will be added to the beginning of the resulting columns, added the seurat@meta.data
-#' @param convertAmbiguousToNA If true, any values for majority_voting with commas (indicating they are ambiguous) will be converted to NA
 #' @param pThreshold By default, this would be passed to the --p-thres argument. However, if you also provide extraArgs, this is ignored.
 #' @param minProp By default, this would be passed to the --min-prop argument. However, if you also provide extraArgs, this is ignored.
 #' @param useMajorityVoting If true, the celltypist --majority-voting option will be added.
@@ -24,9 +23,10 @@ utils::globalVariables(
 #' @param minCellsToRun If the input seurat object has fewer than this many cells, NAs will be added for all expected columns and celltypist will not be run.
 #' @param maxBatchSize If more than this many cells are in the object, it will be split into batches of this size and run in serial.
 #' @param retainProbabilityMatrix If true, the celltypist probability_matrix with per-class probabilities will be stored in meta.data
+#' @param runCelltypistUpdate If true, --update-models will be run for celltypist prior to scoring cells.
 #'
 #' @export
-RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshold = 0.5, minProp = 0, useMajorityVoting = TRUE, mode = "prob_match", extraArgs = c("--mode", mode, "--p-thres", pThreshold, "--min-prop", minProp), assayName = 'RNA', columnPrefix = NULL, convertAmbiguousToNA = FALSE, maxAllowableClasses = 6, minFractionToInclude = 0.01, minCellsToRun = 200, maxBatchSize = 600000, retainProbabilityMatrix = FALSE) {
+RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshold = 0.5, minProp = 0, useMajorityVoting = TRUE, mode = "prob_match", extraArgs = c("--mode", mode, "--p-thres", pThreshold, "--min-prop", minProp), assayName = 'RNA', columnPrefix = NULL, maxAllowableClasses = 6, minFractionToInclude = 0.01, minCellsToRun = 200, maxBatchSize = 600000, retainProbabilityMatrix = FALSE, runCelltypistUpdate = TRUE) {
   if (!reticulate::py_available(initialize = TRUE)) {
     stop(paste0('Python/reticulate not configured. Run "reticulate::py_config()" to initialize python'))
   }
@@ -56,8 +56,7 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
 
   print(paste0('Running celltypist using model: ', modelName))
 
-  # Try to find within RIRA:
-  shouldDownloadModels <- TRUE
+  shouldDownloadModels <- runCelltypistUpdate
   mf <- system.file(paste0("models/", modelName, '.pkl'), package = "RIRA")
   if (file.exists(mf)) {
     print(paste0('Using RIRA model: ', modelName))
@@ -104,14 +103,6 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
     }
   }
 
-  if (convertAmbiguousToNA && 'majority_voting' %in% names(labels)) {
-    toDrop <- grepl(labels$majority_voting, pattern = '\\|')
-    if (sum(toDrop) > 0) {
-      print(paste0('Converting ', sum(toDrop), ' cells with ambiguous values for majority_voting to NAs'))
-      labels$majority_voting[toDrop] <- NA
-    }
-  }
-
   if (!is.na(maxAllowableClasses)) {
     for (fieldName in c('majority_voting', 'predicted_labels')) {
       if (!fieldName %in% names(labels)) {
@@ -127,7 +118,7 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
       }
 
       # NOTE: %in% doesnt handle NAs well
-      labels[[fieldName]][is.na(labels[[fieldName]]) | labels[[fieldName]] %in% toDrop] <- NA
+      labels[[fieldName]][is.na(labels[[fieldName]]) | labels[[fieldName]] %in% toDrop] <- 'Ambiguous'
     }
   }
 
@@ -137,6 +128,17 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
     plotColname <- paste0(columnPrefix, plotColname)
   }
 
+  # Create a single output column that will be consistent no matter whether majority_voting used or not.
+  # This will simplify some of the original values, but the source columns are also preserved:
+  consensusColName <- paste0(columnPrefix, 'cellclass')
+  labels[[consensusColName]] <- as.character(labels[[plotColname]])
+  labels[[consensusColName]][grepl(labels[[consensusColName]], pattern = '\\|')] <- 'Ambiguous'
+  if ('Heterogenous' %in% labels[[consensusColName]]) {
+    labels[[consensusColName]][labels[[consensusColName]] == 'Heterogeneous'] <- 'Ambiguous'
+  }
+  labels[[consensusColName]] <- naturalsort::naturalfactor(labels[[consensusColName]])
+  plotColname <- consensusColName
+
   seuratObj <- Seurat::AddMetaData(seuratObj, labels)
 
   seuratObj <- .FilterLowCalls(seuratObj, plotColname, minFractionToInclude)
@@ -144,7 +146,7 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
     print('No reductions calculated, cannot plot tSNE/UMAP')
   }
   else if (sum(!is.na(seuratObj[[plotColname]])) == 0) {
-    print('No values returned for majority_voting, skipping plot')
+    print('No values returned, skipping plot')
   } else {
     print(DimPlot(seuratObj, group.by = plotColname, shuffle = TRUE))
   }
@@ -369,7 +371,6 @@ TrainCellTypist <- function(seuratObj, labelField, modelFile, minCellsPerClass =
 #' @param seuratObj The seurat object
 #' @param assayName The name of the assay to use. Others will be dropped
 #' @param columnPrefix A prefix that will be added to the beginning of the resulting columns, added the seurat@meta.data
-#' @param convertAmbiguousToNA If true, any values for majority_voting with commas (indicating they are ambiguous) will be converted to NA
 #' @param maxAllowableClasses Celltypist can assign a cell to many classes, creating extremely long labels. Any cell with more than this number of labels will be set to NA
 #' @param minFractionToInclude If non-null, any labels with fewer than this fraction of cells will be set to NA.
 #' @param minCellsToRun If the input seurat object has fewer than this many cells, NAs will be added for all expected columns and celltypist will not be run.
@@ -377,19 +378,49 @@ TrainCellTypist <- function(seuratObj, labelField, modelFile, minCellsPerClass =
 #' @param retainProbabilityMatrix If true, the celltypist probability_matrix with per-class probabilities will be stored in meta.data
 #'
 #' @export
-Classify_TNK <- function(seuratObj, assayName = 'RNA', columnPrefix = 'RIRA_TNK_v2.', convertAmbiguousToNA = FALSE, maxAllowableClasses = 6, minFractionToInclude = 0.01, minCellsToRun = 200, maxBatchSize = 600000, retainProbabilityMatrix = FALSE) {
+Classify_TNK <- function(seuratObj, assayName = 'RNA', columnPrefix = 'RIRA_TNK_v2.', maxAllowableClasses = 6, minFractionToInclude = 0.01, minCellsToRun = 200, maxBatchSize = 600000, retainProbabilityMatrix = FALSE) {
   return(RunCellTypist(seuratObj = seuratObj,
          modelName = "CD4vCD8vGDvNK_v2",
          # These are optimized for this model:
-         pThreshold = 0.5, minProp = 0, useMajorityVoting = FALSE, mode = "best_match",
+         pThreshold = 0.5, minProp = 0, useMajorityVoting = FALSE, mode = "prob_match",
 
          assayName = assayName,
          columnPrefix = columnPrefix,
-         convertAmbiguousToNA = convertAmbiguousToNA,
          maxAllowableClasses = maxAllowableClasses,
          minFractionToInclude = minFractionToInclude,
          minCellsToRun = minCellsToRun,
          maxBatchSize = maxBatchSize,
          retainProbabilityMatrix = retainProbabilityMatrix
+  ))
+}
+
+
+#' @title Classify Bulk Immune cells
+#'
+#' @description Runs celltypist using the RIRA bulk immune model to score cells using CellTypist with optimized parameters.
+#' @param seuratObj The seurat object
+#' @param assayName The name of the assay to use. Others will be dropped
+#' @param columnPrefix A prefix that will be added to the beginning of the resulting columns, added the seurat@meta.data
+#' @param maxAllowableClasses Celltypist can assign a cell to many classes, creating extremely long labels. Any cell with more than this number of labels will be set to NA
+#' @param minFractionToInclude If non-null, any labels with fewer than this fraction of cells will be set to NA.
+#' @param minCellsToRun If the input seurat object has fewer than this many cells, NAs will be added for all expected columns and celltypist will not be run.
+#' @param maxBatchSize If more than this many cells are in the object, it will be split into batches of this size and run in serial.
+#' @param retainProbabilityMatrix If true, the celltypist probability_matrix with per-class probabilities will be stored in meta.data
+#'
+#' @export
+Classify_ImmuneCells <- function(seuratObj, assayName = 'RNA', columnPrefix = 'RIRA_Immune_v1.', maxAllowableClasses = 6, minFractionToInclude = 0.01, minCellsToRun = 200, maxBatchSize = 600000, retainProbabilityMatrix = FALSE) {
+  return(RunCellTypist(seuratObj = seuratObj,
+                       modelName = 'RIRA_Immune_v1',
+
+                       # These are optimized for this model:
+                       minProp = 0.7, useMajorityVoting = TRUE, mode = "prob_match",
+
+                       assayName = assayName,
+                       columnPrefix = columnPrefix,
+                       maxAllowableClasses = maxAllowableClasses,
+                       minFractionToInclude = minFractionToInclude,
+                       minCellsToRun = minCellsToRun,
+                       maxBatchSize = maxBatchSize,
+                       retainProbabilityMatrix = retainProbabilityMatrix
   ))
 }

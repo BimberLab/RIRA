@@ -124,7 +124,7 @@ SeuratToAnnData <- function(seuratObj, outFileBaseName, assayName = NULL, doDiet
   return(!identical(seuratObj@assays[[assayName]]@counts, seuratObj@assays[[assayName]]@data))
 }
 
-.FilterLowCalls <- function(seuratObj, label, minFraction, returnAsFactor = TRUE) {
+.FilterLowCalls <- function(seuratObj, label, minFraction, returnAsFactor = TRUE, labelToAssign = 'Unknown') {
   if (is.null(minFraction)){
     return(seuratObj)
   }
@@ -149,7 +149,7 @@ SeuratToAnnData <- function(seuratObj, outFileBaseName, assayName = NULL, doDiet
   if (length(toRemove) > 0) {
     l <- as.character(unlist(seuratObj[[label]]))
     names(l) <- colnames(seuratObj)
-    l[l %in% toRemove] <- 'Unknown'
+    l[l %in% toRemove] <- labelToAssign
     if (returnAsFactor) {
       l <- as.factor(l)
     }
