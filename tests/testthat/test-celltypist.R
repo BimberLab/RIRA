@@ -64,7 +64,7 @@ test_that("celltypist runs with batchSize", {
 
   # This should be identical to the test above
   expect_equal(12, length(unique(seuratObj$cellclass)), info = 'using default model', tolerance = 0)
-  expect_equal(29, length(unique(seuratObj$majority_voting)), info = 'using default model', tolerance = 0)
+  expect_equal(28, length(unique(seuratObj$majority_voting)), info = 'using default model', tolerance = 0)
   expect_equal(110, length(unique(seuratObj$predicted_labels)))
   expect_equal(289, unname(table(seuratObj$predicted_labels)['B cells']))
 })

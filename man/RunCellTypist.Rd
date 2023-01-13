@@ -18,7 +18,8 @@ RunCellTypist(
   minFractionToInclude = 0.01,
   minCellsToRun = 200,
   maxBatchSize = 6e+05,
-  retainProbabilityMatrix = FALSE
+  retainProbabilityMatrix = FALSE,
+  runCelltypistUpdate = TRUE
 )
 }
 \arguments{
@@ -49,6 +50,8 @@ RunCellTypist(
 \item{maxBatchSize}{If more than this many cells are in the object, it will be split into batches of this size and run in serial.}
 
 \item{retainProbabilityMatrix}{If true, the celltypist probability_matrix with per-class probabilities will be stored in meta.data}
+
+\item{runCelltypistUpdate}{If true, --update-models will be run for celltypist prior to scoring cells.}
 }
 \description{
 Runs celltypist on a seurat object and stores the calls as metadata
