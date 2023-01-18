@@ -63,8 +63,8 @@ PlotImmuneMarkers <- function(seuratObj, reductions = c('tsne', 'umap')) {
 
 	PlotMarkerSet(seuratObj, reductions = reductions, 'Monocyte', features = c('LYZ', 'CST3', 'S100A6', 'VIM'))
 
-	# ITGB3 = CD61
-	PlotMarkerSet(seuratObj, reductions = reductions, 'Platelet/MK', features = c('ITGB3', 'PPBP'))
+	# ITGB3 = CD61. LOC703451=PF4
+	PlotMarkerSet(seuratObj, reductions = reductions, 'Platelet/MK', features = c('ITGB3', 'PPBP', 'LOC703451'))
 
 	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('PPBP', 'PF4'), 'Megakaryocytes')
 

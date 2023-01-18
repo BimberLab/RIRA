@@ -413,7 +413,7 @@ Classify_ImmuneCells <- function(seuratObj, assayName = 'RNA', columnPrefix = 'R
                        modelName = 'RIRA_Immune_v1',
 
                        # These are optimized for this model:
-                       minProp = 0.7, useMajorityVoting = TRUE, mode = "prob_match",
+                       minProp = 0.75, useMajorityVoting = TRUE, mode = "prob_match",
 
                        assayName = assayName,
                        columnPrefix = columnPrefix,
