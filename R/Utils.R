@@ -1,3 +1,5 @@
+#' @import Seurat ggplot2 rlang
+#' @importFrom lsa cosine
 
 pkg.env <- new.env(parent=emptyenv())
 
@@ -196,4 +198,74 @@ SeuratToAnnData <- function(seuratObj, outFileBaseName, assayName = NULL, doDiet
   }
 
   return(ret)
+}
+
+#' @title Remove UCell Doublets
+#'
+#' @description Attempts to remove dump-gate "doublets" from the main three cell type subset objects (Tcell, Bcell, MoMacDC)
+#' @param parentUCell The subset's target cell type's UCell score. (Computed by scGate early in processing).
+#' @param otherUCellScores A vector of cell type UCell scores to attempt to discard from downstream processing. By default, these are cell types that comprise the dump gate in RIRA's scGate model. 
+#' @param clusterResolution The metadata column name that defines cluster membership (e.g. ClusterNames_0.2)
+#' @param cosineSimilarityCutoff A number between -1 and 1 that is used to threshold/gate the prospective doublets as defined by the computed score.
+#' @return Returns a seurat object with the UCell doublets removed. 
+#' @export
+#' 
+.RemoveUCellDoublets <- function(seuratObj, parentUCell = NULL, otherUCellScores = c("Platelet_MK_UCell", "Erythrocyte_UCell", "Neutrophil_UCell", "Epithelial_UCell", "Stromal_UCell"), clusterResolution = "ClusterNames_1.2", cosineSimilarityCutoff = 0.5){
+  #test for valid parentUCell
+  if(is.null(parentUCell)){
+    stop("Please define a parent population's UCell score column within the seurat object's metadata. For RIRA, this should be one of: 'Tcell_UCell', 'Bcell_UCell', or 'MoMacDC_UCell'.")
+  }
+  #check for cosineSimilarityCutoff
+  if(!is.numeric(cosineSimilarityCutoff)){
+    stop("Please ensure cosine similarity cutoff is a double between -1 and 1. ")
+  } else if(abs(cosineSimilarityCutoff) >=1){
+    stop("Please ensure cosine similarity cutoff is a double between -1 and 1. ")
+  }
+  #check for valid clusterResolution
+  if(!clusterResolution %in% colnames(seuratObj@meta.data)){
+    stop("Please specify a valid clusterResolution. clusterResolution should be a column of the seurat object's metadata specifying cluster membership (e.g. 'ClusterNames_0.2').")
+  }
+  #check for valid otherUCellScore columns
+  if(!any(otherUCellScores %in% colnames(seuratObj@meta.data))){
+    stop("No valid UCell scores were supplied to otherUCellScores. Please ensure that otherUCellScores is a vector of column names in the seurat object's metadata.")
+  }
+  #sanitize otherUCellScores for missing scores
+  for(celltypeUCell in otherUCellScores){
+    if(!celltypeUCell %in% colnames(seuratObj@meta.data)){
+      warning(paste0("'",celltypeUCell, "'", " missing from seurat metadata columns. Omitting from doublet removal."))
+      otherUCellScores <- otherUCellScores[otherUCellScores != celltypeUCell]
+    }
+  }
+  
+  #iterate through the celltypes in otherUCellScores
+  for(celltypeUCell in otherUCellScores){
+    #ensure cosine_similiarity column is blank
+    seuratObj@meta.data[["cosine_similarity"]] <- NULL
+    #locally copy metadata and compute cosine similiarity
+    meta <- seuratObj@meta.data %>% 
+      group_by(!!rlang::sym(clusterResolution)) %>%
+      mutate(cosine_similarity = lsa::cosine(!!rlang::sym(parentUCell), !!rlang::sym(celltypeUCell))) 
+    #store store cosine similarity as a uniquely named DoubletScore
+    doubletScoreName <- paste0(celltypeUCell,"_DoubletScore")
+    seuratObj@meta.data[[doubletScoreName]] <- meta[["cosine_similarity"]]
+    
+    #in the event of cosine(vector_of_zeroes, vector_of_zeroes), the metric is undefined
+    #we are using this to threshold downstream, so I think setting this to zero to ensure it can be plotted and doesn't get filtered is fine.
+    seuratObj@meta.data[is.nan(seuratObj@meta.data[,doubletScoreName]), doubletScoreName] <- 0
+    #calculate centroids for plotting
+    centroids <- aggregate(x = cbind(seuratObj@meta.data[[parentUCell]],seuratObj@meta.data[[doubletScoreName]]) ~ seuratObj@meta.data[[clusterResolution]], data=seuratObj@meta.data, FUN=mean)
+    #force consistent names
+    colnames(centroids) <- c(clusterResolution, parentUCell, doubletScoreName)
+    
+    #plot cosine similarity per cluster against parent population
+    P1 <- ggplot(seuratObj@meta.data, aes(x = !!rlang::sym(parentUCell), y = !!rlang::sym(doubletScoreName), color = !!rlang::sym(clusterResolution))) + 
+      geom_point() +
+      geom_text(data = centroids, mapping = aes(x = !!rlang::sym(parentUCell), y = !!rlang::sym(doubletScoreName), label = !!rlang::sym(clusterResolution)), color = "black") +
+      geom_hline(yintercept = cosineSimilarityCutoff, linetype='dashed', color = 'red') +
+      theme_light()
+    print(P1)
+    #drop cells above the cosineSimilarityCutoff for the current celltypeUCell
+    seuratObj <- subset(seuratObj, subset = !!rlang::sym(doubletScoreName) <= cosineSimilarityCutoff)
+  }
+  return(seuratObj)
 }
