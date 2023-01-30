@@ -21,7 +21,7 @@ jobs:
           - {os: 20.04, r: 'devel', bioc: 'devel'}
           - {os: 20.04, r: 'release', bioc: '3.16', pkgdown: "true"}
           # NOTE: disabled due to BiocManager / missing argument error
-          #- {os: 20.04, r: '4.2', bioc: '3.15', rspm: "https://packagemanager.rstudio.com/cran/__linux__/focal/latest"}
+          #- {os: 20.04, r: '4.2', bioc: '3.15'}
 
     env:
       R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
@@ -49,17 +49,16 @@ jobs:
       # Note: the environment variable R_BIOC_VERSION is set to force remotes::install_bioc to follow the proper version
       - name: Setup Bioconductor
         run: |
-          install.packages('devtools')
+          install.packages(c('remotes', 'devtools'))
           if (!requireNamespace("BiocManager", quietly=TRUE))  install.packages("BiocManager");
           BiocManager::install(version = "${{ matrix.config.bioc }}", ask = FALSE);
           cat(append = TRUE, file = "~/.Rprofile", "options(repos = BiocManager::repositories());")
           cat(append = TRUE, file = "~/.Rprofile", "Sys.setenv(R_BIOC_VERSION=as.character(BiocManager::version()));");
+          install.packages("Matrix", repos = "https://packagemanager.posit.co/cran/__linux__/focal/latest", update = TRUE, ask = FALSE)
         shell: Rscript {0}
 
       - name: Query dependencies
         run: |
-          install.packages('remotes')
-          print(paste0("R_BIOC_VERSION: ", Sys.getenv("R_BIOC_VERSION")));
           saveRDS(remotes::dev_package_deps(dependencies = TRUE), ".github/depends.Rds", version = 2)
           writeLines(sprintf("R-%i.%i", getRversion()$major, getRversion()$minor), ".github/R-version")
         shell: Rscript {0}
