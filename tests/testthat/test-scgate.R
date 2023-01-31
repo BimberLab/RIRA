@@ -10,7 +10,7 @@ testthat::context("scGate")
 
 test_that("scGates load", {
   gates <- GetAvailableScGates()
-  expect_equal(length(gates), 17)
+  expect_equal(length(gates), 23)
 
   gate <- GetScGateModel('demo_gate')
   expect_equal(length(gate$levels), 59)
@@ -122,6 +122,7 @@ test_that("scGate Runs", {
   }
 
   # Now use wrapper
+  print('Running RunScGateWithRhesusModels')
   seuratObj <- RunScGateWithRhesusModels(seuratObj)
   print(sort(table(seuratObj$scGateConsensus)))
   dat <- table(seuratObj$scGateConsensus)
@@ -130,7 +131,8 @@ test_that("scGate Runs", {
     Bcell = 335,
     Myeloid = 681,
     T_NK = 1648,
-    'Bcell,T_NK' = 13
+    'Bcell,T_NK' = 13,
+    Platelet = 8
   )
 
   for (pop in names(expected)) {
