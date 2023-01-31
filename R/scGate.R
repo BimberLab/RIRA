@@ -162,18 +162,24 @@ RunScGateWithDefaultModels <- function(seuratObj, min.cells = 30, assay = 'RNA',
 RunScGateWithRhesusModels <- function(seuratObj, min.cells = 30, assay = 'RNA', pos.thr = 0.13, neg.thr = 0.13, ncores = 1, genes.blacklist = 'default', dropAmbiguousConsensusValues = FALSE) {
   return(RunScGateForModels(
     seuratObj = seuratObj,
-    modelNames = c('Bcell.RM', 'Tcell.RM', 'NK.RM', 'Myeloid.RM', 'AvEp.RM', 'Epithelial.RM', 'Erythrocyte.RM', 'pDC.RM', 'Stromal.RM', 'Platelet.RM'),
+    modelNames = c('Bcell.RM', 'Tcell.RM', 'NK.RM', 'Myeloid.RM', 'AvEp.RM', 'Epithelial.RM', 'Erythrocyte.RM', 'pDC.RM', 'Stromal.RM', 'Platelet.RM', 'Mesothelial.RM', 'ActiveAvEp.RM', 'Myelocytes.RM', 'Myofibroblast.RM', 'Fibroblast.RM', 'Hepatocyte.RM'),
     labelRename = c(
       Bcell.RM = 'Bcell',
       Tcell.RM = 'T_NK',
       NK.RM = 'T_NK',
-      Myeloid.RM = 'MoMacDC',
+      Myeloid.RM = 'Myeloid',
       AvEp.RM = 'Epithelial',
       Epithelial.RM = 'Epithelial',
       Erythrocyte.RM = 'Erythrocyte',
-      pDC.RM = 'MoMacDC',
+      pDC.RM = 'Myeloid',
       Stromal.RM = 'Stromal',
-      Platelet.RM = 'Platelet'
+      Platelet.RM = 'Platelet', 
+      Mesothelial.RM = 'Epithelial',
+      ActiveAvEp.RM = 'Epithelial',
+      Myelocytes.RM = 'Myeloid',
+      Myofibroblast.RM = 'Stromal',
+      Fibroblast.RM = 'Stromal',
+      Hepatocyte.RM = 'Epithelial'
     ),
     min.cells = min.cells,
     assay = assay,

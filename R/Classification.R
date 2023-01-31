@@ -332,7 +332,7 @@ TrainModelsFromSeurat <- function(seuratObj, celltype_column, assay = "RNA", slo
     }
   } else if (grepl("Resampled", metrics_file)){
     full_resampling <- readRDS(metrics_file)
-    print(extract_inner_tuning_results(full_resampling))
+    #print(mlr3tuning::extract_inner_tuning_results(full_resampling))
     print(full_resampling$score())
     print(full_resampling$aggregate())
   } else{
@@ -368,7 +368,7 @@ ScoreCellsWithSavedModel <- function(seuratObj, model, fieldToClass, batchSize =
     modelFeats <- names(classifier$importance())
   } else if (!is.null(classifier$model) && grepl(x = classifier$model$TypeDetail, pattern = 'logistic regression')) {
     modelFeats <- colnames(classifier$model$W)
-    toRemove <- names(classifier2$param_set$levels)
+    toRemove <- names(classifier$param_set$levels)
     modelFeats <- modelFeats[!modelFeats %in% toRemove]
   }
 
