@@ -128,7 +128,7 @@ test_that("scGate Runs", {
 
   expected <- c(
     Bcell = 335,
-    MoMacDC = 681,
+    Myeloid = 681,
     T_NK = 1648,
     'Bcell,T_NK' = 13
   )

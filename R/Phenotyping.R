@@ -492,7 +492,7 @@ MakePhenotypingDotPlot <- function(seuratObj,
   
   #Sort the dataframe for faceting
   dotplot_df$CellType <- naturalsort::naturalfactor(dotplot_df$CellType)
-  dotplot_df <- dotplot_df |> arrange(CellType)
+  dotplot_df <- dotplot_df |> dplyr::arrange(CellType)
   
   #Determine if the data should be scaled or not, then alter the color scheme accordingly
   if(scaled){
