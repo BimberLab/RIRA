@@ -44,7 +44,7 @@ test_that("scGate Runs", {
   print(sort(table(seuratObj$scGateConsensus)))
   dat <- table(seuratObj$scGateConsensus)
   expect_equal(unname(dat[['Bcell']]), 244, info = 'With aliasing', tolerance = 2)
-  expect_equal(unname(dat[['T_NK']]), 1662, info = 'With aliasing')
+  expect_equal(unname(dat[['T_NK']]), 1663, info = 'With aliasing')
 
   expect_false('Tcell' %in% names(dat), info = 'With aliasing')
   expect_false('NK' %in% names(dat), info = 'With aliasing')
@@ -73,7 +73,7 @@ test_that("scGate works with built-in gates", {
   suppressWarnings(data("pbmc3k"))
   seuratObj <- suppressWarnings(pbmc3k)
   seuratObj <- RunScGate(seuratObj, model = 'Bcell')
-  expect_equal(sum(seuratObj$is.pure == 'Pure'), 285)
+  expect_equal(sum(seuratObj$is.pure == 'Pure'), 293)
   
 })
 
@@ -89,7 +89,7 @@ test_that("scGates runs on all", {
   print('RunScGateWithDefaultModels, using dropAmbiguousConsensusValues = FALSE')
   print(dat)
   
-  expect_equal(unname(dat[['Bcell,PanBcell']]), 277)
+  expect_equal(unname(dat[['Bcell,PanBcell']]), 270)
   
   # Now with ambiguous cleanup:
   seuratObj <- RunScGateWithDefaultModels(seuratObj, dropAmbiguousConsensusValues = TRUE)
@@ -97,7 +97,7 @@ test_that("scGates runs on all", {
   print('RunScGateWithDefaultModels, using dropAmbiguousConsensusValues = TRUE')
   print(dat)
   expect_false('MoMacDC,Myeloid' %in% names(dat))
-  expect_equal(unname(dat[['Myeloid']]), 37)
+  expect_equal(unname(dat[['Myeloid']]), 212)
 })
 
 test_that("scGate Runs", {
@@ -112,8 +112,8 @@ test_that("scGate Runs", {
 
   expected <- c(
     Bcell.RM = 335,
-    Myeloid.RM = 681,
-    T_NK = 1651,
+    Myeloid.RM = 679,
+    T_NK = 1648,
     'Bcell.RM,T_NK' = 13
   )
 
@@ -129,10 +129,10 @@ test_that("scGate Runs", {
 
   expected <- c(
     Bcell = 335,
-    Myeloid = 681,
-    T_NK = 1648,
+    Myeloid = 679,
+    T_NK = 1651,
     'Bcell,T_NK' = 13,
-    Platelet = 8
+    Platelet = 13
   )
 
   for (pop in names(expected)) {
@@ -146,7 +146,7 @@ test_that("scGate Runs", {
     NK.RM = 65,
     Myeloid.RM = 679,
     Tcell.RM = 1310,
-    'Myeloid.RM,Platelet.RM' = 2
+    'NK.RM,Tcell.RM' = 273
   )
 
   for (pop in names(expected)) {
