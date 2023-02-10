@@ -1,2 +1,5 @@
 levels	use_as	name
 level1	positive	Bcell.RM
+level2	negative	Complement.RM
+level2	negative	Platelet.RM
+level2	negative	Erythrocyte.RM
