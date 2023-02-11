@@ -6,7 +6,7 @@
 \usage{
 Classify_TNK(
   seuratObj,
-  assayName = "RNA",
+  assayName = Seurat::DefaultAssay(seuratObj),
   columnPrefix = "RIRA_TNK_v2.",
   maxAllowableClasses = 6,
   minFractionToInclude = 0.01,

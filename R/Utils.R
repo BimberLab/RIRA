@@ -120,7 +120,7 @@ SeuratToAnnData <- function(seuratObj, outFileBaseName, assayName = NULL, doDiet
   return(seuratObj)
 }
 
-.HasNormalizationBeenPerformed <- function(seuratObj, assayName = 'RNA'){
+.HasNormalizationBeenPerformed <- function(seuratObj, assayName = Seurat::DefaultAssay(seuratObj)){
     if (!assayName %in% names(seuratObj@assays)) {
         stop(paste0('Assay not found: ', assayName))
     }

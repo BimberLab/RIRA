@@ -6,7 +6,7 @@
 \usage{
 Classify_ImmuneCells(
   seuratObj,
-  assayName = "RNA",
+  assayName = Seurat::DefaultAssay(seuratObj),
   columnPrefix = "RIRA_Immune_v1.",
   maxAllowableClasses = 6,
   minFractionToInclude = 0.01,
