@@ -121,7 +121,11 @@ SeuratToAnnData <- function(seuratObj, outFileBaseName, assayName = NULL, doDiet
 }
 
 .HasNormalizationBeenPerformed <- function(seuratObj, assayName = 'RNA'){
-  return(!identical(seuratObj@assays[[assayName]]@counts, seuratObj@assays[[assayName]]@data))
+    if (!assayName %in% names(seuratObj@assays)) {
+        stop(paste0('Assay not found: ', assayName))
+    }
+
+    return(!identical(seuratObj@assays[[assayName]]@counts, seuratObj@assays[[assayName]]@data))
 }
 
 .FilterLowCalls <- function(seuratObj, label, minFraction, returnAsFactor = TRUE, labelToAssign = 'Unknown') {
