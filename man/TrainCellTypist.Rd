@@ -9,7 +9,7 @@ TrainCellTypist(
   labelField,
   modelFile,
   minCellsPerClass = 20,
-  assayName = "RNA",
+  assayName = Seurat::DefaultAssay(seuratObj),
   tempFileLocation = NULL,
   dropAmbiguousLabelValues = TRUE,
   excludedClasses = NULL,

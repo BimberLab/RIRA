@@ -12,7 +12,7 @@ RunCellTypist(
   useMajorityVoting = TRUE,
   mode = "prob_match",
   extraArgs = c("--mode", mode, "--p-thres", pThreshold, "--min-prop", minProp),
-  assayName = "RNA",
+  assayName = Seurat::DefaultAssay(seuratObj),
   columnPrefix = NULL,
   maxAllowableClasses = 6,
   minFractionToInclude = 0.01,
