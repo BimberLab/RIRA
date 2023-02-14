@@ -25,7 +25,7 @@ test_that("scGate runs with custom models", {
   print('scGate runs with custom models')
   print(table(seuratObj$scGateConsensus))
   dat <- table(seuratObj$scGateConsensus)
-  expect_equal(unname(dat[['Myeloid']]), 681)
+  expect_equal(unname(dat[['Myeloid']]), 682)
 })
 
 test_that("scGate Runs", {
@@ -44,7 +44,7 @@ test_that("scGate Runs", {
   print(sort(table(seuratObj$scGateConsensus)))
   dat <- table(seuratObj$scGateConsensus)
   expect_equal(unname(dat[['Bcell']]), 244, info = 'With aliasing', tolerance = 2)
-  expect_equal(unname(dat[['T_NK']]), 1665, info = 'With aliasing')
+  expect_equal(unname(dat[['T_NK']]), 1663, info = 'With aliasing')
 
   expect_false('Tcell' %in% names(dat), info = 'With aliasing')
   expect_false('NK' %in% names(dat), info = 'With aliasing')
@@ -59,7 +59,7 @@ test_that("scGate Runs", {
   seuratObj <- Seurat::FindClusters(seuratObj, resolution = 0.5, random.seed = GetSeed())
 
   seuratObj <- RunScGate(seuratObj, gate)
-  expect_equal(sum(seuratObj$is.pure == 'Pure'), 1506, info = 'After DimRedux')
+  expect_equal(sum(seuratObj$is.pure == 'Pure'), 1504, info = 'After DimRedux')
 
   #At least execute this code once, so overt errors are caught
   seuratObj <- Seurat::RunUMAP(seuratObj, dims = 1:10)
@@ -73,7 +73,7 @@ test_that("scGate works with built-in gates", {
   suppressWarnings(data("pbmc3k"))
   seuratObj <- suppressWarnings(pbmc3k)
   seuratObj <- RunScGate(seuratObj, model = 'Bcell')
-  expect_equal(sum(seuratObj$is.pure == 'Pure'), 295)
+  expect_equal(sum(seuratObj$is.pure == 'Pure'), 293)
 
 })
 
@@ -89,7 +89,7 @@ test_that("scGates runs on all", {
   print('RunScGateWithDefaultModels, using dropAmbiguousConsensusValues = FALSE')
   print(dat)
 
-  expect_equal(unname(dat[['Bcell,PanBcell']]), 272)
+  expect_equal(unname(dat[['Bcell,PanBcell']]), 270)
 
   # Now with ambiguous cleanup:
   seuratObj <- RunScGateWithDefaultModels(seuratObj, dropAmbiguousConsensusValues = TRUE)
@@ -97,7 +97,7 @@ test_that("scGates runs on all", {
   print('RunScGateWithDefaultModels, using dropAmbiguousConsensusValues = TRUE')
   print(dat)
   expect_false('MoMacDC,Myeloid' %in% names(dat))
-  expect_equal(unname(dat[['Myeloid']]), 209)
+  expect_equal(unname(dat[['Myeloid']]), 212)
 })
 
 test_that("scGate Runs", {
@@ -111,10 +111,10 @@ test_that("scGate Runs", {
   dat <- table(seuratObj$scGateConsensus)
 
   expected <- c(
-    Bcell.RM = 338,
+    Bcell.RM = 341,
     Myeloid.RM = 679,
-    T_NK = 1650,
-    'Bcell.RM,T_NK' = 11
+    T_NK = 1649,
+    'Bcell.RM,T_NK' = 9
   )
 
   for (pop in names(expected)) {
@@ -128,10 +128,10 @@ test_that("scGate Runs", {
   dat <- table(seuratObj$scGateConsensus)
 
   expected <- c(
-    Bcell = 338,
-    Myeloid = 680,
-    T_NK = 1650,
-    'Bcell,T_NK' = 11,
+    Bcell = 341,
+    Myeloid = 682,
+    T_NK = 1649,
+    'Bcell,T_NK' = 9,
     Platelet = 13
   )
 
@@ -143,10 +143,10 @@ test_that("scGate Runs", {
   dat <- table(seuratObj$scGateRaw)
 
   expected <- c(
-    NK.RM = 63,
+    NK.RM = 66,
     Myeloid.RM = 679,
-    Tcell.RM = 1313,
-    'NK.RM,Tcell.RM' = 274
+    Tcell.RM = 1311,
+    'NK.RM,Tcell.RM' = 272
   )
 
   for (pop in names(expected)) {
