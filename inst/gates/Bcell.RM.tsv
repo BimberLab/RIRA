@@ -3,3 +3,6 @@ level1	positive	Bcell.RM
 level2	negative	Complement.RM
 level2	negative	Platelet.RM
 level2	negative	Erythrocyte.RM
+level2	negative	Tcell.RM
+level2	negative	Myeloid.RM
+level2	negative	NeutrophilLineage.RM
