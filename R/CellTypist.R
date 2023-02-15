@@ -171,7 +171,7 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
   outFile <- tempfile()
   outDir <- dirname(outFile)
   # NOTE: metadata is not needed for scoring and is can contain invalid characters, so drop it during conversion
-  seuratAnnData <- SeuratToAnnData(seuratObj, paste0(outFile, '-seurat-annData'), assayName, doDiet = TRUE, allowableMetaCols = NA)
+  seuratAnnData <- SeuratToAnnData(seuratObj, paste0(outFile, '-seurat-annData'), assayName, exportMinimalObject = TRUE, allowableMetaCols = NA)
 
   # Ensure models present:
   if (updateModels) {
@@ -332,7 +332,7 @@ TrainCellTypist <- function(seuratObj, labelField, modelFile, minCellsPerClass =
     seuratObj <- Seurat::NormalizeData(seuratObj, verbose = FALSE)
   }
 
-  trainData <- SeuratToAnnData(seuratObj, paste0(outFile, '-seurat-annData'), assayName = assayName, doDiet = TRUE, allowableMetaCols = labelField)
+  trainData <- SeuratToAnnData(seuratObj, paste0(outFile, '-seurat-annData'), assayName = assayName, exportMinimalObject = TRUE, allowableMetaCols = labelField)
 
   # potentially replace windows slashes with forward slash
   trainData <- gsub(trainData, pattern = '\\\\', replacement = '/')
