@@ -4,6 +4,13 @@ library(testthat)
 
 testthat::context("celltypist")
 
+test_that("celltypist is installed", {
+    # this provides more useful information if there is an error loading celltypist
+    print(reticulate::py_exe())
+    print(reticulate::py_version())
+    reticulate::import("celltypist")
+})
+
 test_that("celltypist runs", {
   suppressWarnings(SeuratData::InstallData("pbmc3k"))
   suppressWarnings(data("pbmc3k"))
