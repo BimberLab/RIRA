@@ -63,7 +63,7 @@ SetAtlasDir <- function(folderPath) {
   return(parentFolder)
 }
 
-SeuratToAnnData <- function(seuratObj, outFileBaseName, assayName = NULL, doDiet = FALSE, allowableMetaCols = NULL) {
+SeuratToAnnData <- function(seuratObj, outFileBaseName, assayName = NULL, exportMinimalObject = FALSE, allowableMetaCols = NULL) {
   tmpFile <- outFileBaseName
   if (!is.null(assayName)) {
     for (an in names(seuratObj@assays)) {
@@ -73,8 +73,15 @@ SeuratToAnnData <- function(seuratObj, outFileBaseName, assayName = NULL, doDiet
     }
   }
 
-  if (doDiet) {
-    seuratObj <- Seurat::DietSeurat(seuratObj)
+  if (exportMinimalObject) {
+    if (is.null(assayName)) {
+        stop('You must provide a specific assayName when exporting a minimal seurat object')
+    }
+
+    # NOTE: clone a new object to ensure we only carry forward the minimal data we need:
+    origAssay <- seuratObj@assays[[assayName]]
+    seuratObj <- Seurat::CreateSeuratObject(counts = origAssay@counts, assay = assayName, project = seuratObj@project.name, meta.data = seuratObj@meta.data)
+    seuratObj <- Seurat::SetAssayData(seuratObj, assay = assayName, slot = 'data', new.data = origAssay@data)
   }
 
   seuratObj@misc <- list()
