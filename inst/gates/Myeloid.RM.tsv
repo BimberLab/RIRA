@@ -1,5 +1,5 @@
 levels	use_as	name
-level2	positive	Myeloid.RM
+level1	positive	Myeloid.RM
 level2	negative	Platelet.RM
 level2	negative	Erythrocyte.RM
 level2	negative	Tcell.RM
