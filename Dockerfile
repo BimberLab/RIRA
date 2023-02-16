@@ -9,7 +9,8 @@ ENV NUMBA_CACHE_DIR=/tmp
 ENV MPLCONFIGDIR=/tmp
 ENV CELLTYPIST_FOLDER=/tmp
 
-RUN pip3 install numba celltypist
+# NOTE: can drop 'matplotlib<3.7' once this is resolved: https://github.com/scverse/scanpy/issues/2411
+RUN pip3 install numba 'matplotlib<3.7' celltypist
 
 # NOTE: this is also added to support running as non-root. celltypist needs to write in ~/
 RUN mkdir /userHome && chmod -R 777 /userHome
