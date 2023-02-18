@@ -160,9 +160,11 @@ RunScGateWithDefaultModels <- function(seuratObj, min.cells = 30, assay = 'RNA',
 #'
 #' @export
 RunScGateWithRhesusModels <- function(seuratObj, min.cells = 30, assay = 'RNA', pos.thr = 0.13, neg.thr = 0.13, ncores = 1, genes.blacklist = 'default', dropAmbiguousConsensusValues = FALSE) {
+  mn <- c('Bcell.RM', 'Tcell.RM', 'NK.RM', 'Myeloid.RM', 'AvEp.RM', 'Epithelial.RM', 'Erythrocyte.RM', 'pDC.RM', 'Stromal.RM', 'Platelet.RM', 'Mesothelial.RM', 'ActiveAvEp.RM', 'Myelocytes.RM', 'Myofibroblast.RM', 'Fibroblast.RM', 'Hepatocyte.RM')
   return(RunScGateForModels(
     seuratObj = seuratObj,
-    modelNames = c('Bcell.RM', 'Tcell.RM', 'NK.RM', 'Myeloid.RM', 'AvEp.RM', 'Epithelial.RM', 'Erythrocyte.RM', 'pDC.RM', 'Stromal.RM', 'Platelet.RM', 'Mesothelial.RM', 'ActiveAvEp.RM', 'Myelocytes.RM', 'Myofibroblast.RM', 'Fibroblast.RM', 'Hepatocyte.RM'),
+    modelNames = c(mn, 'PlasmaCell.RM'),
+    consensusModels = mn,
     labelRename = c(
       Bcell.RM = 'Bcell',
       Tcell.RM = 'T_NK',

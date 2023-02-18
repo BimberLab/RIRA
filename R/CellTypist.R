@@ -26,7 +26,7 @@ utils::globalVariables(
 #' @param runCelltypistUpdate If true, --update-models will be run for celltypist prior to scoring cells.
 #'
 #' @export
-RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshold = 0.5, minProp = 0, useMajorityVoting = TRUE, mode = "prob_match", extraArgs = c("--mode", mode, "--p-thres", pThreshold, "--min-prop", minProp), assayName = Seurat::DefaultAssay(seuratObj), columnPrefix = NULL, maxAllowableClasses = 6, minFractionToInclude = 0.01, minCellsToRun = 200, maxBatchSize = 600000, retainProbabilityMatrix = FALSE, runCelltypistUpdate = TRUE) {
+RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshold = 0.5, minProp = 0, useMajorityVoting = TRUE, mode = "prob_match", extraArgs = c("--mode", mode, "--p-thres", pThreshold, "--min-prop", minProp), assayName = Seurat::DefaultAssay(seuratObj), columnPrefix = NULL, maxAllowableClasses = 6, minFractionToInclude = 0.01, minCellsToRun = 200, maxBatchSize = 100000, retainProbabilityMatrix = FALSE, runCelltypistUpdate = TRUE) {
   if (!reticulate::py_available(initialize = TRUE)) {
     stop(paste0('Python/reticulate not configured. Run "reticulate::py_config()" to initialize python'))
   }
@@ -89,6 +89,7 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
       }
 
       df <- .RunCelltypistOnSubset(seuratObj = so, assayName = assayName, modelName = modelName, useMajorityVoting = useMajorityVoting, extraArgs = extraArgs, updateModels = shouldDownloadModels, retainProbabilityMatrix = retainProbabilityMatrix)
+      df$over_clustering <- paste0(i, '-', df$over_clustering)
       rm(so)
 
       if (all(is.null(labels))) {
@@ -101,6 +102,14 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
     if (nrow(labels) != ncol(seuratObj)) {
       stop('There was an error processing celltypist batches')
     }
+  }
+
+  if (useMajorityVoting) {
+      print(ggplot(data.frame(table(labels$over_clustering)), aes(x = Freq)) +
+            geom_histogram() +
+            labs(x = 'Cluster Size', y = '# Clusters') +
+            egg::theme_presentation(base_size = 12)
+      )
   }
 
   if (!is.na(maxAllowableClasses)) {

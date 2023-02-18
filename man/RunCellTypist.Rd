@@ -17,7 +17,7 @@ RunCellTypist(
   maxAllowableClasses = 6,
   minFractionToInclude = 0.01,
   minCellsToRun = 200,
-  maxBatchSize = 6e+05,
+  maxBatchSize = 1e+05,
   retainProbabilityMatrix = FALSE,
   runCelltypistUpdate = TRUE
 )
