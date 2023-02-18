@@ -10,7 +10,7 @@ testthat::context("scGate")
 
 test_that("scGates load", {
   gates <- GetAvailableScGates()
-  expect_equal(length(gates), 23)
+  expect_equal(length(gates), 24)
 
   gate <- GetScGateModel('demo_gate')
   expect_equal(length(gate$levels), 59)
