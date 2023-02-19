@@ -1,7 +1,7 @@
 #' @include Utils.R
 
 utils::globalVariables(
-  names = c('majority_voting', 'Fraction'),
+  names = c('majority_voting', 'Fraction', 'PropPerCluster', 'over_clustering', 'predicted_labels', 'totalPerCluster', 'totalPerLabel', 'propPerLabel'),
   package = 'RIRA',
   add = TRUE
 )
@@ -25,6 +25,7 @@ utils::globalVariables(
 #' @param retainProbabilityMatrix If true, the celltypist probability_matrix with per-class probabilities will be stored in meta.data
 #' @param runCelltypistUpdate If true, --update-models will be run for celltypist prior to scoring cells.
 #'
+#' @importFrom dplyr %>%
 #' @export
 RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshold = 0.5, minProp = 0, useMajorityVoting = TRUE, mode = "prob_match", extraArgs = c("--mode", mode, "--p-thres", pThreshold, "--min-prop", minProp), assayName = Seurat::DefaultAssay(seuratObj), columnPrefix = NULL, maxAllowableClasses = 6, minFractionToInclude = 0.01, minCellsToRun = 200, maxBatchSize = 100000, retainProbabilityMatrix = FALSE, runCelltypistUpdate = TRUE) {
   if (!reticulate::py_available(initialize = TRUE)) {
@@ -89,7 +90,9 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
       }
 
       df <- .RunCelltypistOnSubset(seuratObj = so, assayName = assayName, modelName = modelName, useMajorityVoting = useMajorityVoting, extraArgs = extraArgs, updateModels = shouldDownloadModels, retainProbabilityMatrix = retainProbabilityMatrix)
-      df$over_clustering <- paste0(i, '-', df$over_clustering)
+      if (useMajorityVoting) {
+        df$over_clustering <- paste0(i, '-', df$over_clustering)
+      }
       rm(so)
 
       if (all(is.null(labels))) {
@@ -108,7 +111,19 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
       print(ggplot(data.frame(table(labels$over_clustering)), aes(x = Freq)) +
             geom_histogram() +
             labs(x = 'Cluster Size', y = '# Clusters') +
-            egg::theme_presentation(base_size = 12)
+            egg::theme_presentation(base_size = 12) +
+            ggtitle('Distribution of Cluster Size')
+      )
+
+      dat <- labels %>% dplyr::group_by(over_clustering) %>% dplyr::mutate(totalPerCluster = dplyr::n())
+      dat <- dat %>% dplyr::group_by(over_clustering, totalPerCluster, predicted_labels) %>% dplyr::summarize(totalPerLabel = dplyr::n())
+      dat$propPerLabel <- dat$totalPerLabel / dat$totalPerCluster
+      dat <- dat %>% dplyr::group_by(over_clustering) %>% dplyr::summarize(PropPerCluster = max(propPerLabel))
+      print(ggplot(dat, aes(x = PropPerCluster)) +
+              geom_density() +
+              labs(x = 'Max Prop Per Cluster', y = '# Clusters') +
+              egg::theme_presentation(base_size = 12) +
+              ggtitle('Proportion of Highest Class Per Cluster')
       )
   }
 
@@ -260,7 +275,7 @@ TrainCellTypist <- function(seuratObj, labelField, modelFile, minCellsPerClass =
   }
 
   if (!labelField %in% names(seuratObj@meta.data)) {
-    stop('The labelField must be a field in seuratObj@meta.data')
+    stop(paste0('The labelField must be a field in seuratObj@meta.data. not found: ', labelField))
   }
 
   modelFile <- gsub(modelFile, pattern = '\\\\', replacement = '/')
