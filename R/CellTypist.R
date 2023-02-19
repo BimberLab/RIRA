@@ -114,8 +114,8 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
       )
   }
 
-  dat <- labels %>% dplyr::group_by(over_clustering) %>% dplyr::mutate(totalPerCluster = n())
-  dat <- dat %>% dplyr::group_by(over_clustering, totalPerCluster, predicted_labels) %>% dplyr::summarize(totalPerLabel = n())
+  dat <- labels %>% dplyr::group_by(over_clustering) %>% dplyr::mutate(totalPerCluster = dplyr::n())
+  dat <- dat %>% dplyr::group_by(over_clustering, totalPerCluster, predicted_labels) %>% dplyr::summarize(totalPerLabel = dplyr::n())
   dat$propPerLabel <- dat$totalPerLabel / dat$totalPerCluster
   dat <- dat %>% dplyr::group_by(over_clustering) %>% dplyr::summarize(PropPerCluster = max(propPerLabel))
   print(ggplot(dat, aes(x = PropPerCluster)) +
