@@ -25,6 +25,7 @@ utils::globalVariables(
 #' @param retainProbabilityMatrix If true, the celltypist probability_matrix with per-class probabilities will be stored in meta.data
 #' @param runCelltypistUpdate If true, --update-models will be run for celltypist prior to scoring cells.
 #'
+#' @importFrom dplyr %>%
 #' @export
 RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshold = 0.5, minProp = 0, useMajorityVoting = TRUE, mode = "prob_match", extraArgs = c("--mode", mode, "--p-thres", pThreshold, "--min-prop", minProp), assayName = Seurat::DefaultAssay(seuratObj), columnPrefix = NULL, maxAllowableClasses = 6, minFractionToInclude = 0.01, minCellsToRun = 200, maxBatchSize = 100000, retainProbabilityMatrix = FALSE, runCelltypistUpdate = TRUE) {
   if (!reticulate::py_available(initialize = TRUE)) {
@@ -113,10 +114,10 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
       )
   }
 
-  dat <- labels %>% group_by(over_clustering) %>% mutate(totalPerCluster = n())
-  dat <- dat %>% group_by(over_clustering, totalPerCluster, predicted_labels) %>% summarize(totalPerLabel = n())
+  dat <- labels %>% dplyr::group_by(over_clustering) %>% dplyr::mutate(totalPerCluster = n())
+  dat <- dat %>% dplyr::group_by(over_clustering, totalPerCluster, predicted_labels) %>% dplyr::summarize(totalPerLabel = n())
   dat$propPerLabel <- dat$totalPerLabel / dat$totalPerCluster
-  dat <- dat %>% group_by(over_clustering) %>% summarize(PropPerCluster = max(propPerLabel))
+  dat <- dat %>% dplyr::group_by(over_clustering) %>% dplyr::summarize(PropPerCluster = max(propPerLabel))
   print(ggplot(dat, aes(x = PropPerCluster)) +
           geom_density() +
           labs(x = 'Max Prop Per Cluster', y = '# Clusters') +
