@@ -1,7 +1,7 @@
 #' @include Utils.R
 
 utils::globalVariables(
-  names = c('majority_voting', 'Fraction'),
+  names = c('majority_voting', 'Fraction', 'PropPerCluster', 'over_clustering', 'predicted_labels', 'totalPerCluster', 'totalPerLabel', 'propPerLabel'),
   package = 'RIRA',
   add = TRUE
 )
@@ -108,9 +108,21 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
       print(ggplot(data.frame(table(labels$over_clustering)), aes(x = Freq)) +
             geom_histogram() +
             labs(x = 'Cluster Size', y = '# Clusters') +
-            egg::theme_presentation(base_size = 12)
+            egg::theme_presentation(base_size = 12) +
+            ggtitle('Distribution of Cluster Size')
       )
   }
+
+  dat <- labels %>% group_by(over_clustering) %>% mutate(totalPerCluster = n())
+  dat <- dat %>% group_by(over_clustering, totalPerCluster, predicted_labels) %>% summarize(totalPerLabel = n())
+  dat$propPerLabel <- dat$totalPerLabel / dat$totalPerCluster
+  dat <- dat %>% group_by(over_clustering) %>% summarize(PropPerCluster = max(propPerLabel))
+  print(ggplot(dat, aes(x = PropPerCluster)) +
+          geom_density() +
+          labs(x = 'Max Prop Per Cluster', y = '# Clusters') +
+          egg::theme_presentation(base_size = 12) +
+          ggtitle('Proportion of Highest Class Per Cluster')
+  )
 
   if (!is.na(maxAllowableClasses)) {
     for (fieldName in c('majority_voting', 'predicted_labels')) {
@@ -260,7 +272,7 @@ TrainCellTypist <- function(seuratObj, labelField, modelFile, minCellsPerClass =
   }
 
   if (!labelField %in% names(seuratObj@meta.data)) {
-    stop('The labelField must be a field in seuratObj@meta.data')
+    stop(paste0('The labelField must be a field in seuratObj@meta.data. not found: ', labelField))
   }
 
   modelFile <- gsub(modelFile, pattern = '\\\\', replacement = '/')
