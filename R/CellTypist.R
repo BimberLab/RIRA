@@ -105,6 +105,9 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
     }
   }
 
+  print(paste0('labels: ', useMajorityVoting))
+  print(str(labels))
+
   if (useMajorityVoting) {
       print(ggplot(data.frame(table(labels$over_clustering)), aes(x = Freq)) +
             geom_histogram() +
@@ -112,18 +115,18 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
             egg::theme_presentation(base_size = 12) +
             ggtitle('Distribution of Cluster Size')
       )
-  }
 
-  dat <- labels %>% dplyr::group_by(over_clustering) %>% dplyr::mutate(totalPerCluster = dplyr::n())
-  dat <- dat %>% dplyr::group_by(over_clustering, totalPerCluster, predicted_labels) %>% dplyr::summarize(totalPerLabel = dplyr::n())
-  dat$propPerLabel <- dat$totalPerLabel / dat$totalPerCluster
-  dat <- dat %>% dplyr::group_by(over_clustering) %>% dplyr::summarize(PropPerCluster = max(propPerLabel))
-  print(ggplot(dat, aes(x = PropPerCluster)) +
-          geom_density() +
-          labs(x = 'Max Prop Per Cluster', y = '# Clusters') +
-          egg::theme_presentation(base_size = 12) +
-          ggtitle('Proportion of Highest Class Per Cluster')
-  )
+      dat <- labels %>% dplyr::group_by(over_clustering) %>% dplyr::mutate(totalPerCluster = dplyr::n())
+      dat <- dat %>% dplyr::group_by(over_clustering, totalPerCluster, predicted_labels) %>% dplyr::summarize(totalPerLabel = dplyr::n())
+      dat$propPerLabel <- dat$totalPerLabel / dat$totalPerCluster
+      dat <- dat %>% dplyr::group_by(over_clustering) %>% dplyr::summarize(PropPerCluster = max(propPerLabel))
+      print(ggplot(dat, aes(x = PropPerCluster)) +
+              geom_density() +
+              labs(x = 'Max Prop Per Cluster', y = '# Clusters') +
+              egg::theme_presentation(base_size = 12) +
+              ggtitle('Proportion of Highest Class Per Cluster')
+      )
+  }
 
   if (!is.na(maxAllowableClasses)) {
     for (fieldName in c('majority_voting', 'predicted_labels')) {
