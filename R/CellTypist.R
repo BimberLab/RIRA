@@ -90,7 +90,9 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
       }
 
       df <- .RunCelltypistOnSubset(seuratObj = so, assayName = assayName, modelName = modelName, useMajorityVoting = useMajorityVoting, extraArgs = extraArgs, updateModels = shouldDownloadModels, retainProbabilityMatrix = retainProbabilityMatrix)
-      df$over_clustering <- paste0(i, '-', df$over_clustering)
+      if (useMajorityVoting) {
+        df$over_clustering <- paste0(i, '-', df$over_clustering)
+      }
       rm(so)
 
       if (all(is.null(labels))) {
@@ -104,9 +106,6 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
       stop('There was an error processing celltypist batches')
     }
   }
-
-  print(paste0('labels: ', useMajorityVoting))
-  print(str(labels))
 
   if (useMajorityVoting) {
       print(ggplot(data.frame(table(labels$over_clustering)), aes(x = Freq)) +
