@@ -115,16 +115,24 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
             ggtitle('Distribution of Cluster Size')
       )
 
-      dat <- labels %>% dplyr::group_by(over_clustering) %>% dplyr::mutate(totalPerCluster = dplyr::n())
-      dat <- dat %>% dplyr::group_by(over_clustering, totalPerCluster, predicted_labels) %>% dplyr::summarize(totalPerLabel = dplyr::n())
+      dat <- labels
+      dat$Category <- ifelse(dat$majority_voting == 'Heterogenous', yes = 'Heterogenous', no = 'Not Heterogenous')
+      dat <- dat %>% dplyr::group_by(Category, over_clustering) %>% dplyr::mutate(totalPerCluster = dplyr::n())
+      dat <- dat %>% dplyr::group_by(Category, over_clustering, totalPerCluster, predicted_labels) %>% dplyr::summarize(totalPerLabel = dplyr::n())
       dat$propPerLabel <- dat$totalPerLabel / dat$totalPerCluster
-      dat <- dat %>% dplyr::group_by(over_clustering) %>% dplyr::summarize(PropPerCluster = max(propPerLabel))
-      print(ggplot(dat, aes(x = PropPerCluster)) +
+      dat <- dat %>% dplyr::group_by(Category, over_clustering) %>% dplyr::summarize(PropPerCluster = max(propPerLabel))
+      P1 <- ggplot(dat, aes(x = PropPerCluster)) +
               geom_density() +
               labs(x = 'Max Prop Per Cluster', y = '# Clusters') +
               egg::theme_presentation(base_size = 12) +
-              ggtitle('Proportion of Highest Class Per Cluster')
-      )
+              ggtitle('Proportion of Highest Class Per Cluster') +
+              facet_grid(. ~ Category)
+
+      if (!is.null(minProp) && minProp > 0) {
+        P1 <- P1 + geom_vline(xintercept = minProp, linetype = 'dashed', color = 'red')
+      }
+
+      print(P1)
   }
 
   if (!is.na(maxAllowableClasses)) {
