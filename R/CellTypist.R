@@ -116,7 +116,7 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
       )
 
       dat <- labels
-      dat$Category <- ifelse(dat$majority_voting == 'Heterogenous', yes = 'Heterogenous', no = 'Not Heterogenous')
+      dat$Category <- ifelse(!is.na(dat$majority_voting) & dat$majority_voting == 'Heterogeneous', yes = 'Heterogenous', no = 'Not Heterogenous')
       dat <- dat %>% dplyr::group_by(Category, over_clustering) %>% dplyr::mutate(totalPerCluster = dplyr::n())
       dat <- dat %>% dplyr::group_by(Category, over_clustering, totalPerCluster, predicted_labels) %>% dplyr::summarize(totalPerLabel = dplyr::n())
       dat$propPerLabel <- dat$totalPerLabel / dat$totalPerCluster
@@ -126,7 +126,7 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
               labs(x = 'Max Prop Per Cluster', y = '# Clusters') +
               egg::theme_presentation(base_size = 12) +
               ggtitle('Proportion of Highest Class Per Cluster') +
-              facet_grid(. ~ Category)
+              facet_grid(Category ~ .)
 
       if (!is.null(minProp) && minProp > 0) {
         P1 <- P1 + geom_vline(xintercept = minProp, linetype = 'dashed', color = 'red')
