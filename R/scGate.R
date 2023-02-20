@@ -8,6 +8,7 @@ utils::globalVariables(
 
 # See: https://github.com/carmonalab/scGate/pull/1
 #' @importFrom UCell AddModuleScore_UCell
+#' @import scGate
 #'
 #' @title Run scGate
 #'

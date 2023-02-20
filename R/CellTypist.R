@@ -177,7 +177,7 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
 
   toPlot <- seuratObj[[plotColname]]
   if (sum(!is.na(toPlot)) != 0) {
-    print(ggplot(toPlot, aes_string(x = plotColname, fill = plotColname)) +
+    print(ggplot(toPlot, aes(x = !!rlang::sym(plotColname), fill = !!rlang::sym(plotColname))) +
             geom_bar(color = 'black') +
             egg::theme_presentation(base_size = 12) +
             ggtitle('Celltypist Call') +
