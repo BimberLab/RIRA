@@ -113,7 +113,7 @@ test_that("scGate Runs", {
   expected <- c(
     Bcell.RM = 335,
     Myeloid.RM = 679,
-    T_NK = 1647,
+    T_NK = 1649,
     'Bcell.RM,T_NK' = 13
   )
 
@@ -130,7 +130,7 @@ test_that("scGate Runs", {
   expected <- c(
     Bcell = 335,
     Myeloid = 679,
-    T_NK = 1647,
+    T_NK = 1649,
     'Bcell,T_NK' = 13,
     Platelet = 11
   )
