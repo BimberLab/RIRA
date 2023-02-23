@@ -10,7 +10,7 @@ testthat::context("scGate")
 
 test_that("scGates load", {
   gates <- GetAvailableScGates()
-  expect_equal(length(gates), 24)
+  expect_equal(length(gates), 25)
 
   gate <- GetScGateModel('demo_gate')
   expect_equal(length(gate$levels), 59)
@@ -145,7 +145,7 @@ test_that("scGate Runs", {
   expected <- c(
     NK.RM = 65,
     Myeloid.RM = 677,
-    Tcell.RM = 1309,
+    Tcell.RM = 1311,
     'NK.RM,Tcell.RM' = 273
   )
 
