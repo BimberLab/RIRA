@@ -111,10 +111,10 @@ test_that("scGate Runs", {
   dat <- table(seuratObj$scGateConsensus)
 
   expected <- c(
-    Bcell.RM = 340,
-    Myeloid.RM = 680,
+    Bcell.RM = 335,
+    Myeloid.RM = 679,
     T_NK = 1647,
-    'Bcell.RM,T_NK' = 8
+    'Bcell.RM,T_NK' = 13
   )
 
   for (pop in names(expected)) {
@@ -128,10 +128,10 @@ test_that("scGate Runs", {
   dat <- table(seuratObj$scGateConsensus)
 
   expected <- c(
-    Bcell = 340,
-    Myeloid = 681,
+    Bcell = 335,
+    Myeloid = 679,
     T_NK = 1647,
-    'Bcell,T_NK' = 8,
+    'Bcell,T_NK' = 13,
     Platelet = 11
   )
 
@@ -143,10 +143,10 @@ test_that("scGate Runs", {
   dat <- table(seuratObj$scGateRaw)
 
   expected <- c(
-    NK.RM = 66,
-    Myeloid.RM = 678,
+    NK.RM = 65,
+    Myeloid.RM = 677,
     Tcell.RM = 1309,
-    'NK.RM,Tcell.RM' = 272
+    'NK.RM,Tcell.RM' = 273
   )
 
   for (pop in names(expected)) {

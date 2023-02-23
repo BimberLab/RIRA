@@ -164,7 +164,7 @@ RunScGateWithRhesusModels <- function(seuratObj, min.cells = 30, assay = 'RNA', 
   mn <- c('Bcell.RM', 'Tcell.RM', 'NK.RM', 'Myeloid.RM', 'AvEp.RM', 'Epithelial.RM', 'Erythrocyte.RM', 'pDC.RM', 'Stromal.RM', 'Platelet.RM', 'Mesothelial.RM', 'ActiveAvEp.RM', 'Myelocytes.RM', 'Myofibroblast.RM', 'Fibroblast.RM', 'Hepatocyte.RM')
   return(RunScGateForModels(
     seuratObj = seuratObj,
-    modelNames = c(mn, 'PlasmaCell.RM'),
+    modelNames = c(mn, 'PlasmaCell.RM', 'NeutrophilLineage.RM'),
     consensusModels = mn,
     labelRename = c(
       Bcell.RM = 'Bcell',
