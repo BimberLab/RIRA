@@ -5,9 +5,10 @@ library(testthat)
 testthat::context("celltypist")
 
 test_that("celltypist is installed", {
-    # this provides more useful information if there is an error loading celltypist
-    print(reticulate::py_exe())
-    print(reticulate::py_version())
+  # this provides more useful information if there is an error loading celltypist
+  testthat::expect_no_condition(print(reticulate::py_exe()))
+  testthat::expect_no_condition(print(reticulate::py_version()))
+  testthat::expect_no_condition(print(reticulate::import('celltypist')))
 })
 
 test_that("celltypist runs", {

@@ -1,8 +1,5 @@
 levels	use_as	name
 level1	positive	NK.RM
 level2	negative	Complement.RM
-level2	negative	Platelet.RM
-level2	negative	Erythrocyte.RM
-level2	negative	Myeloid.RM
-level2	negative	Bcell.RM
-level2	negative	NeutrophilLineage.RM
+level3	negative	Platelet.RM
+level3	negative	Erythrocyte.RM
