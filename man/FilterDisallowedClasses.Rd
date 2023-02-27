@@ -7,6 +7,7 @@
 FilterDisallowedClasses(
   seuratObj,
   sourceField = "RIRA_Immune_v1.majority_voting",
+  outputFieldName = "FilterStatus",
   ucellCutoff = 0.2,
   disallowedClasses = list(T_NK = c("Bcell.RM_UCell", "Myeloid_UCell",
     "Erythrocyte.RM_UCell", "Platelet.RM_UCell", "NeutrophilLineage.RM_UCell"), Myeloid =
@@ -20,6 +21,8 @@ FilterDisallowedClasses(
 \item{seuratObj}{The seurat object}
 
 \item{sourceField}{The name of the field on which to compare}
+
+\item{outputFieldName}{The name of the field to store the results}
 
 \item{ucellCutoff}{Any cells expressing the disallowed UCell above this value will be flagged}
 
