@@ -91,4 +91,8 @@ test_that("celltypist runs for RIRA models", {
   expect_equal(1657, unname(table(seuratObj$RIRA_TNK_v2.predicted_labels)['Other']), tolerance = 1)
 
   expect_equal(6.64e-08, min(seuratObj$RIRA_TNK_v2.prob.NK.Cells), tolerance = 0.00001)
+
+  seuratObj <- RunScGateWithRhesusModels(seuratObj)
+  seuratObj <- FilterDisallowedClasses(seuratObj)
+  print(table(seuratObj$DisallowedUCellCombinations))
 })
