@@ -15,6 +15,7 @@
 CalculateUCellScores <- function(seuratObj, forceRecalculate = FALSE, seed = GetSeed(), ncores = 1, assayName = 'RNA', storeRanks = FALSE, plotCor = TRUE) {
   toCalculate <- list(
     TandNK_Activation = GetGeneSet('TandNK_Activation.1'),
+    TandNK_ActivationCore = GetGeneSet('TandNK_Activation.Core'),
     Cytotoxicity = GetGeneSet('Cytotoxicity'),
     EffectorT = GetGeneSet('EffectorT'),
     CentralMemT = GetGeneSet('CentralMemT'),
@@ -76,6 +77,12 @@ CalculateUCellScores <- function(seuratObj, forceRecalculate = FALSE, seed = Get
     print('Data has NAs, cannot make feature plot: TandNK_Activation_UCell')
   } else {
     print(Seurat::FeaturePlot(seuratObj, features = 'TandNK_Activation_UCell', min.cutoff = 'q02', max.cutoff = 'q98') + ggtitle('T Cell Activation Score'))
+  }
+
+  if (any(is.na(seuratObj[['TandNK_ActivationCore_UCell']]))) {
+    print('Data has NAs, cannot make feature plot: TandNK_ActivationCore_UCell')
+  } else {
+    print(Seurat::FeaturePlot(seuratObj, features = 'TandNK_ActivationCore_UCell', min.cutoff = 'q02', max.cutoff = 'q98') + ggtitle('T Cell Activation Score (Core Genes)'))
   }
 
   if (any(is.na(seuratObj[['Cytotoxicity_UCell']]))) {

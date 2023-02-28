@@ -285,6 +285,8 @@ GetGeneSet <- function(name) {
 ### Begin Phenotyping Gene Sets
 .RegisterGeneSet('TandNK_Activation.1', c('CCL4L1','MIR155HG','RGCC','NFKBIA','IFNG','NR4A3','TNFSF14','CCL3'))
 
+.RegisterGeneSet('TandNK_Activation.Core', c('CCL4L1','LOC100430627', 'IFNG','NR4A3','TNFSF14','CCL3', 'LOC100423131'))
+
 # This is based on T-cell analysis from lung T/NK cells. This my not be precisely Memory/Naive.
 .RegisterGeneSet('MemoryAndNaive', c('SELL', 'IL7R', 'LTB', 'SPOCK2', 'COTL1', 'JUNB', 'GPR183', 'CCR7', 'FUOM', 'CD7', 'PECAM1'))
 
