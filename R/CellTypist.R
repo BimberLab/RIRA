@@ -499,7 +499,7 @@ FilterDisallowedClasses <- function(seuratObj, sourceField = 'RIRA_Immune_v1.maj
 
   seuratObj <- Seurat::AddMetaData(seuratObj, toAdd, col.name = outputFieldName)
 
-  print(sort(table(seuratObj[[sourceField]], seuratObj[[outputFieldName]])))
+  print(table(seuratObj@meta.data[[sourceField]], seuratObj@meta.data[[outputFieldName]]))
 
   return(seuratObj)
 }
