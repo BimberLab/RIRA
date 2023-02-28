@@ -77,9 +77,6 @@ test_that("celltypist runs with batchSize", {
 })
 
 test_that("celltypist runs for RIRA models", {
-  suppressWarnings(SeuratData::InstallData("pbmc3k"))
-  seuratObj <- suppressWarnings(pbmc3k)
-  seuratObj <- Seurat::NormalizeData(seuratObj, verbose = FALSE)
   seuratObj <- Classify_TNK(seuratObj, retainProbabilityMatrix = TRUE)
 
   print(table(seuratObj$RIRA_TNK_v2.predicted_labels))
@@ -91,8 +88,17 @@ test_that("celltypist runs for RIRA models", {
   expect_equal(1657, unname(table(seuratObj$RIRA_TNK_v2.predicted_labels)['Other']), tolerance = 1)
 
   expect_equal(6.64e-08, min(seuratObj$RIRA_TNK_v2.prob.NK.Cells), tolerance = 0.00001)
+})
+
+test_that("FilterDisallowedClasses works as expected", {
+  suppressWarnings(SeuratData::InstallData("pbmc3k"))
+  seuratObj <- suppressWarnings(pbmc3k)
+  seuratObj <- Seurat::NormalizeData(seuratObj, verbose = FALSE)
 
   seuratObj <- RunScGateWithRhesusModels(seuratObj)
+  seuratObj <- Classify_ImmuneCells(seuratObj)
   seuratObj <- FilterDisallowedClasses(seuratObj)
   print(table(seuratObj$DisallowedUCellCombinations))
+
+  expect_equal(289, unname(table(seuratObj$DisallowedUCellCombinations)['B cells']))
 })
