@@ -103,8 +103,8 @@ test_that("FilterDisallowedClasses works as expected", {
   seuratObj <- FilterDisallowedClasses(seuratObj)
   print(table(seuratObj$DisallowedUCellCombinations))
 
-  expect_equal(348, sum(seuratObj2$DisallowedUCellCombinations == 'NeutrophilLineage.RM_UCell', na.rm = T))
-  expect_equal(19, sum(seuratObj2$DisallowedUCellCombinations == 'Erythrocyte.RM_UCell', na.rm = T))
-  expect_equal(12, sum(seuratObj2$DisallowedUCellCombinations == 'NK.RM_UCell', na.rm = T))
-  expect_equal(22, sum(seuratObj2$DisallowedUCellCombinations == 'Platelet.RM_UCell', na.rm = T))
+  expect_equal(348, sum(seuratObj$DisallowedUCellCombinations == 'NeutrophilLineage.RM_UCell', na.rm = T))
+  expect_equal(19, sum(seuratObj$DisallowedUCellCombinations == 'Erythrocyte.RM_UCell', na.rm = T))
+  expect_equal(12, sum(seuratObj$DisallowedUCellCombinations == 'NK.RM_UCell', na.rm = T))
+  expect_equal(22, sum(seuratObj$DisallowedUCellCombinations == 'Platelet.RM_UCell', na.rm = T))
 })
