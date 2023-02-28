@@ -77,6 +77,9 @@ test_that("celltypist runs with batchSize", {
 })
 
 test_that("celltypist runs for RIRA models", {
+  suppressWarnings(SeuratData::InstallData("pbmc3k"))
+  seuratObj <- suppressWarnings(pbmc3k)
+  seuratObj <- Seurat::NormalizeData(seuratObj, verbose = FALSE)
   seuratObj <- Classify_TNK(seuratObj, retainProbabilityMatrix = TRUE)
 
   print(table(seuratObj$RIRA_TNK_v2.predicted_labels))

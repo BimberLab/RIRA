@@ -9,10 +9,10 @@ FilterDisallowedClasses(
   sourceField = "RIRA_Immune_v1.majority_voting",
   outputFieldName = "DisallowedUCellCombinations",
   ucellCutoff = 0.2,
-  disallowedClasses = list(T_NK = c("Bcell.RM_UCell", "Myeloid_UCell",
+  disallowedClasses = list(T_NK = c("Bcell.RM_UCell", "Myeloid.RM_UCell",
     "Erythrocyte.RM_UCell", "Platelet.RM_UCell", "NeutrophilLineage.RM_UCell"), Myeloid =
     c("Bcell.RM_UCell", "Tcell.RM_UCell", "NK.RM_UCell", "Erythrocyte.RM_UCell",
-    "Platelet.RM_UCell"), Bcell = c("Tcell.RM_UCell", "NK.RM_UCell", "Myeloid_UCell",
+    "Platelet.RM_UCell"), Bcell = c("Tcell.RM_UCell", "NK.RM_UCell", "Myeloid.RM_UCell",
     "Erythrocyte.RM_UCell", "Platelet.RM_UCell", "NeutrophilLineage.RM_UCell"))
 )
 }
