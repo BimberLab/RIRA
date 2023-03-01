@@ -1,7 +1,7 @@
 #' @include Utils.R
 
 utils::globalVariables(
-  names = c('majority_voting', 'Fraction', 'PropPerCluster', 'over_clustering', 'predicted_labels', 'totalPerCluster', 'totalPerLabel', 'propPerLabel'),
+  names = c('majority_voting', 'Fraction', 'PropPerCluster', 'over_clustering', 'predicted_labels', 'totalPerCluster', 'totalPerLabel', 'propPerLabel', 'sortOrder'),
   package = 'RIRA',
   add = TRUE
 )
@@ -455,4 +455,51 @@ Classify_ImmuneCells <- function(seuratObj, assayName = Seurat::DefaultAssay(seu
                        maxBatchSize = maxBatchSize,
                        retainProbabilityMatrix = retainProbabilityMatrix
   ))
+}
+
+#' @title Filter Disallowed Classes
+#'
+#' @description This is used to flag cells with high UCell score combinations generally indiciative of contamination or doublets
+#' @param seuratObj The seurat object
+#' @param sourceField The name of the field on which to compare
+#' @param outputFieldName The name of the field to store the results
+#' @param ucellCutoff Any cells expressing the disallowed UCell above this value will be flagged
+#' @param disallowedClasses This is a list where the names are the cell classes (which should match levels in sourceField), and values are a vector of UCell field names.
+#'
+#' @export
+FilterDisallowedClasses <- function(seuratObj, sourceField = 'RIRA_Immune_v1.majority_voting', outputFieldName = 'DisallowedUCellCombinations', ucellCutoff = 0.2, disallowedClasses = list(
+  T_NK = c('Bcell.RM_UCell', 'Myeloid.RM_UCell', 'Erythrocyte.RM_UCell', 'Platelet.RM_UCell', 'NeutrophilLineage.RM_UCell'),
+  Myeloid = c('Bcell.RM_UCell', 'Tcell.RM_UCell', 'NK.RM_UCell', 'Erythrocyte.RM_UCell', 'Platelet.RM_UCell'),
+  Bcell = c('Tcell.RM_UCell', 'NK.RM_UCell', 'Myeloid.RM_UCell', 'Erythrocyte.RM_UCell', 'Platelet.RM_UCell', 'NeutrophilLineage.RM_UCell')
+)) {
+  if (!sourceField %in% names(seuratObj@meta.data)) {
+    stop(paste0('Missing source field: ', sourceField))
+  }
+
+  toDrop <- data.frame(cellbarcode = character(), reason = character())
+  for (cls in names(disallowedClasses)) {
+    for (ucell in disallowedClasses[[cls]]) {
+      if (!ucell %in% names(seuratObj@meta.data)) {
+        stop(paste0('Missing UCell field: ', ucell))
+      }
+
+      x <- colnames(seuratObj)[seuratObj[[sourceField]] == cls & seuratObj[[ucell]] > ucellCutoff]
+      if (length(x) > 0) {
+        toDrop <- rbind(toDrop, data.frame(cellbarcode = x, reason = ucell))
+      }
+    }
+  }
+
+  allCells <- data.frame(cellbarcode = colnames(seuratObj), sortOrder = 1:ncol(seuratObj))
+  allCells <- merge(allCells, toDrop, by = 'cellbarcode', all.x = T)
+  allCells <- dplyr::arrange(allCells, sortOrder)
+
+  toAdd <- allCells$reason
+  names(toAdd) <- allCells$cellbarcode
+
+  seuratObj <- Seurat::AddMetaData(seuratObj, toAdd, col.name = outputFieldName)
+
+  print(table(seuratObj@meta.data[[sourceField]], seuratObj@meta.data[[outputFieldName]]))
+
+  return(seuratObj)
 }

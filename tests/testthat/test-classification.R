@@ -24,7 +24,7 @@ prepareTrainingData <- function(){
   seuratObj <- Seurat::FindNeighbors(seuratObj, dims = 1:10)
   seuratObj <- Seurat::FindClusters(seuratObj, resolution = 0.5)
   
-  seuratObj <- Seurat::RunUMAP(seuratObj, dims = 1:10)
+  seuratObj <- suppressWarnings(Seurat::RunUMAP(seuratObj, dims = 1:10))
   print(Seurat::DimPlot(seuratObj, reduction = "umap", label = T))
   print(Seurat::FeaturePlot(seuratObj, features = c("MS4A1", "GNLY", "CD3E", "CD14", "FCER1A", "FCGR3A", "LYZ", "PPBP","CD8A"), label = T))
   
