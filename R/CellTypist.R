@@ -107,6 +107,11 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
     }
   }
 
+  labels$predicted_labels[!is.na(labels$predicted_labels)] <- 'Unassigned'
+  if (useMajorityVoting) {
+    labels$majority_voting[!is.na(labels$majority_voting)] <- 'Unassigned'
+  }
+
   if (useMajorityVoting) {
       print(ggplot(data.frame(table(labels$over_clustering)), aes(x = Freq)) +
             geom_histogram() +
@@ -150,7 +155,7 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
       }
 
       # NOTE: %in% doesnt handle NAs well
-      labels[[fieldName]][is.na(labels[[fieldName]]) | labels[[fieldName]] %in% toDrop] <- 'Ambiguous'
+      labels[[fieldName]][!is.na(labels[[fieldName]]) & labels[[fieldName]] %in% toDrop] <- 'Ambiguous'
     }
   }
 
@@ -470,7 +475,7 @@ Classify_ImmuneCells <- function(seuratObj, assayName = Seurat::DefaultAssay(seu
 FilterDisallowedClasses <- function(seuratObj, sourceField = 'RIRA_Immune_v1.majority_voting', outputFieldName = 'DisallowedUCellCombinations', ucellCutoff = 0.2, disallowedClasses = list(
   T_NK = c('Bcell.RM_UCell', 'Myeloid.RM_UCell', 'Erythrocyte.RM_UCell', 'Platelet.RM_UCell', 'NeutrophilLineage.RM_UCell'),
   Myeloid = c('Bcell.RM_UCell', 'Tcell.RM_UCell', 'NK.RM_UCell', 'Erythrocyte.RM_UCell', 'Platelet.RM_UCell'),
-  Bcell = c('Tcell.RM_UCell', 'NK.RM_UCell', 'Myeloid.RM_UCell', 'Erythrocyte.RM_UCell', 'Platelet.RM_UCell', 'NeutrophilLineage.RM_UCell')
+  Bcell = c('Tcell.RM_UCell', 'NK.RM_UCell', 'Myeloid.RM_UCell', 'Erythrocyte.RM_UCell', 'Platelet.RM_UCell', 'NeutrophilLineage.RM_UCell', 'Complement.RM_UCell')
 )) {
   if (!sourceField %in% names(seuratObj@meta.data)) {
     stop(paste0('Missing source field: ', sourceField))
