@@ -13,7 +13,8 @@ FilterDisallowedClasses(
     "Erythrocyte.RM_UCell", "Platelet.RM_UCell", "NeutrophilLineage.RM_UCell"), Myeloid =
     c("Bcell.RM_UCell", "Tcell.RM_UCell", "NK.RM_UCell", "Erythrocyte.RM_UCell",
     "Platelet.RM_UCell"), Bcell = c("Tcell.RM_UCell", "NK.RM_UCell", "Myeloid.RM_UCell",
-    "Erythrocyte.RM_UCell", "Platelet.RM_UCell", "NeutrophilLineage.RM_UCell"))
+    "Erythrocyte.RM_UCell", "Platelet.RM_UCell", "NeutrophilLineage.RM_UCell",
+    "Complement.RM_UCell"))
 )
 }
 \arguments{

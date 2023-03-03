@@ -107,9 +107,9 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
     }
   }
 
-  labels$predicted_labels[!is.na(labels$predicted_labels)] <- 'Unassigned'
+  labels$predicted_labels[is.na(labels$predicted_labels)] <- 'Unassigned'
   if (useMajorityVoting) {
-    labels$majority_voting[!is.na(labels$majority_voting)] <- 'Unassigned'
+    labels$majority_voting[is.na(labels$majority_voting)] <- 'Unassigned'
   }
 
   if (useMajorityVoting) {
