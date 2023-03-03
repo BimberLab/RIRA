@@ -443,10 +443,11 @@ Classify_TNK <- function(seuratObj, assayName = Seurat::DefaultAssay(seuratObj),
 #' @param minCellsToRun If the input seurat object has fewer than this many cells, NAs will be added for all expected columns and celltypist will not be run.
 #' @param maxBatchSize If more than this many cells are in the object, it will be split into batches of this size and run in serial.
 #' @param retainProbabilityMatrix If true, the celltypist probability_matrix with per-class probabilities will be stored in meta.data
+#' @param filterDisallowedClasses If true, this will run FilterDisallowedClasses() on the output.
 #'
 #' @export
-Classify_ImmuneCells <- function(seuratObj, assayName = Seurat::DefaultAssay(seuratObj), columnPrefix = 'RIRA_Immune_v1.', maxAllowableClasses = 6, minFractionToInclude = 0.01, minCellsToRun = 200, maxBatchSize = 600000, retainProbabilityMatrix = FALSE) {
-  return(RunCellTypist(seuratObj = seuratObj,
+Classify_ImmuneCells <- function(seuratObj, assayName = Seurat::DefaultAssay(seuratObj), columnPrefix = 'RIRA_Immune_v1.', maxAllowableClasses = 6, minFractionToInclude = 0.01, minCellsToRun = 200, maxBatchSize = 600000, retainProbabilityMatrix = FALSE, filterDisallowedClasses = TRUE) {
+  seuratObj <- RunCellTypist(seuratObj = seuratObj,
                        modelName = 'RIRA_Immune_v1',
 
                        # These are optimized for this model:
@@ -459,7 +460,22 @@ Classify_ImmuneCells <- function(seuratObj, assayName = Seurat::DefaultAssay(seu
                        minCellsToRun = minCellsToRun,
                        maxBatchSize = maxBatchSize,
                        retainProbabilityMatrix = retainProbabilityMatrix
-  ))
+  )
+
+  # Create a simplified final column:
+  targetField <- paste0(columnPrefix, 'classification')
+  seuratObj[[targetField]] <- as.character(seuratObj@meta.data[[paste0(columnPrefix, 'majority_voting')]])
+  seuratObj@meta.data[[targetField]][grepl(seuratObj@meta.data[[targetField]], pattern = '\\|')] <- 'Ambiguous'
+  if (filterDisallowedClasses) {
+    seuratObj <- FilterDisallowedClasses(seuratObj, sourceField = targetField)
+    seuratObj@meta.data[[targetField]][!is.na(seuratObj@meta.data$DisallowedUCellCombinations)] <- 'Unknown'
+  }
+
+  seuratObj@meta.data[[targetField]][seuratObj@meta.data[[targetField]] %in% c('AvEp', 'Epithelial', 'Stromal', 'Mesothelial', 'ActiveAvEp', 'Myofibroblast', 'Fibroblast', 'Hepatocyte')] <- 'Non-Immune'
+  seuratObj@meta.data[[targetField]][seuratObj@meta.data[[targetField]] %in% c('Unassigned', 'Contamination', 'Ambiguous', 'Heterogeneous', 'Unknown')] <- 'Unknown'
+  seuratObj@meta.data[[targetField]] <- naturalsort::naturalfactor(seuratObj@meta.data[[targetField]])
+
+  return(seuratObj)
 }
 
 #' @title Filter Disallowed Classes

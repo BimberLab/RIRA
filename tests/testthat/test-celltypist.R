@@ -100,7 +100,11 @@ test_that("FilterDisallowedClasses works as expected", {
 
   seuratObj <- RunScGateWithRhesusModels(seuratObj)
   seuratObj <- Classify_ImmuneCells(seuratObj)
-  seuratObj <- FilterDisallowedClasses(seuratObj)
+
+  print('RIRA_Immune_v1.classification:')
+  print(table(seuratObj$RIRA_Immune_v1.classification))
+
+  print('DisallowedUCellCombinations:')
   print(table(seuratObj$DisallowedUCellCombinations))
 
   # NOTE: these are producing different results on 3.16 vs devel. This is possibly scGate versions?
