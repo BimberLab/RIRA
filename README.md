@@ -20,7 +20,7 @@ RIRA's data was generated and labeled using the following process:
 1) Merge data from XX 10x Genomics datasets, representing 8 tissues and XX rhesus macaques
 2) Perform strict QC and filtration, based on metrics such as per-cell RNA saturation
 3) For initial phenotyping, we used scGate with a set of rhesus-adapted gates to divide cells. This initial pass is lossy, and will not label all cells.
-4) Cells labeled by scGate were downsampled to equalize cells per class, and then fed as training data to celltypist. The resulting model (RIRA_Immune_v1) is available through this R package.
+4) Cells labeled by scGate were downsampled to equalize cells per class, and then fed as training data to celltypist. The resulting model (RIRA_Immune_v2) is available through this R package.
 5) The above model will classify cells into course bins (T/NK, Bcell, MoMacDC, and Other). For many analyses we find it useful to subdivide a dataset into these categories and then perform dimensionality reduction on these more homogenous subsets.
 6) RIRA provides a handful of models trained to identify more specific subsets (such as differentiating CD4 vs CD8 T cells)
 
@@ -28,7 +28,7 @@ RIRA's data was generated and labeled using the following process:
 
 ```
 # Use the built-in celltypist model to score cells according to course phenotypes (T/NK, Bcell, MoMacDC, Other):
-seuratObj <- RIRA::RunCellTypist(seuratObj, modelName = ‘RIRA_Immune_v1’)
+seuratObj <- RIRA::RunCellTypist(seuratObj, modelName = ‘RIRA_Immune_v2’)
 
 # Also the built-in celltypist model for finer scope T/NK lineage:
 seuratObj <- RIRA::Classify_TNK(seuratObj)

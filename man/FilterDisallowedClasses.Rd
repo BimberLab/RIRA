@@ -6,7 +6,7 @@
 \usage{
 FilterDisallowedClasses(
   seuratObj,
-  sourceField = "RIRA_Immune_v1.majority_voting",
+  sourceField = "RIRA_Immune_v2.majority_voting",
   outputFieldName = "DisallowedUCellCombinations",
   ucellCutoff = 0.2,
   disallowedClasses = list(T_NK = c("Bcell.RM_UCell", "Myeloid.RM_UCell",

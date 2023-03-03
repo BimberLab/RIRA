@@ -7,7 +7,7 @@
 Classify_ImmuneCells(
   seuratObj,
   assayName = Seurat::DefaultAssay(seuratObj),
-  columnPrefix = "RIRA_Immune_v1.",
+  columnPrefix = "RIRA_Immune_v2.",
   maxAllowableClasses = 6,
   minFractionToInclude = 0.01,
   minCellsToRun = 200,
