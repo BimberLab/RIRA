@@ -7,12 +7,13 @@
 Classify_ImmuneCells(
   seuratObj,
   assayName = Seurat::DefaultAssay(seuratObj),
-  columnPrefix = "RIRA_Immune_v1.",
+  columnPrefix = "RIRA_Immune_v2.",
   maxAllowableClasses = 6,
   minFractionToInclude = 0.01,
   minCellsToRun = 200,
   maxBatchSize = 6e+05,
-  retainProbabilityMatrix = FALSE
+  retainProbabilityMatrix = FALSE,
+  filterDisallowedClasses = TRUE
 )
 }
 \arguments{
@@ -31,6 +32,8 @@ Classify_ImmuneCells(
 \item{maxBatchSize}{If more than this many cells are in the object, it will be split into batches of this size and run in serial.}
 
 \item{retainProbabilityMatrix}{If true, the celltypist probability_matrix with per-class probabilities will be stored in meta.data}
+
+\item{filterDisallowedClasses}{If true, this will run FilterDisallowedClasses() on the output.}
 }
 \description{
 Runs celltypist using the RIRA bulk immune model to score cells using CellTypist with optimized parameters.

@@ -107,6 +107,11 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
     }
   }
 
+  labels$predicted_labels[is.na(labels$predicted_labels)] <- 'Unassigned'
+  if (useMajorityVoting) {
+    labels$majority_voting[is.na(labels$majority_voting)] <- 'Unassigned'
+  }
+
   if (useMajorityVoting) {
       print(ggplot(data.frame(table(labels$over_clustering)), aes(x = Freq)) +
             geom_histogram() +
@@ -150,7 +155,7 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
       }
 
       # NOTE: %in% doesnt handle NAs well
-      labels[[fieldName]][is.na(labels[[fieldName]]) | labels[[fieldName]] %in% toDrop] <- 'Ambiguous'
+      labels[[fieldName]][!is.na(labels[[fieldName]]) & labels[[fieldName]] %in% toDrop] <- 'Ambiguous'
     }
   }
 
@@ -438,11 +443,12 @@ Classify_TNK <- function(seuratObj, assayName = Seurat::DefaultAssay(seuratObj),
 #' @param minCellsToRun If the input seurat object has fewer than this many cells, NAs will be added for all expected columns and celltypist will not be run.
 #' @param maxBatchSize If more than this many cells are in the object, it will be split into batches of this size and run in serial.
 #' @param retainProbabilityMatrix If true, the celltypist probability_matrix with per-class probabilities will be stored in meta.data
+#' @param filterDisallowedClasses If true, this will run FilterDisallowedClasses() on the output.
 #'
 #' @export
-Classify_ImmuneCells <- function(seuratObj, assayName = Seurat::DefaultAssay(seuratObj), columnPrefix = 'RIRA_Immune_v1.', maxAllowableClasses = 6, minFractionToInclude = 0.01, minCellsToRun = 200, maxBatchSize = 600000, retainProbabilityMatrix = FALSE) {
-  return(RunCellTypist(seuratObj = seuratObj,
-                       modelName = 'RIRA_Immune_v1',
+Classify_ImmuneCells <- function(seuratObj, assayName = Seurat::DefaultAssay(seuratObj), columnPrefix = 'RIRA_Immune_v2.', maxAllowableClasses = 6, minFractionToInclude = 0.01, minCellsToRun = 200, maxBatchSize = 600000, retainProbabilityMatrix = FALSE, filterDisallowedClasses = TRUE) {
+  seuratObj <- RunCellTypist(seuratObj = seuratObj,
+                       modelName = 'RIRA_Immune_v2',
 
                        # These are optimized for this model:
                        minProp = 0.75, useMajorityVoting = TRUE, mode = "prob_match",
@@ -454,7 +460,22 @@ Classify_ImmuneCells <- function(seuratObj, assayName = Seurat::DefaultAssay(seu
                        minCellsToRun = minCellsToRun,
                        maxBatchSize = maxBatchSize,
                        retainProbabilityMatrix = retainProbabilityMatrix
-  ))
+  )
+
+  # Create a simplified final column:
+  targetField <- paste0(columnPrefix, 'cellclass')
+  seuratObj@meta.data[[targetField]] <- as.character(seuratObj@meta.data[[targetField]])
+  seuratObj@meta.data[[targetField]][grepl(seuratObj@meta.data[[targetField]], pattern = '\\|')] <- 'Ambiguous'
+  if (filterDisallowedClasses) {
+    seuratObj <- FilterDisallowedClasses(seuratObj, sourceField = targetField)
+    seuratObj@meta.data[[targetField]][!is.na(seuratObj@meta.data$DisallowedUCellCombinations)] <- 'Unknown'
+  }
+
+  seuratObj@meta.data[[targetField]][seuratObj@meta.data[[targetField]] %in% c('AvEp', 'Epithelial', 'Stromal', 'Mesothelial', 'ActiveAvEp', 'Myofibroblast', 'Fibroblast', 'Hepatocyte')] <- 'Non-Immune'
+  seuratObj@meta.data[[targetField]][seuratObj@meta.data[[targetField]] %in% c('Unassigned', 'Contamination', 'Ambiguous', 'Heterogeneous', 'Unknown')] <- 'Unknown'
+  seuratObj@meta.data[[targetField]] <- naturalsort::naturalfactor(seuratObj@meta.data[[targetField]])
+
+  return(seuratObj)
 }
 
 #' @title Filter Disallowed Classes
@@ -467,10 +488,10 @@ Classify_ImmuneCells <- function(seuratObj, assayName = Seurat::DefaultAssay(seu
 #' @param disallowedClasses This is a list where the names are the cell classes (which should match levels in sourceField), and values are a vector of UCell field names.
 #'
 #' @export
-FilterDisallowedClasses <- function(seuratObj, sourceField = 'RIRA_Immune_v1.majority_voting', outputFieldName = 'DisallowedUCellCombinations', ucellCutoff = 0.2, disallowedClasses = list(
+FilterDisallowedClasses <- function(seuratObj, sourceField = 'RIRA_Immune_v2.majority_voting', outputFieldName = 'DisallowedUCellCombinations', ucellCutoff = 0.2, disallowedClasses = list(
   T_NK = c('Bcell.RM_UCell', 'Myeloid.RM_UCell', 'Erythrocyte.RM_UCell', 'Platelet.RM_UCell', 'NeutrophilLineage.RM_UCell'),
   Myeloid = c('Bcell.RM_UCell', 'Tcell.RM_UCell', 'NK.RM_UCell', 'Erythrocyte.RM_UCell', 'Platelet.RM_UCell'),
-  Bcell = c('Tcell.RM_UCell', 'NK.RM_UCell', 'Myeloid.RM_UCell', 'Erythrocyte.RM_UCell', 'Platelet.RM_UCell', 'NeutrophilLineage.RM_UCell')
+  Bcell = c('Tcell.RM_UCell', 'NK.RM_UCell', 'Myeloid.RM_UCell', 'Erythrocyte.RM_UCell', 'Platelet.RM_UCell', 'NeutrophilLineage.RM_UCell', 'Complement.RM_UCell')
 )) {
   if (!sourceField %in% names(seuratObj@meta.data)) {
     stop(paste0('Missing source field: ', sourceField))

@@ -27,12 +27,12 @@ test_that("celltypist runs", {
   expect_equal(289, unname(table(seuratObj$predicted_labels)['B cells']))
 
   # ensure the RIRA model works:
-  seuratObj <- RunCellTypist(seuratObj, modelName = 'RIRA_Immune_v1', columnPrefix = 'RIRA.')
+  seuratObj <- RunCellTypist(seuratObj, modelName = 'RIRA_Immune_v2', columnPrefix = 'RIRA.')
   print(sort(table(seuratObj$RIRA.majority_voting)))
   expect_equal(4, length(unique(seuratObj$RIRA.majority_voting)), info = 'using RIRA model', tolerance = 1)
   expect_equal(346, unname(table(seuratObj$RIRA.majority_voting)['Bcell']), tolerance = 1)
   expect_equal(1653, unname(table(seuratObj$RIRA.majority_voting)['T_NK']), tolerance = 1)
-  expect_equal(686, unname(table(seuratObj$RIRA.majority_voting)['MoMacDC']))
+  expect_equal(686, unname(table(seuratObj$RIRA.majority_voting)['Myeloid']))
 
   # NOTE: this is very slow, so skip in automated testing for now
   modelFile <- 'myModel.pkl'
@@ -70,7 +70,7 @@ test_that("celltypist runs with batchSize", {
   print(table(seuratObj$majority_voting))
 
   # This should be identical to the test above
-  expect_equal(12, length(unique(seuratObj$cellclass)), info = 'using default model', tolerance = 0)
+  expect_equal(13, length(unique(seuratObj$cellclass)), info = 'using default model', tolerance = 0)
   expect_equal(28, length(unique(seuratObj$majority_voting)), info = 'using default model', tolerance = 1)  # NOTE: getting different outcomes on devel vs. 3.16, perhaps due to some package difference? the difference is ambugious calls
   expect_equal(110, length(unique(seuratObj$predicted_labels)))
   expect_equal(289, unname(table(seuratObj$predicted_labels)['B cells']))
@@ -100,12 +100,20 @@ test_that("FilterDisallowedClasses works as expected", {
 
   seuratObj <- RunScGateWithRhesusModels(seuratObj)
   seuratObj <- Classify_ImmuneCells(seuratObj)
-  seuratObj <- FilterDisallowedClasses(seuratObj)
+
+  print('RIRA_Immune_v2.cellclass:')
+  print(table(seuratObj$RIRA_Immune_v2.cellclass))
+
+  expect_equal(255, sum(seuratObj$RIRA_Immune_v2.cellclass == 'Bcell', na.rm = T))
+  expect_equal(570, sum(seuratObj$RIRA_Immune_v2.cellclass == 'Myeloid', na.rm = T))
+  expect_equal(1289, sum(seuratObj$RIRA_Immune_v2.cellclass == 'T_NK', na.rm = T))
+
+  print('DisallowedUCellCombinations:')
   print(table(seuratObj$DisallowedUCellCombinations))
 
   # NOTE: these are producing different results on 3.16 vs devel. This is possibly scGate versions?
   expect_equal(347, sum(seuratObj$DisallowedUCellCombinations == 'NeutrophilLineage.RM_UCell', na.rm = T), tolerance = 3)
-  expect_equal(20, sum(seuratObj$DisallowedUCellCombinations == 'Erythrocyte.RM_UCell', na.rm = T))
-  expect_equal(11, sum(seuratObj$DisallowedUCellCombinations == 'NK.RM_UCell', na.rm = T))
-  expect_equal(21, sum(seuratObj$DisallowedUCellCombinations == 'Platelet.RM_UCell', na.rm = T), tolerance = 1)
+  expect_equal(21, sum(seuratObj$DisallowedUCellCombinations == 'Erythrocyte.RM_UCell', na.rm = T))
+  expect_equal(57, sum(seuratObj$DisallowedUCellCombinations == 'NK.RM_UCell', na.rm = T))
+  expect_equal(55, sum(seuratObj$DisallowedUCellCombinations == 'Platelet.RM_UCell', na.rm = T), tolerance = 1)
 })
