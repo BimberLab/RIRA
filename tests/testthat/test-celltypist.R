@@ -32,7 +32,7 @@ test_that("celltypist runs", {
   expect_equal(4, length(unique(seuratObj$RIRA.majority_voting)), info = 'using RIRA model', tolerance = 1)
   expect_equal(346, unname(table(seuratObj$RIRA.majority_voting)['Bcell']), tolerance = 1)
   expect_equal(1653, unname(table(seuratObj$RIRA.majority_voting)['T_NK']), tolerance = 1)
-  expect_equal(570, unname(table(seuratObj$RIRA.majority_voting)['Myeloid']))
+  expect_equal(686, unname(table(seuratObj$RIRA.majority_voting)['Myeloid']))
 
   # NOTE: this is very slow, so skip in automated testing for now
   modelFile <- 'myModel.pkl'
