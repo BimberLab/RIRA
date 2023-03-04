@@ -32,7 +32,7 @@ test_that("celltypist runs", {
   expect_equal(4, length(unique(seuratObj$RIRA.majority_voting)), info = 'using RIRA model', tolerance = 1)
   expect_equal(346, unname(table(seuratObj$RIRA.majority_voting)['Bcell']), tolerance = 1)
   expect_equal(1653, unname(table(seuratObj$RIRA.majority_voting)['T_NK']), tolerance = 1)
-  expect_equal(686, unname(table(seuratObj$RIRA.majority_voting)['MoMacDC']))
+  expect_equal(570, unname(table(seuratObj$RIRA.majority_voting)['Myeloid']))
 
   # NOTE: this is very slow, so skip in automated testing for now
   modelFile <- 'myModel.pkl'
@@ -105,7 +105,7 @@ test_that("FilterDisallowedClasses works as expected", {
   print(table(seuratObj$RIRA_Immune_v2.cellclass))
 
   expect_equal(255, sum(seuratObj$RIRA_Immune_v2.cellclass == 'Bcell', na.rm = T))
-  expect_equal(686, sum(seuratObj$RIRA_Immune_v2.cellclass == 'Myeloid', na.rm = T))
+  expect_equal(570, sum(seuratObj$RIRA_Immune_v2.cellclass == 'Myeloid', na.rm = T))
   expect_equal(1289, sum(seuratObj$RIRA_Immune_v2.cellclass == 'T_NK', na.rm = T))
 
   print('DisallowedUCellCombinations:')
@@ -113,7 +113,7 @@ test_that("FilterDisallowedClasses works as expected", {
 
   # NOTE: these are producing different results on 3.16 vs devel. This is possibly scGate versions?
   expect_equal(347, sum(seuratObj$DisallowedUCellCombinations == 'NeutrophilLineage.RM_UCell', na.rm = T), tolerance = 3)
-  expect_equal(20, sum(seuratObj$DisallowedUCellCombinations == 'Erythrocyte.RM_UCell', na.rm = T))
-  expect_equal(11, sum(seuratObj$DisallowedUCellCombinations == 'NK.RM_UCell', na.rm = T))
-  expect_equal(21, sum(seuratObj$DisallowedUCellCombinations == 'Platelet.RM_UCell', na.rm = T), tolerance = 1)
+  expect_equal(21, sum(seuratObj$DisallowedUCellCombinations == 'Erythrocyte.RM_UCell', na.rm = T))
+  expect_equal(57, sum(seuratObj$DisallowedUCellCombinations == 'NK.RM_UCell', na.rm = T))
+  expect_equal(55, sum(seuratObj$DisallowedUCellCombinations == 'Platelet.RM_UCell', na.rm = T), tolerance = 1)
 })
