@@ -303,11 +303,12 @@ TrainCellTypist <- function(seuratObj, labelField, modelFile, minCellsPerClass =
   }
   outFile <- tempfile(tmpdir = outDir)
 
+  print(paste0('Initial cells: ', ncol(seuratObj)))
   if (!is.null(excludedClasses)) {
     for (label in excludedClasses) {
       print(paste0('Dropping label: ', label))
-        toKeep <- rownames(seuratObj@meta.data)[seuratObj@meta.data[[labelField]] != label]
-        seuratObj <- subset(seuratObj, cells = toKeep)
+      toKeep <- rownames(seuratObj@meta.data)[seuratObj@meta.data[[labelField]] != label]
+      seuratObj <- subset(seuratObj, cells = toKeep)
       print(paste0('Cells remaining: ', ncol(seuratObj)))
     }
   }
@@ -336,6 +337,9 @@ TrainCellTypist <- function(seuratObj, labelField, modelFile, minCellsPerClass =
   if (!is.null(minCellsPerClass) && minCellsPerClass > 0) {
     seuratObj <- .DropLowCountClasses(seuratObj, labelField, minCellsPerClass)
   }
+
+  print('Summary of cells per class:')
+  print(sort(table(seuratObj@meta.data[[labelField]])))
 
   shouldNormalize <- FALSE
   if (!all(is.null(featureInclusionList))) {
