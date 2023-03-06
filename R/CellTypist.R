@@ -475,6 +475,17 @@ Classify_ImmuneCells <- function(seuratObj, assayName = Seurat::DefaultAssay(seu
   seuratObj@meta.data[[targetField]][seuratObj@meta.data[[targetField]] %in% c('Unassigned', 'Contamination', 'Ambiguous', 'Heterogeneous', 'Unknown')] <- 'Unknown'
   seuratObj@meta.data[[targetField]] <- naturalsort::naturalfactor(seuratObj@meta.data[[targetField]])
 
+  print(ggplot(seuratObj@meta.data, aes(x = !!rlang::sym(targetField), fill = !!rlang::sym(targetField))) +
+      geom_bar(color = 'black') +
+      egg::theme_presentation(base_size = 12) +
+      ggtitle('Celltypist Call After Rename') +
+      labs(x = 'Celltypist Call', y = '# Cells') +
+      theme(
+        legend.position = 'none',
+        axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)
+      )
+  )
+
   return(seuratObj)
 }
 
