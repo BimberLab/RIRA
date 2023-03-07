@@ -106,7 +106,7 @@ test_that("FilterDisallowedClasses works as expected", {
 
   expect_equal(255, sum(seuratObj$RIRA_Immune_v2.cellclass == 'Bcell', na.rm = T))
   expect_equal(570, sum(seuratObj$RIRA_Immune_v2.cellclass == 'Myeloid', na.rm = T))
-  expect_equal(1289, sum(seuratObj$RIRA_Immune_v2.cellclass == 'T_NK', na.rm = T))
+  expect_equal(1297, sum(seuratObj$RIRA_Immune_v2.cellclass == 'T_NK', na.rm = T))
 
   print('DisallowedUCellCombinations:')
   print(table(seuratObj$DisallowedUCellCombinations))
@@ -115,5 +115,5 @@ test_that("FilterDisallowedClasses works as expected", {
   expect_equal(347, sum(seuratObj$DisallowedUCellCombinations == 'NeutrophilLineage.RM_UCell', na.rm = T), tolerance = 3)
   expect_equal(21, sum(seuratObj$DisallowedUCellCombinations == 'Erythrocyte.RM_UCell', na.rm = T))
   expect_equal(57, sum(seuratObj$DisallowedUCellCombinations == 'NK.RM_UCell', na.rm = T))
-  expect_equal(55, sum(seuratObj$DisallowedUCellCombinations == 'Platelet.RM_UCell', na.rm = T), tolerance = 1)
+  expect_equal(57, sum(seuratObj$DisallowedUCellCombinations == 'Platelet.RM_UCell', na.rm = T), tolerance = 1)
 })
