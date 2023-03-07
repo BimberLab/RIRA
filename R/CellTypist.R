@@ -455,7 +455,7 @@ Classify_ImmuneCells <- function(seuratObj, assayName = Seurat::DefaultAssay(seu
                        modelName = 'RIRA_Immune_v2',
 
                        # These are optimized for this model:
-                       minProp = 0.75, useMajorityVoting = TRUE, mode = "prob_match",
+                       minProp = 0.5, useMajorityVoting = TRUE, mode = "prob_match",
 
                        assayName = assayName,
                        columnPrefix = columnPrefix,
