@@ -306,6 +306,8 @@ GetGeneSet <- function(name) {
 
 .RegisterGeneSet('Myelocytes', c("OLFM4", "LTF", "CAMP", "LCN2"))
 .RegisterGeneSet('Pro_Myelocytes', c("BPI", "MPO", "ELANE", "RTD1A", "RTD1B", "DEFA1B", "AZU1"))
+#These were found by literature investigation, and the MCMs were added via correlation with UNG - a necessary gene for somatic hypermutation.
+.RegisterGeneSet('SomaticHypermutation', c("AICDA", "UNG", "MCM5", "MCM4", "MCM3", "MCM6", "MCM2"))
 ### End Phenotyping Gene Sets
 
 # Sustaining CD4 survival?
