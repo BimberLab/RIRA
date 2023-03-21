@@ -516,7 +516,13 @@ FilterDisallowedClasses <- function(seuratObj, sourceField = 'RIRA_Immune_v2.maj
   for (cls in names(disallowedClasses)) {
     for (ucell in disallowedClasses[[cls]]) {
       if (!ucell %in% names(seuratObj@meta.data)) {
-        stop(paste0('Missing UCell field: ', ucell))
+        modelName <- gsub(ucell, pattern = '_UCell', replacement = '')
+        model <- GetScGateModel(modelName)
+        if (!is.null(model)) {
+          seuratObj <- RunScGate(seuratObj, modelName)
+        } else {
+          stop(paste0('Missing UCell field: ', ucell))
+        }
       }
 
       x <- colnames(seuratObj)[seuratObj[[sourceField]] == cls & seuratObj[[ucell]] > ucellCutoff]
