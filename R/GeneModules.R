@@ -24,7 +24,19 @@ CalculateUCellScores <- function(seuratObj, forceRecalculate = FALSE, seed = Get
     Interferon_Response = GetGeneSet('Interferon_Response')
   )
 
-  if (forceRecalculate || any(!paste0(names(toCalculate), '_UCell') %in% names(seuratObj@meta.data))) {
+  needsRecalc <- forceRecalculate || any(!paste0(names(toCalculate), '_UCell') %in% names(seuratObj@meta.data))
+
+  # NOTE: situations like merging two seurat objects could result in these columns existing, but having NAs
+  if (!needsRecalc) {
+    for (colName in paste0(names(toCalculate), '_UCell')) {
+      if (colName %in% names(seuratObj@meta.data) && any(is.na(seuratObj@meta.data[[colName]]))) {
+        needsRecalc <- TRUE
+        break
+      }
+    }
+  }
+
+  if (needsRecalc) {
     if (!is.null(seed)) {
       print(paste0('Setting random seed: ', seed))
       set.seed(seed)
