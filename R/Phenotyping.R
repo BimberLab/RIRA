@@ -306,6 +306,17 @@ GetGeneSet <- function(name) {
 
 .RegisterGeneSet('Myelocytes', c("OLFM4", "LTF", "CAMP", "LCN2"))
 .RegisterGeneSet('Pro_Myelocytes', c("BPI", "MPO", "ELANE", "RTD1A", "RTD1B", "DEFA1B", "AZU1"))
+#These were found by literature investigation, and the MCMs were added via correlation with UNG - a necessary gene for somatic hypermutation.
+.RegisterGeneSet('SomaticHypermutation', c("AICDA", "UNG", "MCM5", "MCM4", "MCM3", "MCM6", "MCM2"))
+#These BCell signatures were compiled by Greg for use in RIRA (evidence is literature support & marker-uniqueness within RIRA)
+.RegisterGeneSet("GerminalCenter", c("AICDA", "RGS13", "MEF2B", "ELL3", "FAS")) #CD40 omitted 
+.RegisterGeneSet("CD40_Pos_BCells", c("CD69", "AHNAK", "MAMU-DRA", "MS4A1", "CD1C")) #this is a weak signature, with some overlap between CD40- B cells. This should be supplemented with Memory vs Naive gene sets.
+.RegisterGeneSet("CD40_Neg_BCells", c("ANHAK", "SOX5", "MAMU-DRA", "MS4A1", "CD1C")) #similarly, this signature has overlap with CD40+. 
+.RegisterGeneSet("Pre-BCells", c("STMN1", "VPREB1", "SOX4"))
+.RegisterGeneSet("PlasmaCells", c("DERL3", "TNFRSF17", "JCHAIN", "FKBP11", "XBP1")) #I omitted IGHA1, since we should probably keep this gene set class agnostic.
+.RegisterGeneSet("NaiveB",  c("TCL1A", "FCER2", "CXCR4")) 
+.RegisterGeneSet("MemoryB",  c("CR2", "PLAC8", "LY86", "CD44")) 
+.RegisterGeneSet("InnateB",  c("CD1C", "AHNAK", "SOX5")) 
 ### End Phenotyping Gene Sets
 
 # Sustaining CD4 survival?
