@@ -66,7 +66,12 @@ RunScGate <- function(seuratObj, model, min.cells = 30, assay = 'RNA', pos.thr =
   if (length(names(seuratObj@reductions)) > 0) {
     colNames <- names(seuratObj@meta.data)[grepl(names(seuratObj@meta.data), pattern = paste0('UCell$'))]
     for (col in colNames) {
-      suppressWarnings(print(Seurat::FeaturePlot(seuratObj, features = col, min.cutoff = 'q05', max.cutoff = 'q95')))
+      tryCatch({
+        suppressWarnings(print(Seurat::FeaturePlot(seuratObj, features = col, min.cutoff = 'q05', max.cutoff = 'q95')))
+      }, error = function(e){
+        print(paste0("Error generating UCell FeaturePlot for: ", col))
+        print(conditionMessage(e))
+      })
     }
   } else {
     print('There are no reductions in this seurat object, cannot create UCell FeaturePlots')
