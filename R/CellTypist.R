@@ -238,7 +238,7 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
     stop(paste0('Missing file: ', labelFile, '. files present: ', paste0(list.files(outDir), collapse = ', ')))
   }
 
-  labels <- utils::read.csv(labelFile, header = T, row.names = 1)
+  labels <- utils::read.csv(labelFile, header = T, row.names = 1, stringsAsFactors = FALSE)
 
   if ('majority_voting' %in% names(labels)) {
     labels$majority_voting[labels$majority_voting == 'Unassigned'] <- NA
@@ -250,7 +250,7 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
       stop(paste0('Missing file: ', probabilityMatrixFile, '. files present: ', paste0(list.files(outDir), collapse = ', ')))
     }
 
-    probabilityMatrix <- utils::read.csv(probabilityMatrixFile, header = T, row.names = 1, check.names = T)
+    probabilityMatrix <- utils::read.csv(probabilityMatrixFile, header = T, row.names = 1, check.names = T, stringsAsFactors = FALSE)
     names(probabilityMatrix) <- paste0('prob.', names(probabilityMatrix))
     labels <- cbind(labels, probabilityMatrix)
   }
@@ -468,15 +468,19 @@ Classify_ImmuneCells <- function(seuratObj, assayName = Seurat::DefaultAssay(seu
 
   # Create a simplified final column:
   targetField <- paste0(columnPrefix, 'cellclass')
+  if (!targetField %in% names(seuratObj@meta.data)) {
+    stop(paste0('Missing expected field, something went wrong with celltypist: ', targetField))
+  }
+
   seuratObj@meta.data[[targetField]] <- as.character(seuratObj@meta.data[[targetField]])
-  seuratObj@meta.data[[targetField]][grepl(seuratObj@meta.data[[targetField]], pattern = '\\|')] <- 'Ambiguous'
+  seuratObj@meta.data[[targetField]][!is.na(seuratObj@meta.data[[targetField]]) & grepl(seuratObj@meta.data[[targetField]], pattern = '\\|')] <- 'Ambiguous'
   if (filterDisallowedClasses) {
     seuratObj <- FilterDisallowedClasses(seuratObj, sourceField = targetField)
     seuratObj@meta.data[[targetField]][!is.na(seuratObj@meta.data$DisallowedUCellCombinations)] <- 'Unknown'
   }
 
-  seuratObj@meta.data[[targetField]][seuratObj@meta.data[[targetField]] %in% c('AvEp', 'Epithelial', 'Stromal', 'Mesothelial', 'ActiveAvEp', 'Myofibroblast', 'Fibroblast', 'Hepatocyte')] <- 'Non-Immune'
-  seuratObj@meta.data[[targetField]][seuratObj@meta.data[[targetField]] %in% c('Unassigned', 'Contamination', 'Ambiguous', 'Heterogeneous', 'Unknown')] <- 'Unknown'
+  seuratObj@meta.data[[targetField]][!is.na(seuratObj@meta.data[[targetField]]) & seuratObj@meta.data[[targetField]] %in% c('AvEp', 'Epithelial', 'Stromal', 'Mesothelial', 'ActiveAvEp', 'Myofibroblast', 'Fibroblast', 'Hepatocyte')] <- 'Non-Immune'
+  seuratObj@meta.data[[targetField]][!is.na(seuratObj@meta.data[[targetField]]) & seuratObj@meta.data[[targetField]] %in% c('Unassigned', 'Contamination', 'Ambiguous', 'Heterogeneous', 'Unknown')] <- 'Unknown'
   seuratObj@meta.data[[targetField]] <- naturalsort::naturalfactor(seuratObj@meta.data[[targetField]])
 
   print(ggplot(seuratObj@meta.data, aes(x = !!rlang::sym(targetField), fill = !!rlang::sym(targetField))) +
@@ -533,7 +537,9 @@ FilterDisallowedClasses <- function(seuratObj, sourceField = 'RIRA_Immune_v2.maj
   }
 
   allCells <- data.frame(cellbarcode = colnames(seuratObj), sortOrder = 1:ncol(seuratObj))
-  allCells <- merge(allCells, toDrop, by = 'cellbarcode', all.x = T)
+  if (nrow(toDrop) > 0) {
+    allCells <- merge(allCells, toDrop, by = 'cellbarcode', all.x = T)
+  }
   allCells <- dplyr::arrange(allCells, sortOrder)
 
   toAdd <- allCells$reason
