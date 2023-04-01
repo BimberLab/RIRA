@@ -38,7 +38,7 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
 
   if (ncol(seuratObj) < minCellsToRun) {
     warning('Too few cells, will not run celltypist. NAs will be added instead')
-    expectedCols <- c('predicted_labels', 'over_clustering', 'majority_voting')
+    expectedCols <- c('predicted_labels', 'over_clustering', 'majority_voting', 'cellclass')
     if (!is.null(columnPrefix)) {
       expectedCols <- paste0(columnPrefix, expectedCols)
     }
@@ -469,7 +469,8 @@ Classify_ImmuneCells <- function(seuratObj, assayName = Seurat::DefaultAssay(seu
   # Create a simplified final column:
   targetField <- paste0(columnPrefix, 'cellclass')
   if (!targetField %in% names(seuratObj@meta.data)) {
-    stop(paste0('Missing expected field, something went wrong with celltypist: ', targetField))
+    foundFields <- sort(unique(c(names(seuratObj@meta.data)[grepl(names(seuratObj@meta.data), pattern = 'cellclass')], names(seuratObj@meta.data)[grepl(names(seuratObj@meta.data), pattern = columnPrefix)])))
+    stop(paste0('Missing expected field, something went wrong with celltypist: ', targetField, '. Fields found: ', paste0(foundFields, collapse = ',')))
   }
 
   seuratObj@meta.data[[targetField]] <- as.character(seuratObj@meta.data[[targetField]])
