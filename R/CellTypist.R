@@ -540,13 +540,14 @@ FilterDisallowedClasses <- function(seuratObj, sourceField = 'RIRA_Immune_v2.maj
   allCells <- data.frame(cellbarcode = colnames(seuratObj), sortOrder = 1:ncol(seuratObj))
   if (nrow(toDrop) > 0) {
     allCells <- merge(allCells, toDrop, by = 'cellbarcode', all.x = T)
+    allCells <- dplyr::arrange(allCells, sortOrder)
+
+    toAdd <- allCells$reason
+    names(toAdd) <- allCells$cellbarcode
+    seuratObj <- Seurat::AddMetaData(seuratObj, toAdd, col.name = outputFieldName)
+  } else {
+    seuratObj[[outputFieldName]] <- NA
   }
-  allCells <- dplyr::arrange(allCells, sortOrder)
-
-  toAdd <- allCells$reason
-  names(toAdd) <- allCells$cellbarcode
-
-  seuratObj <- Seurat::AddMetaData(seuratObj, toAdd, col.name = outputFieldName)
 
   print(table(seuratObj@meta.data[[sourceField]], seuratObj@meta.data[[outputFieldName]]))
 
