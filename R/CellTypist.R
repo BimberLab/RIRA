@@ -421,7 +421,7 @@ TrainCellTypist <- function(seuratObj, labelField, modelFile, minCellsPerClass =
 #' @export
 Classify_TNK <- function(seuratObj, assayName = Seurat::DefaultAssay(seuratObj), columnPrefix = 'RIRA_TNK_v2.', maxAllowableClasses = 6, minFractionToInclude = 0.01, minCellsToRun = 200, maxBatchSize = 600000, retainProbabilityMatrix = FALSE) {
   return(RunCellTypist(seuratObj = seuratObj,
-         modelName = "CD4vCD8vGDvNK_v2",
+         modelName = "RIRA_TNK_v2",
          # These are optimized for this model:
          pThreshold = 0.5, minProp = 0, useMajorityVoting = FALSE, mode = "prob_match",
 
