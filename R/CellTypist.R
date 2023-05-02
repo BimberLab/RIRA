@@ -520,7 +520,7 @@ FilterDisallowedClasses <- function(seuratObj, sourceField = 'RIRA_Immune_v2.maj
   toDrop <- data.frame(cellbarcode = character(), reason = character())
   for (cls in names(disallowedClasses)) {
     for (ucell in disallowedClasses[[cls]]) {
-      if (!ucell %in% names(seuratObj@meta.data)) {
+      if (!ucell %in% names(seuratObj@meta.data) || any(is.na(seuratObj@meta.data[[ucell]]))) {
         modelName <- gsub(ucell, pattern = '_UCell', replacement = '')
         model <- GetScGateModel(modelName)
         if (!is.null(model)) {
