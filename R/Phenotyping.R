@@ -88,13 +88,17 @@ PlotImmuneMarkers <- function(seuratObj, reductions = c('tsne', 'umap')) {
 
 	PlotMarkerSet(seuratObj, reductions = reductions, 'Treg17', features = c('RORA', 'RORB', 'RORC', 'IL4', 'STAT3'))
 
-	# ZBTB16 = PLZF
 	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('HAVCR2'), 'Th1')
 
 	# ZBTB16 = PLZF
-	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('ZBTB16', 'DPP4'), 'MAIT')
+	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('KLRB1', 'NCR3', 'ZBTB16', 'RORC', 'SLC4A10', 'DPP4'), 'MAIT')
 
-	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('TBX21', 'GATA3', 'RORC', 'FOXP3', 'BCL6', 'EOMES', 'TOX', 'GATA2', 'TCF7', 'KLF2', 'NR4A1', 'LEF1', 'PRDM1', 'ID2', 'ID3'), 'Transcription Factors')
+	# ZNF683 = HOBIT
+	# LOC100423131 = XCL1, ENSMMUG00000013779, Lymphotactin
+	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('NCR3', 'CD69', 'KLRC2', 'XCL1', 'LOC100423131', 'ZNF683', 'CD7'), 'NKT')
+
+	# ZNF683 = HOBIT
+	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('TBX21', 'GATA3', 'RORC', 'FOXP3', 'BCL6', 'EOMES', 'TOX', 'GATA2', 'TCF7', 'KLF2', 'NR4A1', 'LEF1', 'PRDM1', 'ID2', 'ID3', 'ZNF683'), 'Transcription Factors')
 
 	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('TIGIT', 'CTLA4', 'BTLA', 'PDCD1', 'CD274'), 'Inhibitory Markers')
 
