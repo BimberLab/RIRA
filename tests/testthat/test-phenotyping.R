@@ -4,6 +4,8 @@ library(testthat)
 
 context("Phenotyping")
 
+source('installSeuratData.R')
+
 test_that("Gene sets work", {
   expect_equal(length(GetGeneSet('MMul10TcrGenes')), 102)
   expect_equal(length(GetGeneSet('TandNK_Activation.1')), 8)
@@ -15,9 +17,7 @@ test_that("ExpandGeneList works", {
 })
 
 test_that("ScoreUsingSavedComponent works", {
-  suppressWarnings(SeuratData::InstallData("pbmc3k"))
-  suppressWarnings(data("pbmc3k"))
-  seuratObj <- suppressWarnings(pbmc3k)
+  seuratObj <- getBaseSeuratData()
   seuratObj <- Seurat::FindVariableFeatures(seuratObj, nfeatures = 2000)
   seuratObj <- Seurat::ScaleData(seuratObj)
   seuratObj <- Seurat::RunPCA(seuratObj, features = Seurat::VariableFeatures(object = seuratObj))

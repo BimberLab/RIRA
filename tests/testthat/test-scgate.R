@@ -8,6 +8,8 @@ future::plan(future::sequential)
 
 testthat::context("scGate")
 
+source('installSeuratData.R')
+
 test_that("scGates load", {
   gates <- GetAvailableScGates()
   expect_equal(length(gates), 26)
@@ -17,9 +19,7 @@ test_that("scGates load", {
 })
 
 test_that("scGate runs with custom models", {
-  suppressWarnings(SeuratData::InstallData("pbmc3k"))
-  suppressWarnings(data("pbmc3k"))
-  seuratObj <- suppressWarnings(pbmc3k)
+  seuratObj <- getBaseSeuratData()
 
   seuratObj <- RunScGateForModels(seuratObj, modelNames = c('Bcell', 'Tcell', 'NK', 'Myeloid', 'Stromal', 'pDC', 'Erythrocyte', 'Epithelial', 'Platelet_MK'), labelRename = list(Tcell = 'T_NK', NK = 'T_NK'))
   print('scGate runs with custom models')
@@ -31,9 +31,7 @@ test_that("scGate runs with custom models", {
 test_that("scGate Runs", {
   gate <- GetScGateModel('demo_gate')
 
-  suppressWarnings(SeuratData::InstallData("pbmc3k"))
-  suppressWarnings(data("pbmc3k"))
-  seuratObj <- suppressWarnings(pbmc3k)
+  seuratObj <- getBaseSeuratData()
   
   # Try without reductions present:
   seuratObj <- RunScGate(seuratObj, gate)
@@ -69,9 +67,7 @@ test_that("scGate Runs", {
 
 test_that("scGate works with built-in gates", {
   # Use with built-in gate:
-  suppressWarnings(SeuratData::InstallData("pbmc3k"))
-  suppressWarnings(data("pbmc3k"))
-  seuratObj <- suppressWarnings(pbmc3k)
+  seuratObj <- getBaseSeuratData()
   seuratObj <- RunScGate(seuratObj, model = 'Bcell')
   expect_equal(sum(seuratObj$is.pure == 'Pure'), 293)
 
@@ -79,9 +75,7 @@ test_that("scGate works with built-in gates", {
 
 
 test_that("scGates runs on all", {
-  suppressWarnings(SeuratData::InstallData("pbmc3k"))
-  suppressWarnings(data("pbmc3k"))
-  seuratObj <- suppressWarnings(pbmc3k)
+  seuratObj <- getBaseSeuratData()
 
   seuratObj <- RunScGateWithDefaultModels(seuratObj)
   expect_false('Bcell.is.pure.level4' %in% names(seuratObj@meta.data))
@@ -101,9 +95,7 @@ test_that("scGates runs on all", {
 })
 
 test_that("scGate Runs", {
-  suppressWarnings(SeuratData::InstallData("pbmc3k"))
-  suppressWarnings(data("pbmc3k"))
-  seuratObj <- suppressWarnings(pbmc3k)
+  seuratObj <- getBaseSeuratData()
 
   # Try with aliasing of models:
   seuratObj <- RunScGateForModels(seuratObj, modelNames = c('Bcell.RM', 'Tcell.RM', 'NK.RM', 'Myeloid.RM', 'AvEp.RM', 'Epithelial.RM', 'Erythrocyte.RM', 'pDC.RM', 'Stromal.RM'), labelRename = list(Tcell.RM = 'T_NK', NK.RM = 'T_NK'))
