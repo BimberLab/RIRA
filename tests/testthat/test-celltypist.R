@@ -4,6 +4,8 @@ library(testthat)
 
 testthat::context("celltypist")
 
+source('installSeuratData.R')
+
 test_that("celltypist is installed", {
   # this provides more useful information if there is an error loading celltypist
   testthat::expect_no_condition(print(reticulate::py_exe()))
@@ -12,9 +14,7 @@ test_that("celltypist is installed", {
 })
 
 test_that("celltypist runs", {
-  suppressWarnings(SeuratData::InstallData("pbmc3k"))
-  suppressWarnings(data("pbmc3k"))
-  seuratObj <- suppressWarnings(pbmc3k)
+  seuratObj <- getBaseSeuratData()
   print(seuratObj)
 
   seuratObj <- Seurat::NormalizeData(seuratObj, verbose = FALSE)
@@ -55,9 +55,7 @@ test_that("celltypist runs", {
 })
 
 test_that("celltypist runs with batchSize", {
-  suppressWarnings(SeuratData::InstallData("pbmc3k"))
-  suppressWarnings(data("pbmc3k"))
-  seuratObj <- suppressWarnings(pbmc3k)
+  seuratObj <- getBaseSeuratData()
   print(seuratObj)
 
   seuratObj <- Seurat::NormalizeData(seuratObj, verbose = FALSE)
@@ -77,8 +75,7 @@ test_that("celltypist runs with batchSize", {
 })
 
 test_that("celltypist runs for RIRA models", {
-  suppressWarnings(SeuratData::InstallData("pbmc3k"))
-  seuratObj <- suppressWarnings(pbmc3k)
+  seuratObj <- getBaseSeuratData()
   seuratObj <- Seurat::NormalizeData(seuratObj, verbose = FALSE)
   seuratObj <- Classify_TNK(seuratObj, retainProbabilityMatrix = TRUE)
 
@@ -94,8 +91,7 @@ test_that("celltypist runs for RIRA models", {
 })
 
 test_that("FilterDisallowedClasses works as expected", {
-  suppressWarnings(SeuratData::InstallData("pbmc3k"))
-  seuratObj <- suppressWarnings(pbmc3k)
+  seuratObj <- getBaseSeuratData()
   seuratObj <- Seurat::NormalizeData(seuratObj, verbose = FALSE)
 
   seuratObj <- RunScGateWithRhesusModels(seuratObj)

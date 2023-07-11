@@ -9,8 +9,8 @@ ENV NUMBA_CACHE_DIR=/tmp
 ENV MPLCONFIGDIR=/tmp
 ENV CELLTYPIST_FOLDER=/tmp
 
-# NOTE: can drop 'matplotlib<3.7' once this is resolved: https://github.com/scverse/scanpy/issues/2411
-RUN pip3 install numba 'matplotlib<3.7' celltypist
+# TODO: remove scikit-learn once this is resolved: https://github.com/Teichlab/celltypist/issues/75#issuecomment-1629757568
+RUN pip3 install numba scikit-learn==1.2.2 celltypist
 
 # NOTE: this is also added to support running as non-root. celltypist needs to write in ~/
 RUN mkdir /userHome && chmod -R 777 /userHome
@@ -23,5 +23,7 @@ RUN cd /RIRA \
 	&& R CMD build . \
 	&& Rscript -e "BiocManager::install(ask = F, upgrade = 'always');" \
 	&& Rscript -e "devtools::install_deps(pkg = '.', dependencies = TRUE, upgrade = 'always');" \
+    # NOTE: Related to: https://github.com/satijalab/seurat/issues/7328. Should revert to a release once patched.
+    # && Rscript -e "remotes::install_github('satijalab/seurat', ref='443ab86684253d9a7290c3d38c2bc1d8db021776');" \
 	&& R CMD INSTALL --build *.tar.gz \
 	&& rm -Rf /tmp/downloaded_packages/ /tmp/*.rds
