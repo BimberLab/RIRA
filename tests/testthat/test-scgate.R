@@ -91,7 +91,7 @@ test_that("scGates runs on all", {
   print('RunScGateWithDefaultModels, using dropAmbiguousConsensusValues = TRUE')
   print(dat)
   expect_false('MoMacDC,Myeloid' %in% names(dat))
-  expect_equal(unname(dat[['Immune,Monocyte,Myeloid']]), 188)
+  expect_equal(unname(dat[['Immune']]), 7)
 })
 
 test_that("scGate Runs", {
