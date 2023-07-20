@@ -82,7 +82,7 @@ SeuratToAnnData <- function(seuratObj, outFileBaseName, assayName = NULL, export
     origAssay <- seuratObj@assays[[assayName]]
     seuratObj <- Seurat::CreateSeuratObject(counts = origAssay@counts, assay = assayName, project = seuratObj@project.name, meta.data = seuratObj@meta.data)
     if (includeData){
-    seuratObj <- Seurat::SetAssayData(seuratObj, assay = assayName, slot = 'data', new.data = origAssay@data)
+      seuratObj <- Seurat::SetAssayData(seuratObj, assay = assayName, slot = 'data', new.data = origAssay@data)
     }
   }
 
