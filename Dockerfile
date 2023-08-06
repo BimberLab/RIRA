@@ -9,8 +9,7 @@ ENV NUMBA_CACHE_DIR=/tmp
 ENV MPLCONFIGDIR=/tmp
 ENV CELLTYPIST_FOLDER=/tmp
 
-# TODO: remove scikit-learn once this is resolved: https://github.com/Teichlab/celltypist/issues/75#issuecomment-1629757568
-RUN pip3 install numba scikit-learn==1.2.2 celltypist
+RUN pip3 install numba celltypist
 
 # NOTE: this is also added to support running as non-root. celltypist needs to write in ~/
 RUN mkdir /userHome && chmod -R 777 /userHome
