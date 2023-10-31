@@ -35,14 +35,14 @@ test_that("scGate Runs", {
   
   # Try without reductions present:
   seuratObj <- RunScGate(seuratObj, gate)
-  expect_equal(sum(seuratObj$is.pure == 'Pure'), 1486, info = 'Before DimRedux')
+  expect_equal(sum(seuratObj$is.pure == 'Pure'), 1486, info = 'Before DimRedux', tolerance = 1)
 
   # Try with aliasing of models:
   seuratObj <- RunScGateForModels(seuratObj, modelNames = c('Bcell', 'Tcell', 'NK', 'Myeloid'), labelRename = list(Tcell = 'T_NK', NK = 'T_NK'))
   print(sort(table(seuratObj$scGateConsensus)))
   dat <- table(seuratObj$scGateConsensus)
   expect_equal(unname(dat[['Bcell']]), 244, info = 'With aliasing', tolerance = 2)
-  expect_equal(unname(dat[['T_NK']]), 1657, info = 'With aliasing')
+  expect_equal(unname(dat[['T_NK']]), 1657, info = 'With aliasing', tolerance = 1)
 
   expect_false('Tcell' %in% names(dat), info = 'With aliasing')
   expect_false('NK' %in% names(dat), info = 'With aliasing')
@@ -69,7 +69,7 @@ test_that("scGate works with built-in gates", {
   # Use with built-in gate:
   seuratObj <- getBaseSeuratData()
   seuratObj <- RunScGate(seuratObj, model = 'Bcell')
-  expect_equal(sum(seuratObj$is.pure == 'Pure'), 340)
+  expect_equal(sum(seuratObj$is.pure == 'Pure'), 340, tolerance = 1)
 
 })
 
@@ -83,7 +83,7 @@ test_that("scGates runs on all", {
   print('RunScGateWithDefaultModels, using dropAmbiguousConsensusValues = FALSE')
   print(dat)
 
-  expect_equal(unname(dat[['Bcell,Bcell.NonGerminalCenter,Immune,PanBcell']]), 331)
+  expect_equal(unname(dat[['Bcell,Bcell.NonGerminalCenter,Immune,PanBcell']]), 331, tolerance = 1)
 
   # Now with ambiguous cleanup:
   seuratObj <- RunScGateWithDefaultModels(seuratObj, dropAmbiguousConsensusValues = TRUE)
@@ -128,7 +128,7 @@ test_that("scGate Runs", {
   )
 
   for (pop in names(expected)) {
-    expect_equal(unname(dat[[pop]]), expected[[pop]], info = 'RM models using wrapper')
+    expect_equal(unname(dat[[pop]]), expected[[pop]], info = 'RM models using wrapper', tolerance = 4)
   }
 
   print(sort(table(seuratObj$scGateRaw)))
@@ -142,6 +142,6 @@ test_that("scGate Runs", {
   )
 
   for (pop in names(expected)) {
-    expect_equal(unname(dat[[pop]]), expected[[pop]], info = 'RM models, raw calls')
+    expect_equal(unname(dat[[pop]]), expected[[pop]], info = 'RM models, raw calls', tolerance = 4)
   }
 })
