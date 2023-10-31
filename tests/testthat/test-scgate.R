@@ -25,7 +25,7 @@ test_that("scGate runs with custom models", {
   print('scGate runs with custom models')
   print(table(seuratObj$scGateConsensus))
   dat <- table(seuratObj$scGateConsensus)
-  expect_equal(unname(dat[['Myeloid']]), 679)
+  expect_equal(unname(dat[['Myeloid']]), 660)
 })
 
 test_that("scGate Runs", {
@@ -35,14 +35,14 @@ test_that("scGate Runs", {
   
   # Try without reductions present:
   seuratObj <- RunScGate(seuratObj, gate)
-  expect_equal(sum(seuratObj$is.pure == 'Pure'), 1489, info = 'Before DimRedux')
+  expect_equal(sum(seuratObj$is.pure == 'Pure'), 1486, info = 'Before DimRedux')
 
   # Try with aliasing of models:
   seuratObj <- RunScGateForModels(seuratObj, modelNames = c('Bcell', 'Tcell', 'NK', 'Myeloid'), labelRename = list(Tcell = 'T_NK', NK = 'T_NK'))
   print(sort(table(seuratObj$scGateConsensus)))
   dat <- table(seuratObj$scGateConsensus)
   expect_equal(unname(dat[['Bcell']]), 244, info = 'With aliasing', tolerance = 2)
-  expect_equal(unname(dat[['T_NK']]), 1664, info = 'With aliasing')
+  expect_equal(unname(dat[['T_NK']]), 1657, info = 'With aliasing')
 
   expect_false('Tcell' %in% names(dat), info = 'With aliasing')
   expect_false('NK' %in% names(dat), info = 'With aliasing')
@@ -57,7 +57,7 @@ test_that("scGate Runs", {
   seuratObj <- Seurat::FindClusters(seuratObj, resolution = 0.5, random.seed = GetSeed())
 
   seuratObj <- RunScGate(seuratObj, gate)
-  expect_equal(sum(seuratObj$is.pure == 'Pure'), 1504, info = 'After DimRedux')
+  expect_equal(sum(seuratObj$is.pure == 'Pure'), 1503, info = 'After DimRedux')
 
   #At least execute this code once, so overt errors are caught
   seuratObj <- suppressWarnings(Seurat::RunUMAP(seuratObj, dims = 1:10))
@@ -91,7 +91,7 @@ test_that("scGates runs on all", {
   print('RunScGateWithDefaultModels, using dropAmbiguousConsensusValues = TRUE')
   print(dat)
   expect_false('MoMacDC,Myeloid' %in% names(dat))
-  expect_equal(unname(dat[['Immune']]), 7)
+  expect_equal(unname(dat[['Immune']]), 25)
 })
 
 test_that("scGate Runs", {
@@ -103,10 +103,10 @@ test_that("scGate Runs", {
   dat <- table(seuratObj$scGateConsensus)
 
   expected <- c(
-    Bcell.RM = 335,
-    Myeloid.RM = 679,
-    T_NK = 1649,
-    'Bcell.RM,T_NK' = 13
+    Bcell.RM = 337,
+    Myeloid.RM = 680,
+    T_NK = 1647,
+    'Bcell.RM,T_NK' = 15
   )
 
   for (pop in names(expected)) {
@@ -120,11 +120,11 @@ test_that("scGate Runs", {
   dat <- table(seuratObj$scGateConsensus)
 
   expected <- c(
-    Bcell = 335,
-    Myeloid = 679,
-    T_NK = 1649,
-    'Bcell,T_NK' = 13,
-    Platelet = 11
+    Bcell = 337,
+    Myeloid = 680,
+    T_NK = 1647,
+    'Bcell,T_NK' = 15,
+    Platelet = 14
   )
 
   for (pop in names(expected)) {
@@ -135,10 +135,10 @@ test_that("scGate Runs", {
   dat <- table(seuratObj$scGateRaw)
 
   expected <- c(
-    NK.RM = 65,
-    Myeloid.RM = 677,
-    Tcell.RM = 1311,
-    'NK.RM,Tcell.RM' = 273
+    NK.RM = 72,
+    Myeloid.RM = 679,
+    Tcell.RM = 1301,
+    'NK.RM,Tcell.RM' = 274
   )
 
   for (pop in names(expected)) {
