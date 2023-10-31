@@ -83,6 +83,9 @@ jobs:
       - name: Install dependencies
         run: |
           remotes::install_deps(dependencies = TRUE, upgrade = "always")
+          # Force 4.x for both Seurat and SeuratObject 
+          devtools::install_version('SeuratObject', version = '4.1.4', ask = FALSE)
+          devtools::install_version('Seurat', version = '4.4.0', ask = FALSE)
           install.packages("pkgdown")
           remotes::install_cran("rcmdcheck")
         shell: Rscript {0}
@@ -115,10 +118,3 @@ jobs:
       - name: Install package
         if: github.ref == 'refs/heads/master' && matrix.config.pkgdown == 'true'
         run: R CMD INSTALL .
-
-#      - name: Deploy package
-#        if: github.ref == 'refs/heads/master' && matrix.config.pkgdown == 'true'
-#        run: |
-#          git config --local user.email "actions@github.com"
-#          git config --local user.name "GitHub Actions"
-#          Rscript -e 'pkgdown::deploy_to_branch(new_process = FALSE, clean = TRUE)'
