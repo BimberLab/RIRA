@@ -98,6 +98,7 @@ GetAvailableScGates <- function() {
 #' @description Returns the selected scGate model
 #' @param modelName The name of the gate to return. See GetAvailableScGates() for a list of known gates
 #' @param allowSCGateDB If true, this will search local models and the models provided by scGate::get_scGateDB()
+#' @importFrom magrittr %>%
 #' @export
 GetScGateModel <- function(modelName, allowSCGateDB = TRUE) {
   gateFile <- system.file(paste0("gates/", modelName, ".tsv"), package = "RIRA")

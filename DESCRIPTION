@@ -40,7 +40,8 @@ Imports:
     naturalsort,
     patchwork,
     BiocParallel,
-    ggcorrplot
+    ggcorrplot,
+    magrittr
 Suggests:
     devtools,
     testthat (>= 2.1.0),
