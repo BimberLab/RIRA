@@ -85,52 +85,73 @@ CalculateUCellScores <- function(seuratObj, forceRecalculate = FALSE, seed = Get
     }
   }
 
+  hasReductions <- length(seuratObj@reductions) > 0
+  if (!hasReductions) {
+    print('No reductions calculated, cannot plot tSNE/UMAP')
+  }
+
   if (any(is.na(seuratObj[['TandNK_Activation_UCell']]))) {
     print('Data has NAs, cannot make feature plot: TandNK_Activation_UCell')
   } else {
-    print(Seurat::FeaturePlot(seuratObj, features = 'TandNK_Activation_UCell', min.cutoff = 'q02', max.cutoff = 'q98') + ggtitle('T Cell Activation Score'))
+    if (hasReductions) {
+      print(Seurat::FeaturePlot(seuratObj, features = 'TandNK_Activation_UCell', min.cutoff = 'q02', max.cutoff = 'q98') + ggtitle('T Cell Activation Score'))
+    }
   }
 
   if (any(is.na(seuratObj[['TandNK_ActivationCore_UCell']]))) {
     print('Data has NAs, cannot make feature plot: TandNK_ActivationCore_UCell')
   } else {
-    print(Seurat::FeaturePlot(seuratObj, features = 'TandNK_ActivationCore_UCell', min.cutoff = 'q02', max.cutoff = 'q98') + ggtitle('T Cell Activation Score (Core Genes)'))
+    if (hasReductions) {
+      print(Seurat::FeaturePlot(seuratObj, features = 'TandNK_ActivationCore_UCell', min.cutoff = 'q02', max.cutoff = 'q98') + ggtitle('T Cell Activation Score (Core Genes)'))
+    }
   }
 
   if (any(is.na(seuratObj[['Cytotoxicity_UCell']]))) {
     print('Data has NAs, cannot make feature plot: Cytotoxicity_UCell')
   } else {
-    print(Seurat::FeaturePlot(seuratObj, features = 'Cytotoxicity_UCell', min.cutoff = 'q05', max.cutoff = 'q95') + ggtitle('Cytotoxicity Score'))
+    if (hasReductions) {
+      print(Seurat::FeaturePlot(seuratObj, features = 'Cytotoxicity_UCell', min.cutoff = 'q05', max.cutoff = 'q95') + ggtitle('Cytotoxicity Score'))
+    }
   }
 
   if (any(is.na(seuratObj[['EffectorT_UCell']]))) {
     print('Data has NAs, cannot make feature plot: EffectorT_UCell')
   } else {
-    print(Seurat::FeaturePlot(seuratObj, features = 'EffectorT_UCell', min.cutoff = 'q05', max.cutoff = 'q95') + ggtitle('Effector T Score'))
+    if (hasReductions) {
+      print(Seurat::FeaturePlot(seuratObj, features = 'EffectorT_UCell', min.cutoff = 'q05', max.cutoff = 'q95') + ggtitle('Effector T Score'))
+    }
   }
 
   if (any(is.na(seuratObj[['NaiveT_UCell']]))) {
     print('Data has NAs, cannot make feature plot: NaiveT_UCell')
   } else {
-    print(Seurat::FeaturePlot(seuratObj, features = 'NaiveT_UCell', min.cutoff = 'q05', max.cutoff = 'q95') + ggtitle('Naive T Score'))
+    if (hasReductions) {
+      print(Seurat::FeaturePlot(seuratObj, features = 'NaiveT_UCell', min.cutoff = 'q05', max.cutoff = 'q95') + ggtitle('Naive T Score'))
+    }
   }
 
   if (any(is.na(seuratObj[['CentralMemT_UCell']]))) {
     print('Data has NAs, cannot make feature plot: CentralMemT_UCell')
   } else {
-    print(Seurat::FeaturePlot(seuratObj, features = 'CentralMemT_UCell', min.cutoff = 'q05', max.cutoff = 'q95') + ggtitle('Central Mem T Score'))
+    if (hasReductions) {
+      print(Seurat::FeaturePlot(seuratObj, features = 'CentralMemT_UCell', min.cutoff = 'q05', max.cutoff = 'q95') + ggtitle('Central Mem T Score'))
+    }
   }
 
   if (any(is.na(seuratObj[['Glycolysis_UCell']]))) {
     print('Data has NAs, cannot make feature plot: Glycolysis_UCell')
   } else {
-    print(Seurat::FeaturePlot(seuratObj, features = 'Glycolysis_UCell', min.cutoff = 'q05', max.cutoff = 'q95') + ggtitle('Glycolysis'))
+    if (hasReductions) {
+      print(Seurat::FeaturePlot(seuratObj, features = 'Glycolysis_UCell', min.cutoff = 'q05', max.cutoff = 'q95') + ggtitle('Glycolysis'))
+    }
   }
 
   if (any(is.na(seuratObj[['Interferon_Response_UCell']]))) {
     print('Data has NAs, cannot make feature plot: Interferon_Response_UCell')
   } else {
-    print(Seurat::FeaturePlot(seuratObj, features = 'Interferon_Response_UCell', min.cutoff = 'q05', max.cutoff = 'q95') + ggtitle('Interferon_Response'))
+    if (hasReductions) {
+      print(Seurat::FeaturePlot(seuratObj, features = 'Interferon_Response_UCell', min.cutoff = 'q05', max.cutoff = 'q95') + ggtitle('Interferon_Response'))
+    }
   }
 
   return(seuratObj)
