@@ -51,7 +51,7 @@ prepareTestData <- function(){
 test_that("Cell type classification works", {
   fn <- 'seurat3k.rds'
   if (file.exists(fn)) {
-    seuratObjTrain <- readRDS(fn)
+    seuratObjTrain <- Seurat::UpdateSeuratObject(readRDS(fn))
   } else {
     seuratObjTrain <- prepareTrainingData()  
     saveRDS(seuratObjTrain, file = fn)
