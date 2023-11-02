@@ -48,8 +48,6 @@ Suggests:
     SeuratData
 Remotes:
     pengminshi/cFIT,
-    carmonalab/UCell,
-    carmonalab/scGate,
     satijalab/seurat-data,
     mojaveazure/seurat-disk
 RoxygenNote: 7.2.3
