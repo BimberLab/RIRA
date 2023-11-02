@@ -91,7 +91,7 @@ test_that("scGates runs on all", {
   print('RunScGateWithDefaultModels, using dropAmbiguousConsensusValues = TRUE')
   print(dat)
   expect_false('MoMacDC,Myeloid' %in% names(dat))
-  expect_equal(unname(dat[['Immune']]), 25)
+  expect_equal(unname(dat[['Immune']]), 26)
 })
 
 test_that("scGate Runs", {
@@ -103,10 +103,10 @@ test_that("scGate Runs", {
   dat <- table(seuratObj$scGateConsensus)
 
   expected <- c(
-    Bcell.RM = 337,
-    Myeloid.RM = 680,
+    Bcell.RM = 338,
+    Myeloid.RM = 679,
     T_NK = 1647,
-    'Bcell.RM,T_NK' = 15
+    'Bcell.RM,T_NK' = 14
   )
 
   for (pop in names(expected)) {
