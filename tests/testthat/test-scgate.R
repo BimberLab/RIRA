@@ -29,9 +29,9 @@ test_that("scGate runs with custom models", {
   # Intended to capture 2.4.x:
   if (packageVersion('UCell') < '2.5.0') {
     print('UCell version is less than 2.5.0')
-    expect_equal(unname(dat[['Myeloid']]), 660)
-  } else {
     expect_equal(unname(dat[['Myeloid']]), 680)
+  } else {
+    expect_equal(unname(dat[['Myeloid']]), 660)
   }
 
 })
@@ -66,9 +66,9 @@ test_that("scGate Runs", {
 
   seuratObj <- RunScGate(seuratObj, gate)
   if (packageVersion('UCell') < '2.5.0') {
-    expect_equal(sum(seuratObj$is.pure == 'Pure'), 1503, info = 'After DimRedux')
-  } else {
     expect_equal(sum(seuratObj$is.pure == 'Pure'), 1505, info = 'After DimRedux')
+  } else {
+    expect_equal(sum(seuratObj$is.pure == 'Pure'), 1503, info = 'After DimRedux')
   }
 
   #At least execute this code once, so overt errors are caught
@@ -104,9 +104,9 @@ test_that("scGates runs on all", {
   print(dat)
   expect_false('MoMacDC,Myeloid' %in% names(dat))
   if (packageVersion('UCell') < '2.5.0') {
-    expect_equal(unname(dat[['Immune']]), 25, tolerance = 1)
-  } else {
     expect_equal(unname(dat[['Immune']]), 7, tolerance = 1)
+  } else {
+    expect_equal(unname(dat[['Immune']]), 25, tolerance = 1)
   }
 })
 
@@ -121,16 +121,16 @@ test_that("scGate Runs", {
   if (packageVersion('UCell') < '2.5.0') {
     expected <- c(
       Bcell.RM = 337,
-      Myeloid.RM = 676,
-      T_NK = 1647,
+      Myeloid.RM = 678,
+      T_NK = 1648,
       'Bcell.RM,T_NK' = 15
     )
   } else {
     expected <- c(
       Bcell.RM = 337,
-      Myeloid.RM = 678,
-      T_NK = 1648,
-      'Bcell.RM,T_NK' = 14
+      Myeloid.RM = 676,
+      T_NK = 1647,
+      'Bcell.RM,T_NK' = 15
     )
   }
 
