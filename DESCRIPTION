@@ -15,7 +15,7 @@ Imports:
     SeuratObject (<= 4.1.4),
     rlang,
     scGate,
-    UCell,
+    UCell (>= 2.6.0),
     dplyr,
     Matrix,
     SingleCellExperiment,

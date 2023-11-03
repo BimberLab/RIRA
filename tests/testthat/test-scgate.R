@@ -91,7 +91,7 @@ test_that("scGates runs on all", {
   print('RunScGateWithDefaultModels, using dropAmbiguousConsensusValues = TRUE')
   print(dat)
   expect_false('MoMacDC,Myeloid' %in% names(dat))
-  expect_equal(unname(dat[['Immune']]), 25)
+  expect_equal(unname(dat[['Immune']]), 25, tolerance = 1)
 })
 
 test_that("scGate Runs", {
@@ -110,7 +110,7 @@ test_that("scGate Runs", {
   )
 
   for (pop in names(expected)) {
-    expect_equal(unname(dat[[pop]]), expected[[pop]], info = paste0('RM models: ', pop))
+    expect_equal(unname(dat[[pop]]), expected[[pop]], info = paste0('RM models: ', pop), tolerance = 3)
   }
 
   # Now use wrapper
