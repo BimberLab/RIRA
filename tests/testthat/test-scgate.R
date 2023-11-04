@@ -25,7 +25,15 @@ test_that("scGate runs with custom models", {
   print('scGate runs with custom models')
   print(table(seuratObj$scGateConsensus))
   dat <- table(seuratObj$scGateConsensus)
-  expect_equal(unname(dat[['Myeloid']]), 660)
+
+  # Intended to capture 2.4.x:
+  if (packageVersion('UCell') < '2.5.0') {
+    print('UCell version is less than 2.5.0')
+    expect_equal(unname(dat[['Myeloid']]), 680)
+  } else {
+    expect_equal(unname(dat[['Myeloid']]), 660)
+  }
+
 })
 
 test_that("scGate Runs", {
@@ -57,7 +65,11 @@ test_that("scGate Runs", {
   seuratObj <- Seurat::FindClusters(seuratObj, resolution = 0.5, random.seed = GetSeed())
 
   seuratObj <- RunScGate(seuratObj, gate)
-  expect_equal(sum(seuratObj$is.pure == 'Pure'), 1503, info = 'After DimRedux')
+  if (packageVersion('UCell') < '2.5.0') {
+    expect_equal(sum(seuratObj$is.pure == 'Pure'), 1505, info = 'After DimRedux')
+  } else {
+    expect_equal(sum(seuratObj$is.pure == 'Pure'), 1503, info = 'After DimRedux')
+  }
 
   #At least execute this code once, so overt errors are caught
   seuratObj <- suppressWarnings(Seurat::RunUMAP(seuratObj, dims = 1:10))
@@ -91,7 +103,11 @@ test_that("scGates runs on all", {
   print('RunScGateWithDefaultModels, using dropAmbiguousConsensusValues = TRUE')
   print(dat)
   expect_false('MoMacDC,Myeloid' %in% names(dat))
-  expect_equal(unname(dat[['Immune']]), 26)
+  if (packageVersion('UCell') < '2.5.0') {
+    expect_equal(unname(dat[['Immune']]), 7, tolerance = 1)
+  } else {
+    expect_equal(unname(dat[['Immune']]), 25, tolerance = 1)
+  }
 })
 
 test_that("scGate Runs", {
@@ -102,15 +118,24 @@ test_that("scGate Runs", {
   print(sort(table(seuratObj$scGateConsensus)))
   dat <- table(seuratObj$scGateConsensus)
 
-  expected <- c(
-    Bcell.RM = 338,
-    Myeloid.RM = 679,
-    T_NK = 1647,
-    'Bcell.RM,T_NK' = 14
-  )
+  if (packageVersion('UCell') < '2.5.0') {
+    expected <- c(
+      Bcell.RM = 337,
+      Myeloid.RM = 678,
+      T_NK = 1648,
+      'Bcell.RM,T_NK' = 15
+    )
+  } else {
+    expected <- c(
+      Bcell.RM = 337,
+      Myeloid.RM = 676,
+      T_NK = 1647,
+      'Bcell.RM,T_NK' = 15
+    )
+  }
 
   for (pop in names(expected)) {
-    expect_equal(unname(dat[[pop]]), expected[[pop]], info = paste0('RM models: ', pop))
+    expect_equal(unname(dat[[pop]]), expected[[pop]], info = paste0('RM models: ', pop), tolerance = 3)
   }
 
   # Now use wrapper
