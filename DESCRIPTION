@@ -48,7 +48,7 @@ Suggests:
     SeuratData (<= 2.2.0)
 Remotes:
     pengminshi/cFIT,
-    satijalab/seurat-data@dd7d0df1fe7cd563281eac91edd0f1fac1ff3fe5,
+    satijalab/seurat-data@1c829d0056cf311da6fdd0e78fa517c933571c09,
     mojaveazure/seurat-disk
 RoxygenNote: 7.2.3
 Collate: 
