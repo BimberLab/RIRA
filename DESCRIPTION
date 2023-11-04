@@ -45,10 +45,10 @@ Imports:
 Suggests:
     devtools,
     testthat (>= 2.1.0),
-    SeuratData
+    SeuratData (<= 2.2.0)
 Remotes:
     pengminshi/cFIT,
-    satijalab/seurat-data@dd7d0df1fe7cd563281eac91edd0f1fac1ff3fe5 (<= 2.2.0),
+    satijalab/seurat-data@dd7d0df1fe7cd563281eac91edd0f1fac1ff3fe5,
     mojaveazure/seurat-disk
 RoxygenNote: 7.2.3
 Collate: 
