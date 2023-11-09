@@ -89,7 +89,7 @@ jobs:
       - name: Install dependencies
         run: |
           remotes::install_deps(dependencies = TRUE, upgrade = "always")
-          # Force 4.x for both Seurat
+          # Force 4.x for Seurat
           devtools::install_version('Seurat', version = '4.4.0', ask = FALSE, upgrade = 'never')
           # TODO: eventually remove. Related to: https://github.com/mojaveazure/seurat-object/issues/166
           devtools::install_version('Matrix', version = '1.6-1.1', ask = FALSE, upgrade = 'never')    

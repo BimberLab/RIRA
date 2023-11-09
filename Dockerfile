@@ -22,7 +22,7 @@ RUN cd /RIRA \
 	&& R CMD build . \
 	&& Rscript -e "BiocManager::install(ask = F, upgrade = 'always');" \
 	&& Rscript -e "devtools::install_deps(pkg = '.', dependencies = TRUE, upgrade = 'always');" \
-    # Force 4.x for both Seurat
+    # Force 4.x for Seurat
     && Rscript -e "devtools::install_version('Seurat', version = '4.4.0', ask = FALSE, upgrade = 'never')" \
     # TODO: eventually remove. Related to: https://github.com/mojaveazure/seurat-object/issues/166
     && Rscript -e "devtools::install_version('Matrix', version = '1.6-1.1', ask = FALSE, upgrade = 'never')" \
