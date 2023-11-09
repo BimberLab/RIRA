@@ -12,7 +12,7 @@ Depends:
     R (>= 4.3.0),
 Imports:
     Seurat (<= 4.4.0),
-    SeuratObject (<= 4.1.4),
+    SeuratObject,
     rlang,
     scGate,
     UCell (>= 2.6.0),
