@@ -42,7 +42,7 @@ Imports:
     BiocParallel,
     ggcorrplot,
     magrittr,
-    Matrix (= 1.6-1.1)
+    Matrix (== 1.6-1.1)
 Suggests:
     devtools,
     testthat (>= 2.1.0),
