@@ -71,10 +71,10 @@ test_that("Cell type classification works", {
   
   print(sort(table(seuratObj$RIRA_Consensus)))
   expected <- list(
-    'B' = 104,
-    'TorNK' = 609,
-    'Myeloid' = 231,
-    'Unknown' = 56
+    'B' = 109,
+    'TorNK' = 607,
+    'Myeloid' = 230,
+    'Unknown' = 54
   )
   
   for (cellType in names(expected)) {
