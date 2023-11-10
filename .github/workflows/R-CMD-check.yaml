@@ -21,7 +21,6 @@ jobs:
           - {os: 22.04, r: 'devel', bioc: 'devel'}
           - {os: 22.04, r: '4.3', bioc: '3.18'}
           - {os: 22.04, r: '4.3', bioc: '3.17'}
-          - {os: 22.04, r: '4.2', bioc: '3.16'}
 
     env:
       R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
@@ -90,11 +89,12 @@ jobs:
       - name: Install dependencies
         run: |
           remotes::install_deps(dependencies = TRUE, upgrade = "always")
-          # Force 4.x for both Seurat and SeuratObject 
-          devtools::install_version('Seurat', version = '4.4.0', ask = FALSE, upgrade = 'never')
-          devtools::install_version('SeuratObject', version = '4.1.4', ask = FALSE, upgrade = 'never')
+          # Force 4.x for Seurat
+          devtools::install_version('Seurat', version = '4.4.0', ask = FALSE, upgrade = 'never')          
           install.packages("pkgdown")
           remotes::install_cran("rcmdcheck")
+          # Due to Matrix/SeuratObject: https://github.com/mojaveazure/seurat-object/issues/166
+          install.packages('SeuratObject', ask = FALSE, force = TRUE, type = 'source', repos = 'https://cloud.r-project.org')
         shell: Rscript {0}
 
       - name: Session info

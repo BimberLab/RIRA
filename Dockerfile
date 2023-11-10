@@ -22,8 +22,9 @@ RUN cd /RIRA \
 	&& R CMD build . \
 	&& Rscript -e "BiocManager::install(ask = F, upgrade = 'always');" \
 	&& Rscript -e "devtools::install_deps(pkg = '.', dependencies = TRUE, upgrade = 'always');" \
-    # Force 4.x for both Seurat and SeuratObject
+    # Force 4.x for Seurat
     && Rscript -e "devtools::install_version('Seurat', version = '4.4.0', ask = FALSE, upgrade = 'never')" \
-    && Rscript -e "devtools::install_version('SeuratObject', version = '4.1.4', ask = FALSE, upgrade = 'never')" \
+    # Due to Matrix/SeuratObject: https://github.com/mojaveazure/seurat-object/issues/166
+    && Rscript -e "install.packages('SeuratObject', ask = FALSE, force = TRUE, type = 'source', repos = 'https://cloud.r-project.org')" \
 	&& R CMD INSTALL --build *.tar.gz \
 	&& rm -Rf /tmp/downloaded_packages/ /tmp/*.rds
