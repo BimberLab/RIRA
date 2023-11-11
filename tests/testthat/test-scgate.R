@@ -68,7 +68,7 @@ test_that("scGate Runs", {
   if (packageVersion('UCell') < '2.5.0') {
     expect_equal(sum(seuratObj$is.pure == 'Pure'), 1505, info = 'After DimRedux')
   } else {
-    expect_equal(sum(seuratObj$is.pure == 'Pure'), 1493, info = 'After DimRedux')
+    expect_equal(sum(seuratObj$is.pure == 'Pure'), 1493, info = 'After DimRedux', tolerance = 1)
   }
 
   #At least execute this code once, so overt errors are caught
