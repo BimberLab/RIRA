@@ -21,7 +21,8 @@ CalculateUCellScores <- function(seuratObj, forceRecalculate = FALSE, seed = Get
     CentralMemT = GetGeneSet('CentralMemT'),
     NaiveT = GetGeneSet('NaiveT'),
     Glycolysis = GetGeneSet('Glycolysis'),
-    Interferon_Response = GetGeneSet('Interferon_Response')
+    Interferon_Response = GetGeneSet('Interferon_Response'),
+    Interferon_Response_IFI6 = GetGeneSet('Interferon_Response_IFI6_correlated')
   )
 
   needsRecalc <- forceRecalculate || any(!paste0(names(toCalculate), '_UCell') %in% names(seuratObj@meta.data))
