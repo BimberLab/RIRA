@@ -530,7 +530,7 @@ FilterDisallowedClasses <- function(seuratObj, sourceField = 'RIRA_Immune_v2.maj
         }
       }
 
-      x <- colnames(seuratObj)[seuratObj[[sourceField]] == cls & seuratObj[[ucell]] > ucellCutoff]
+      x <- colnames(seuratObj)[seuratObj@meta.data[[sourceField]] == cls & seuratObj@meta.data[[ucell]] > ucellCutoff]
       if (length(x) > 0) {
         toDrop <- rbind(toDrop, data.frame(cellbarcode = x, reason = ucell))
       }
