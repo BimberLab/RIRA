@@ -39,7 +39,7 @@ ScoreUsingSavedComponent <- function(seuratObj, componentOrName, fieldName) {
   seuratObj <- Seurat::AddMetaData(seuratObj, cellScores, col.name = fieldName)
   
   suppressMessages(print(FeaturePlot(seuratObj, features = fieldName, order = T) & ggplot2::scale_colour_gradientn(colours = c("navy", "dodgerblue", "gold", "red"))))
-  graphics::hist(seuratObj[[fieldName]][,1], breaks = 300, main = fieldName)
+  graphics::hist(seuratObj@meta.data[[fieldName]], breaks = 300, main = fieldName)
 
   return(seuratObj)
 }
