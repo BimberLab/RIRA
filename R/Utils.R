@@ -80,9 +80,9 @@ SeuratToAnnData <- function(seuratObj, outFileBaseName, assayName = NULL, export
 
     # NOTE: clone a new object to ensure we only carry forward the minimal data we need:
     origAssay <- seuratObj@assays[[assayName]]
-    seuratObj <- Seurat::CreateSeuratObject(counts = origAssay@counts, assay = assayName, project = seuratObj@project.name, meta.data = seuratObj@meta.data)
+    seuratObj <- Seurat::CreateSeuratObject(counts = Seurat::GetAssayData(origAssay, slot = 'counts'), assay = assayName, project = seuratObj@project.name, meta.data = seuratObj@meta.data)
     if (includeData){
-      seuratObj <- Seurat::SetAssayData(seuratObj, assay = assayName, slot = 'data', new.data = origAssay@data)
+      seuratObj <- Seurat::SetAssayData(seuratObj, assay = assayName, slot = 'data', new.data = Seurat::GetAssayData(origAssay, slot = 'data'))
     }
   }
 
@@ -134,7 +134,7 @@ SeuratToAnnData <- function(seuratObj, outFileBaseName, assayName = NULL, export
         stop(paste0('Assay not found: ', assayName))
     }
 
-    return(!identical(seuratObj@assays[[assayName]]@counts, seuratObj@assays[[assayName]]@data))
+    return(!identical(Seurat::GetAssayData(seuratObj, assay = assayName, slot = 'counts'), Seurat::GetAssayData(seuratObj, assay = assayName, slot = 'data')))
 }
 
 .FilterLowCalls <- function(seuratObj, label, minFraction, returnAsFactor = TRUE, labelToAssign = 'Unknown') {
