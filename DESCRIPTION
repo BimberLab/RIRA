@@ -56,7 +56,6 @@ Remotes:
 RoxygenNote: 7.2.3
 Collate: 
     'Utils.R'
-    'Atlas.R'
     'CellTypist.R'
     'Classification.R'
     'ComponentScores.R'
