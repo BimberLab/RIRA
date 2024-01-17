@@ -68,7 +68,7 @@ SeuratToMatrix <- function(seuratObj, outDir, assayName, slot = 'counts'){
     outDir <- gsub(outDir, pattern = "/$", replacement = "")
   }
 
-  DropletUtils::write10xCounts(x = Seurat::GetAssayData(seuratObj, assay = assayName, slot = slot), path = outFile, overwrite = TRUE, type = 'sparse')
+  DropletUtils::write10xCounts(x = Seurat::GetAssayData(seuratObj, assay = assayName, slot = slot), path = outDir, overwrite = TRUE, type = 'sparse')
 
   return(paste0(outDir, '/matrix.mtx'))
 }
