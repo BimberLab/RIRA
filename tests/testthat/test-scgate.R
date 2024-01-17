@@ -56,7 +56,7 @@ test_that("scGate Runs", {
   expect_false('NK' %in% names(dat), info = 'With aliasing')
 
   # Add reductions so plotting will work:
-  seuratObj <- suppressWarnings(pbmc3k)
+  seuratObj <- getBaseSeuratData()
   seuratObj <- suppressWarnings(Seurat::NormalizeData(seuratObj))
   seuratObj <- Seurat::FindVariableFeatures(seuratObj, nfeatures = 2000)
   seuratObj <- Seurat::ScaleData(seuratObj)
