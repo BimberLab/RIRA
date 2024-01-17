@@ -64,9 +64,13 @@ SetAtlasDir <- function(folderPath) {
 }
 
 SeuratToMatrix <- function(seuratObj, outDir, assayName, slot = 'counts'){
+  if (endsWith(outDir, "/")){
+    outDir <- gsub(outDir, pattern = "/$", replacement = "")
+  }
+
   DropletUtils::write10xCounts(x = Seurat::GetAssayData(seuratObj, assay = assayName, slot = slot), path = outFile, overwrite = TRUE, type = 'sparse')
 
-  return(paste0(outDir, 'matrix.mtx'))
+  return(paste0(outDir, '/matrix.mtx'))
 }
 
 SeuratToAnnData <- function(seuratObj, outFileBaseName, assayName = NULL, exportMinimalObject = FALSE, allowableMetaCols = NULL, includeData = TRUE) {
