@@ -63,6 +63,18 @@ SetAtlasDir <- function(folderPath) {
   return(parentFolder)
 }
 
+SeuratToH5 <- function(seuratObj, outFile, assayName, slot = 'counts'){
+  if (!is.null(assayName)) {
+    for (an in names(seuratObj@assays)) {
+      if (an != assayName) {
+        seuratObj[[an]] <- NULL
+      }
+    }
+  }
+
+  DropletUtils::write10xCounts(x = Seurat::GetAssayData(seuratObj, assay = assayName, slot = slot), path = outFile, overwrite = TRUE)
+}
+
 SeuratToAnnData <- function(seuratObj, outFileBaseName, assayName = NULL, exportMinimalObject = FALSE, allowableMetaCols = NULL, includeData = TRUE) {
   tmpFile <- outFileBaseName
   if (!is.null(assayName)) {

@@ -205,10 +205,10 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
 }
 
 .RunCelltypistOnSubset <- function(seuratObj, assayName, modelName, useMajorityVoting, extraArgs, retainProbabilityMatrix, updateModels = TRUE) {
-  outFile <- tempfile()
-  outDir <- dirname(outFile)
-  # NOTE: metadata is not needed for scoring and is can contain invalid characters, so drop it during conversion
-  seuratAnnData <- SeuratToAnnData(seuratObj, paste0(outFile, '-seurat-annData'), assayName, exportMinimalObject = TRUE, allowableMetaCols = NA)
+  outH5 <- tempfile(fileext = '.h5')
+  outDir <- dirname(outH5)
+
+  SeuratToH5(seuratObj, outFile = outH5, assayName = assayName)
 
   # Ensure models present:
   if (updateModels) {
@@ -216,7 +216,7 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
   }
 
   # Now run celltypist itself:
-  args <- c("-m", "celltypist.command_line", "-i", seuratAnnData, "-m", modelName, "--outdir", outDir, "--prefix", "celltypist.", "--quiet")
+  args <- c("-m", "celltypist.command_line", "-i", outH5, "-m", modelName, "--outdir", outDir, "--prefix", "celltypist.", "--quiet")
 
   # NOTE: this produces a series of PDFs, one per class. Consider either providing an argument on where to move these, or reading/printing them
   #if (generatePlots) {
@@ -255,7 +255,7 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
     labels <- cbind(labels, probabilityMatrix)
   }
 
-  unlink(seuratAnnData)
+  unlink(outH5)
   unlink(labelFile)
   unlink(probabilityMatrixFile)
   unlink(paste0(outDir, '/celltypist.decision_matrix.csv'))
