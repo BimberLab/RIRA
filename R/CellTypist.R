@@ -205,10 +205,8 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
 }
 
 .RunCelltypistOnSubset <- function(seuratObj, assayName, modelName, useMajorityVoting, extraArgs, retainProbabilityMatrix, updateModels = TRUE) {
-  outMtx <- tempfile(fileext = '.mtx')
-  outDir <- dirname(outMtx)
-
-  SeuratToMM(seuratObj, outFile = outMtx, assayName = assayName)
+  outDir <- tempfile(fileext = '')
+  matrixFile <- SeuratToMatrix(seuratObj, outDir = outDir, assayName = assayName)
 
   # Ensure models present:
   if (updateModels) {
@@ -216,7 +214,7 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
   }
 
   # Now run celltypist itself:
-  args <- c("-m", "celltypist.command_line", "-i", outMtx, "-m", modelName, "--outdir", outDir, "--prefix", "celltypist.", "--quiet")
+  args <- c("-m", "celltypist.command_line", "-i", matrixFile, "-m", modelName, "--outdir", outDir, "--prefix", "celltypist.", "--quiet")
 
   # NOTE: this produces a series of PDFs, one per class. Consider either providing an argument on where to move these, or reading/printing them
   #if (generatePlots) {
@@ -255,7 +253,7 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
     labels <- cbind(labels, probabilityMatrix)
   }
 
-  unlink(outMtx)
+  unlink(outDir, recursive = TRUE)
   unlink(labelFile)
   unlink(probabilityMatrixFile)
   unlink(paste0(outDir, '/celltypist.decision_matrix.csv'))

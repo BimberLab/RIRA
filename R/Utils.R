@@ -63,12 +63,10 @@ SetAtlasDir <- function(folderPath) {
   return(parentFolder)
 }
 
-SeuratToH5 <- function(seuratObj, outFile, assayName, slot = 'counts'){
-  DropletUtils::write10xCounts(x = Seurat::GetAssayData(seuratObj, assay = assayName, slot = slot), path = outFile, overwrite = TRUE)
-}
+SeuratToMatrix <- function(seuratObj, outDir, assayName, slot = 'counts'){
+  DropletUtils::write10xCounts(x = Seurat::GetAssayData(seuratObj, assay = assayName, slot = slot), path = outFile, overwrite = TRUE, type = 'sparse')
 
-SeuratToMM <- function(seuratObj, outFile, assayName, slot = 'counts'){
-  Matrix::writeMM(obj = Seurat::GetAssayData(seuratObj, assay = assayName, slot = slot), file = outFile)
+  return(paste0(outDir, 'matrix.mtx'))
 }
 
 SeuratToAnnData <- function(seuratObj, outFileBaseName, assayName = NULL, exportMinimalObject = FALSE, allowableMetaCols = NULL, includeData = TRUE) {
