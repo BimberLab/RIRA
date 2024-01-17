@@ -102,7 +102,7 @@ GetScGateModel <- function(modelName, allowSCGateDB = TRUE) {
   gateFile <- system.file(paste0("gates/", modelName, ".tsv"), package = "RIRA")
   if (file.exists(gateFile)) {
     masterFile <- system.file("gates/master_table.tsv", package = "RIRA")
-    return(scGate::load_scGate_model(gateFile, master.table = masterFile))
+    return(suppressWarnings(scGate::load_scGate_model(gateFile, master.table = masterFile)))
   }
 
   if (!allowSCGateDB) {
