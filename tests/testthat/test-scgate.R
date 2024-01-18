@@ -106,7 +106,7 @@ test_that("scGates runs on all", {
   if (packageVersion('UCell') < '2.5.0') {
     expect_equal(unname(dat[['Immune']]), 7, tolerance = 1)
   } else {
-    expect_equal(unname(dat[['Immune']]), 25, tolerance = 1)
+    expect_equal(unname(dat[['CD4T,Immune,Male,Tcell,Tcell.alphabeta']]), 907, tolerance = 1)
   }
 })
 
