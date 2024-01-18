@@ -13,7 +13,8 @@ RunScGateWithDefaultModels(
   ncores = 1,
   genes.blacklist = "default",
   labelRename = NULL,
-  dropAmbiguousConsensusValues = FALSE
+  dropAmbiguousConsensusValues = FALSE,
+  excludedModels = c("Male", "Female")
 )
 }
 \arguments{
@@ -34,6 +35,8 @@ RunScGateWithDefaultModels(
 \item{labelRename}{An optional list that maps the model name to the final label that should be used in the seurat object. for exmaple: list(Tcell = 'T_NK', NK = 'T_NK'), would re-label cells classified as either 'Tcell' or 'NK' by those models to one common label of T_NK}
 
 \item{dropAmbiguousConsensusValues}{If true, any consensus calls that are ambiguous will be set to NA}
+
+\item{excludedModels}{An optional vector of model names to exclude}
 }
 \description{
 Helper function to run scGate, running all human models in scGate::get_sc()
