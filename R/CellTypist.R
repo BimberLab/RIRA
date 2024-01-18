@@ -378,21 +378,31 @@ TrainCellTypist <- function(seuratObj, labelField, modelFile, minCellsPerClass =
     seuratObj <- Seurat::NormalizeData(seuratObj, verbose = FALSE)
   }
 
-  trainData <- SeuratToAnnData(seuratObj, paste0(outFile, '-seurat-annData'), assayName = assayName, exportMinimalObject = TRUE, allowableMetaCols = labelField)
+  matrixOutDir <- paste0(outFile, '-seurat-annData')
+  trainDataMatrix <- SeuratToMatrix(seuratObj, outDir = matrixOutDir, assayName = assayName)
+
+  geneFile <- paste0(dirname(trainDataMatrix), '/genes.tsv')
+  cellFile <- paste0(dirname(trainDataMatrix), '/barcodes.tsv')
+  unlink(cellFile)
+
+  # Cell typist expects a single column per gene:
+  tbl <- read.table(geneFile, sep = '\t')
+  write.table(tbl$V1, file = geneFile, row.names = FALSE, col.names = FALSE)
+
 
   # potentially replace windows slashes with forward slash
-  trainData <- gsub(trainData, pattern = '\\\\', replacement = '/')
+  trainDataMatrix <- gsub(trainDataMatrix, pattern = '\\\\', replacement = '/')
   outFile <- gsub(outFile, pattern = '\\\\', replacement = '/')
+  geneFile <- gsub(geneFile, pattern = '\\\\', replacement = '/')
 
   labelFile <- paste0(outFile, '.seurat.labels.txt')
   scriptFile <- paste0(outFile, '.seurat.train.py')
 
   utils::write.table(seuratObj@meta.data[[labelField]], row.names = F, sep = '\t', quote = F, col.names = F, file = labelFile)
 
-  # potentially add: labels=, genes=, transpose_input=True
   typistCommand <- c(
     "import celltypist;",
-    paste0("new_model = celltypist.train('", trainData, "', labels = '", labelFile, "', use_SGD = False, solver = 'saga', feature_selection = True, top_genes = 300);"),
+    paste0("new_model = celltypist.train('", trainDataMatrix, "', labels = '", labelFile, "', use_SGD = False, transpose_input = True, genes = '", geneFile, "', solver = 'saga', feature_selection = True, top_genes = 300);"),
     paste0("new_model.write('", modelFile, "');")
   )
 
@@ -401,7 +411,7 @@ TrainCellTypist <- function(seuratObj, labelField, modelFile, minCellsPerClass =
   print('Running celltypist.train:')
   print(typistCommand)
 
-  system2(reticulate::py_exe(), c(scriptFile))
+  system2(reticulate::py_exe(), scriptFile)
 
   if (!file.exists(modelFile)) {
     stop(paste0('Unable to find file: ', modelFile))
@@ -409,7 +419,7 @@ TrainCellTypist <- function(seuratObj, labelField, modelFile, minCellsPerClass =
 
   unlink(labelFile)
   unlink(scriptFile)
-  unlink(trainData)
+  unlink(matrixOutDir, recursive = TRUE)
 }
 
 #' @title Classify T/NK
