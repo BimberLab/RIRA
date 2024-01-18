@@ -1,7 +1,7 @@
 #' @include Utils.R
 
 utils::globalVariables(
-  names = c('majority_voting', 'Fraction', 'PropPerCluster', 'over_clustering', 'predicted_labels', 'totalPerCluster', 'totalPerLabel', 'propPerLabel', 'sortOrder'),
+  names = c('majority_voting', 'Fraction', 'PropPerCluster', 'over_clustering', 'predicted_labels', 'totalPerCluster', 'totalPerLabel', 'propPerLabel', 'sortOrder', 'Category'),
   package = 'RIRA',
   add = TRUE
 )
@@ -212,7 +212,7 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
   cellFile <- paste0(dirname(matrixFile), '/barcodes.tsv')
 
   # Cell typist expects a single column:
-  tbl <- read.table(geneFile, sep = '\t')
+  tbl <- utils::read.table(geneFile, sep = '\t')
   write.table(tbl$V1, file = geneFile, row.names = FALSE, col.names = FALSE)
 
   # Ensure models present:
@@ -386,8 +386,8 @@ TrainCellTypist <- function(seuratObj, labelField, modelFile, minCellsPerClass =
   unlink(cellFile)
 
   # Cell typist expects a single column per gene:
-  tbl <- read.table(geneFile, sep = '\t')
-  write.table(tbl$V1, file = geneFile, row.names = FALSE, col.names = FALSE)
+  tbl <- utils::read.table(geneFile, sep = '\t')
+  utils::write.table(tbl$V1, file = geneFile, row.names = FALSE, col.names = FALSE)
 
 
   # potentially replace windows slashes with forward slash
