@@ -207,8 +207,13 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
 .RunCelltypistOnSubset <- function(seuratObj, assayName, modelName, useMajorityVoting, extraArgs, retainProbabilityMatrix, updateModels = TRUE) {
   outDir <- tempfile(fileext = '')
   matrixFile <- SeuratToMatrix(seuratObj, outDir = outDir, assayName = assayName)
+
   geneFile <- paste0(dirname(matrixFile), '/genes.tsv')
   cellFile <- paste0(dirname(matrixFile), '/barcodes.tsv')
+
+  # Cell typist expects a single column:
+  tbl <- read.table(geneFile, sep = '\t')
+  write.table(tbl$V1, file = geneFile, row.names = FALSE, col.names = FALSE)
 
   # Ensure models present:
   if (updateModels) {
@@ -384,6 +389,7 @@ TrainCellTypist <- function(seuratObj, labelField, modelFile, minCellsPerClass =
 
   utils::write.table(seuratObj@meta.data[[labelField]], row.names = F, sep = '\t', quote = F, col.names = F, file = labelFile)
 
+  # potentially add: labels=, genes=, transpose_input=True
   typistCommand <- c(
     "import celltypist;",
     paste0("new_model = celltypist.train('", trainData, "', labels = '", labelFile, "', use_SGD = False, solver = 'saga', feature_selection = True, top_genes = 300);"),
