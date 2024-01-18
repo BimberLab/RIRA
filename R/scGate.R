@@ -102,7 +102,7 @@ GetScGateModel <- function(modelName, allowSCGateDB = TRUE) {
   gateFile <- system.file(paste0("gates/", modelName, ".tsv"), package = "RIRA")
   if (file.exists(gateFile)) {
     masterFile <- system.file("gates/master_table.tsv", package = "RIRA")
-    return(suppressWarnings(scGate::load_scGate_model(gateFile, master.table = masterFile)))
+    return(scGate::load_scGate_model(gateFile, master.table = masterFile))
   }
 
   if (!allowSCGateDB) {
@@ -110,7 +110,7 @@ GetScGateModel <- function(modelName, allowSCGateDB = TRUE) {
   }
 
   modelDir <- gsub(tempdir(), pattern = '\\\\', replacement = '/')
-  models.DB <- scGate::get_scGateDB(force_update = T, destination = modelDir)
+  models.DB <- suppressWarnings(scGate::get_scGateDB(force_update = T, destination = modelDir))
   if (!modelName %in% names(models.DB$human$generic)){
     stop(paste0('Unable to find model: ', modelName))
   }
@@ -135,7 +135,7 @@ GetScGateModel <- function(modelName, allowSCGateDB = TRUE) {
 #' @export
 RunScGateWithDefaultModels <- function(seuratObj, min.cells = 30, assay = 'RNA', pos.thr = 0.13, neg.thr = 0.13, ncores = 1, genes.blacklist = 'default', labelRename = NULL, dropAmbiguousConsensusValues = FALSE) {
   modelDir <- gsub(tempdir(), pattern = '\\\\', replacement = '/')
-  models.DB <- scGate::get_scGateDB(force_update = T, destination = modelDir)
+  models.DB <- suppressWarnings(scGate::get_scGateDB(force_update = T, destination = modelDir))
   modelNames <- names(models.DB$human$generic)
 
   return(RunScGateForModels(seuratObj,
