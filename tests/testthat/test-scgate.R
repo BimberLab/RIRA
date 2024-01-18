@@ -95,7 +95,7 @@ test_that("scGates runs on all", {
   print('RunScGateWithDefaultModels, using dropAmbiguousConsensusValues = FALSE')
   print(dat)
 
-  expect_equal(unname(dat[['Bcell,Bcell.NonGerminalCenter,Immune,Male,PanBcell']]), 285, tolerance = 1)
+  expect_equal(unname(dat[['Bcell,Bcell.NonGerminalCenter,Immune,PanBcell']]), 285, tolerance = 1)
 
   # Now with ambiguous cleanup:
   seuratObj <- RunScGateWithDefaultModels(seuratObj, dropAmbiguousConsensusValues = TRUE)
@@ -106,7 +106,7 @@ test_that("scGates runs on all", {
   if (packageVersion('UCell') < '2.5.0') {
     expect_equal(unname(dat[['Immune']]), 7, tolerance = 1)
   } else {
-    expect_equal(unname(dat[['CD4T,Immune,Male,Tcell,Tcell.alphabeta']]), 907, tolerance = 1)
+    expect_equal(unname(dat[['CD4T,Immune,Tcell,Tcell.alphabeta']]), 907, tolerance = 1)
   }
 })
 
