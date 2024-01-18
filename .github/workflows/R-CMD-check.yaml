@@ -89,8 +89,6 @@ jobs:
       - name: Install dependencies
         run: |
           remotes::install_deps(dependencies = TRUE, upgrade = "always")
-          # Force 4.x for Seurat
-          devtools::install_version('Seurat', version = '4.4.0', ask = FALSE, upgrade = 'never')          
           install.packages("pkgdown")
           remotes::install_cran("rcmdcheck")
           # Due to Matrix/SeuratObject: https://github.com/mojaveazure/seurat-object/issues/166

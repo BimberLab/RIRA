@@ -43,7 +43,7 @@ test_that("celltypist runs", {
   TrainCellTypist(seuratObjForTraining, 'majority_voting', paste0(getwd(), '/', modelFile))
 
   # A bit circular, but this is just a test case:
-  seuratObj <- suppressWarnings(pbmc3k)
+  seuratObj <- getBaseSeuratData()
   seuratObj <- Seurat::NormalizeData(seuratObj, verbose = FALSE)
   seuratObj <- RunCellTypist(seuratObj, modelName = modelFile)
 

@@ -11,7 +11,7 @@ License: GPL-3
 Depends:
     R (>= 4.3.0),
 Imports:
-    Seurat (<= 4.4.0),
+    Seurat,
     SeuratObject,
     rlang,
     scGate,
@@ -36,7 +36,6 @@ Imports:
     ggplot2,
     egg,
     reticulate,
-    SeuratDisk,
     naturalsort,
     patchwork,
     BiocParallel,
@@ -56,7 +55,6 @@ Remotes:
 RoxygenNote: 7.2.3
 Collate: 
     'Utils.R'
-    'Atlas.R'
     'CellTypist.R'
     'Classification.R'
     'ComponentScores.R'

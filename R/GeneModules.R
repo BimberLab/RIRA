@@ -62,7 +62,7 @@ CalculateUCellScores <- function(seuratObj, forceRecalculate = FALSE, seed = Get
       # Drop any genes with all zeros
       genesToSkip <- c()
       for (gene in geneList) {
-        if (sum(seuratObj@assays[[assayName]]@data[gene,] > 0) == 0) {
+        if (sum(Seurat::GetAssayData(seuratObj, assay = assayName, slot = 'data')[gene,] > 0) == 0) {
           genesToSkip <- c(genesToSkip, gene)
         }
       }
@@ -76,7 +76,7 @@ CalculateUCellScores <- function(seuratObj, forceRecalculate = FALSE, seed = Get
         stop(paste0('No shared genes: ', moduleName))
       }
 
-      geneData <- as.data.frame(t(as.matrix(seuratObj@assays[[assayName]]@data[geneList,])))
+      geneData <- as.data.frame(t(as.matrix(Seurat::GetAssayData(seuratObj, assay = assayName, slot = 'data')[geneList,])))
 
       geneData$UCell <- unlist(seuratObj[[paste0(moduleName, '_UCell')]])
 

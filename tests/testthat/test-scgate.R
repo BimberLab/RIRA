@@ -56,7 +56,7 @@ test_that("scGate Runs", {
   expect_false('NK' %in% names(dat), info = 'With aliasing')
 
   # Add reductions so plotting will work:
-  seuratObj <- suppressWarnings(pbmc3k)
+  seuratObj <- getBaseSeuratData()
   seuratObj <- suppressWarnings(Seurat::NormalizeData(seuratObj))
   seuratObj <- Seurat::FindVariableFeatures(seuratObj, nfeatures = 2000)
   seuratObj <- Seurat::ScaleData(seuratObj)
@@ -95,7 +95,7 @@ test_that("scGates runs on all", {
   print('RunScGateWithDefaultModels, using dropAmbiguousConsensusValues = FALSE')
   print(dat)
 
-  expect_equal(unname(dat[['Bcell,Bcell.NonGerminalCenter,Immune,PanBcell']]), 331, tolerance = 1)
+  expect_equal(unname(dat[['Bcell,Bcell.NonGerminalCenter,Immune,PanBcell']]), 285, tolerance = 1)
 
   # Now with ambiguous cleanup:
   seuratObj <- RunScGateWithDefaultModels(seuratObj, dropAmbiguousConsensusValues = TRUE)
@@ -106,7 +106,7 @@ test_that("scGates runs on all", {
   if (packageVersion('UCell') < '2.5.0') {
     expect_equal(unname(dat[['Immune']]), 7, tolerance = 1)
   } else {
-    expect_equal(unname(dat[['Immune']]), 25, tolerance = 1)
+    expect_equal(unname(dat[['Immune']]), 131, tolerance = 1)
   }
 })
 

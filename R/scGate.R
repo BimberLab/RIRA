@@ -110,7 +110,7 @@ GetScGateModel <- function(modelName, allowSCGateDB = TRUE) {
   }
 
   modelDir <- gsub(tempdir(), pattern = '\\\\', replacement = '/')
-  models.DB <- scGate::get_scGateDB(force_update = T, destination = modelDir)
+  models.DB <- suppressWarnings(scGate::get_scGateDB(force_update = T, destination = modelDir))
   if (!modelName %in% names(models.DB$human$generic)){
     stop(paste0('Unable to find model: ', modelName))
   }
@@ -131,12 +131,16 @@ GetScGateModel <- function(modelName, allowSCGateDB = TRUE) {
 #' @param genes.blacklist Passed directly to scGate::scGate. Genes blacklisted from variable features. The default loads the list of genes in scGate::genes.blacklist.default; you may deactivate blacklisting by setting genes.blacklist=NULL
 #' @param labelRename An optional list that maps the model name to the final label that should be used in the seurat object. for exmaple: list(Tcell = 'T_NK', NK = 'T_NK'), would re-label cells classified as either 'Tcell' or 'NK' by those models to one common label of T_NK
 #' @param dropAmbiguousConsensusValues If true, any consensus calls that are ambiguous will be set to NA
+#' @param excludedModels An optional vector of model names to exclude
 #'
 #' @export
-RunScGateWithDefaultModels <- function(seuratObj, min.cells = 30, assay = 'RNA', pos.thr = 0.13, neg.thr = 0.13, ncores = 1, genes.blacklist = 'default', labelRename = NULL, dropAmbiguousConsensusValues = FALSE) {
+RunScGateWithDefaultModels <- function(seuratObj, min.cells = 30, assay = 'RNA', pos.thr = 0.13, neg.thr = 0.13, ncores = 1, genes.blacklist = 'default', labelRename = NULL, dropAmbiguousConsensusValues = FALSE, excludedModels = c('Male', 'Female')) {
   modelDir <- gsub(tempdir(), pattern = '\\\\', replacement = '/')
-  models.DB <- scGate::get_scGateDB(force_update = T, destination = modelDir)
+  models.DB <- suppressWarnings(scGate::get_scGateDB(force_update = T, destination = modelDir))
   modelNames <- names(models.DB$human$generic)
+  if (!is.null(excludedModels)) {
+    modelNames <- modelNames[!modelNames %in% excludedModels]
+  }
 
   return(RunScGateForModels(seuratObj,
                             modelNames = modelNames,

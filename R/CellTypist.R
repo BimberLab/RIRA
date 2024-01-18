@@ -1,7 +1,7 @@
 #' @include Utils.R
 
 utils::globalVariables(
-  names = c('majority_voting', 'Fraction', 'PropPerCluster', 'over_clustering', 'predicted_labels', 'totalPerCluster', 'totalPerLabel', 'propPerLabel', 'sortOrder'),
+  names = c('majority_voting', 'Fraction', 'PropPerCluster', 'over_clustering', 'predicted_labels', 'totalPerCluster', 'totalPerLabel', 'propPerLabel', 'sortOrder', 'Category'),
   package = 'RIRA',
   add = TRUE
 )
@@ -205,10 +205,15 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
 }
 
 .RunCelltypistOnSubset <- function(seuratObj, assayName, modelName, useMajorityVoting, extraArgs, retainProbabilityMatrix, updateModels = TRUE) {
-  outFile <- tempfile()
-  outDir <- dirname(outFile)
-  # NOTE: metadata is not needed for scoring and is can contain invalid characters, so drop it during conversion
-  seuratAnnData <- SeuratToAnnData(seuratObj, paste0(outFile, '-seurat-annData'), assayName, exportMinimalObject = TRUE, allowableMetaCols = NA)
+  outDir <- tempfile(fileext = '')
+  matrixFile <- SeuratToMatrix(seuratObj, outDir = outDir, assayName = assayName)
+
+  geneFile <- paste0(dirname(matrixFile), '/genes.tsv')
+  cellFile <- paste0(dirname(matrixFile), '/barcodes.tsv')
+
+  # Cell typist expects a single column:
+  tbl <- utils::read.table(geneFile, sep = '\t')
+  write.table(tbl$V1, file = geneFile, row.names = FALSE, col.names = FALSE)
 
   # Ensure models present:
   if (updateModels) {
@@ -216,7 +221,7 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
   }
 
   # Now run celltypist itself:
-  args <- c("-m", "celltypist.command_line", "-i", seuratAnnData, "-m", modelName, "--outdir", outDir, "--prefix", "celltypist.", "--quiet")
+  args <- c("-m", "celltypist.command_line", "-i", matrixFile, "-gf", geneFile, "-cf", cellFile, "-m", modelName, "--outdir", outDir, "--prefix", "celltypist.", "--quiet", "--transpose-input")
 
   # NOTE: this produces a series of PDFs, one per class. Consider either providing an argument on where to move these, or reading/printing them
   #if (generatePlots) {
@@ -255,7 +260,7 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
     labels <- cbind(labels, probabilityMatrix)
   }
 
-  unlink(seuratAnnData)
+  unlink(outDir, recursive = TRUE)
   unlink(labelFile)
   unlink(probabilityMatrixFile)
   unlink(paste0(outDir, '/celltypist.decision_matrix.csv'))
@@ -373,11 +378,22 @@ TrainCellTypist <- function(seuratObj, labelField, modelFile, minCellsPerClass =
     seuratObj <- Seurat::NormalizeData(seuratObj, verbose = FALSE)
   }
 
-  trainData <- SeuratToAnnData(seuratObj, paste0(outFile, '-seurat-annData'), assayName = assayName, exportMinimalObject = TRUE, allowableMetaCols = labelField)
+  matrixOutDir <- paste0(outFile, '-seurat-annData')
+  trainDataMatrix <- SeuratToMatrix(seuratObj, outDir = matrixOutDir, assayName = assayName)
+
+  geneFile <- paste0(dirname(trainDataMatrix), '/genes.tsv')
+  cellFile <- paste0(dirname(trainDataMatrix), '/barcodes.tsv')
+  unlink(cellFile)
+
+  # Cell typist expects a single column per gene:
+  tbl <- utils::read.table(geneFile, sep = '\t')
+  utils::write.table(tbl$V1, file = geneFile, row.names = FALSE, col.names = FALSE)
+
 
   # potentially replace windows slashes with forward slash
-  trainData <- gsub(trainData, pattern = '\\\\', replacement = '/')
+  trainDataMatrix <- gsub(trainDataMatrix, pattern = '\\\\', replacement = '/')
   outFile <- gsub(outFile, pattern = '\\\\', replacement = '/')
+  geneFile <- gsub(geneFile, pattern = '\\\\', replacement = '/')
 
   labelFile <- paste0(outFile, '.seurat.labels.txt')
   scriptFile <- paste0(outFile, '.seurat.train.py')
@@ -386,7 +402,7 @@ TrainCellTypist <- function(seuratObj, labelField, modelFile, minCellsPerClass =
 
   typistCommand <- c(
     "import celltypist;",
-    paste0("new_model = celltypist.train('", trainData, "', labels = '", labelFile, "', use_SGD = False, solver = 'saga', feature_selection = True, top_genes = 300);"),
+    paste0("new_model = celltypist.train('", trainDataMatrix, "', labels = '", labelFile, "', use_SGD = False, transpose_input = True, genes = '", geneFile, "', solver = 'saga', feature_selection = True, top_genes = 300);"),
     paste0("new_model.write('", modelFile, "');")
   )
 
@@ -395,7 +411,7 @@ TrainCellTypist <- function(seuratObj, labelField, modelFile, minCellsPerClass =
   print('Running celltypist.train:')
   print(typistCommand)
 
-  system2(reticulate::py_exe(), c(scriptFile))
+  system2(reticulate::py_exe(), scriptFile)
 
   if (!file.exists(modelFile)) {
     stop(paste0('Unable to find file: ', modelFile))
@@ -403,7 +419,7 @@ TrainCellTypist <- function(seuratObj, labelField, modelFile, minCellsPerClass =
 
   unlink(labelFile)
   unlink(scriptFile)
-  unlink(trainData)
+  unlink(matrixOutDir, recursive = TRUE)
 }
 
 #' @title Classify T/NK
