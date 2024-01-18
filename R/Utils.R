@@ -73,54 +73,6 @@ SeuratToMatrix <- function(seuratObj, outDir, assayName, slot = 'counts'){
   return(paste0(outDir, '/matrix.mtx'))
 }
 
-SeuratToAnnData <- function(seuratObj, outFileBaseName, assayName = NULL, exportMinimalObject = FALSE, allowableMetaCols = NULL, includeData = TRUE) {
-  tmpFile <- outFileBaseName
-  if (!is.null(assayName)) {
-    for (an in names(seuratObj@assays)) {
-      if (an != assayName) {
-        seuratObj[[an]] <- NULL
-      }
-    }
-  }
-
-  if (exportMinimalObject) {
-    if (is.null(assayName)) {
-        stop('You must provide a specific assayName when exporting a minimal seurat object')
-    }
-
-    # NOTE: clone a new object to ensure we only carry forward the minimal data we need:
-    origAssay <- seuratObj@assays[[assayName]]
-    seuratObj <- Seurat::CreateSeuratObject(counts = Seurat::GetAssayData(origAssay, slot = 'counts'), assay = assayName, project = seuratObj@project.name, meta.data = seuratObj@meta.data)
-    if (includeData){
-      seuratObj <- Seurat::SetAssayData(seuratObj, assay = assayName, slot = 'data', new.data = Seurat::GetAssayData(origAssay, slot = 'data'))
-    }
-  }
-
-  seuratObj@misc <- list()
-  seuratObj@commands <- list()
-
-  if (all(is.na(allowableMetaCols))) {
-    print('Removing all metadata prior to save')
-    seuratObj@meta.data <- seuratObj@meta.data[,NULL, drop = FALSE]
-    seuratObj@meta.data$CellBarcode <- rownames(seuratObj@meta.data)
-  } else if (!all(is.null(allowableMetaCols))) {
-    if (!all(allowableMetaCols %in% names(seuratObj@meta.data))) {
-      stop('Not all columns requested in allowableMetaCols exist in the seurat object')
-    }
-
-    seuratObj@meta.data <- seuratObj@meta.data[,allowableMetaCols, drop = FALSE]
-  }
-
-  print('Saving to H5Seurat')
-  SeuratDisk::SaveH5Seurat(seuratObj, filename = tmpFile)
-  h5seurat <- paste0(tmpFile, ".h5seurat")
-  print('Converting from H5Seurat to AnnData')
-  SeuratDisk::Convert(source = h5seurat, dest = "h5ad", overwrite = T)
-  unlink(h5seurat)
-
-  return(paste0(outFileBaseName, ".h5ad"))
-}
-
 .DropLowCountClasses <- function(seuratObj, targetColumn, minCells) {
   dat <- table(seuratObj@meta.data[[targetColumn]])
   dat <- dat[dat > 0]
