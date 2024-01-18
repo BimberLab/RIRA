@@ -207,6 +207,8 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
 .RunCelltypistOnSubset <- function(seuratObj, assayName, modelName, useMajorityVoting, extraArgs, retainProbabilityMatrix, updateModels = TRUE) {
   outDir <- tempfile(fileext = '')
   matrixFile <- SeuratToMatrix(seuratObj, outDir = outDir, assayName = assayName)
+  geneFile <- paste0(dirname(matrixFile), '/genes.tsv')
+  cellFile <- paste0(dirname(matrixFile), '/barcodes.tsv')
 
   # Ensure models present:
   if (updateModels) {
@@ -214,7 +216,7 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
   }
 
   # Now run celltypist itself:
-  args <- c("-m", "celltypist.command_line", "-i", matrixFile, "-m", modelName, "--outdir", outDir, "--prefix", "celltypist.", "--quiet")
+  args <- c("-m", "celltypist.command_line", "-i", matrixFile, "-gf", geneFile, "-cf", cellFile, "-m", modelName, "--outdir", outDir, "--prefix", "celltypist.", "--quiet")
 
   # NOTE: this produces a series of PDFs, one per class. Consider either providing an argument on where to move these, or reading/printing them
   #if (generatePlots) {
