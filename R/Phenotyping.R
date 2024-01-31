@@ -91,7 +91,7 @@ PlotImmuneMarkers <- function(seuratObj, reductions = c('tsne', 'umap')) {
 	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('HAVCR2'), 'Th1')
 
 	# ZBTB16 = PLZF
-	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('KLRB1', 'NCR3', 'ZBTB16', 'RORC', 'SLC4A10', 'DPP4'), 'MAIT')
+	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('KLRB1', 'CEPBD', 'NCR3', 'ZBTB16', 'RORC', 'SLC4A10', 'DPP4'), 'MAIT')
 
 	# ZNF683 = HOBIT
 	# LOC100423131 = XCL1, ENSMMUG00000013779, Lymphotactin

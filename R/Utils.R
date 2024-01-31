@@ -92,11 +92,18 @@ SeuratToMatrix <- function(seuratObj, outDir, assayName, slot = 'counts'){
 }
 
 .HasNormalizationBeenPerformed <- function(seuratObj, assayName = Seurat::DefaultAssay(seuratObj)){
-    if (!assayName %in% names(seuratObj@assays)) {
-        stop(paste0('Assay not found: ', assayName))
-    }
+  if (!assayName %in% names(seuratObj@assays)) {
+    stop(paste0('Assay not found: ', assayName))
+  }
 
+  assayObj <- Seurat::GetAssay(seuratObj, assay = assayName)
+  if (class(assayObj)[1] == 'Assay') {
     return(!identical(Seurat::GetAssayData(seuratObj, assay = assayName, slot = 'counts'), Seurat::GetAssayData(seuratObj, assay = assayName, slot = 'data')))
+  } else if (class(assayData)[1] == 'Assay5') {
+    return('data' %in% names(assayObj@layers))
+  } else {
+    stop(paste0('Unknown assay class: ', class(assayData)[1]))
+  }
 }
 
 .FilterLowCalls <- function(seuratObj, label, minFraction, returnAsFactor = TRUE, labelToAssign = 'Unknown') {
