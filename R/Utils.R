@@ -99,10 +99,10 @@ SeuratToMatrix <- function(seuratObj, outDir, assayName, slot = 'counts'){
   assayObj <- Seurat::GetAssay(seuratObj, assay = assayName)
   if (class(assayObj)[1] == 'Assay') {
     return(!identical(Seurat::GetAssayData(seuratObj, assay = assayName, slot = 'counts'), Seurat::GetAssayData(seuratObj, assay = assayName, slot = 'data')))
-  } else if (class(assayData)[1] == 'Assay5') {
+  } else if (class(assayObj)[1] == 'Assay5') {
     return('data' %in% names(assayObj@layers))
   } else {
-    stop(paste0('Unknown assay class: ', class(assayData)[1]))
+    stop(paste0('Unknown assay class: ', class(assayObj)[1]))
   }
 }
 
