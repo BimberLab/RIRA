@@ -41,7 +41,7 @@ Imports:
     BiocParallel,
     ggcorrplot,
     magrittr,
-    Matrix
+    mlr3verse
 Suggests:
     devtools,
     testthat (>= 2.1.0),
