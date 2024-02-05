@@ -71,7 +71,7 @@ TrainModel <- function(training_matrix, celltype, hyperparameter_tuning = F, lea
   } else {
     #Set model-independent values for the autotuner
     measure <- msr("classif.ce")
-    terminator <- trm("evals", n_evals = n_models)
+    terminator <- mlr3verse::trm("evals", n_evals = n_models)
 
     #Define a tuning space 25% as large as the number of models 
     #In the case of sensitive hyperparameters, resolution = 5 allows for a low/medium-low/medium/medium-high/high type parameter space
