@@ -97,7 +97,7 @@ CalculateUCellScores <- function(seuratObj, forceRecalculate = FALSE, seed = Get
   }
 
   for (geneModule in names(toCalculate)) {
-    ucell <- paste0(geneModule, '_Cell')
+    ucell <- paste0(geneModule, '_UCell')
     if (any(is.na(seuratObj[[ucell]]))) {
       print(paste0('Data has NAs, cannot make feature plot: ', ucell))
     } else {
