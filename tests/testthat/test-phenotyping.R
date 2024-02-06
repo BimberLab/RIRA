@@ -32,5 +32,8 @@ test_that("ScoreUsingSavedComponent works", {
   seuratObj <- ScoreUsingSavedComponent(seuratObj, componentOrName = 'Tcell_NaiveToEffector', fieldName = 'Test2')
   expect_equal(round(max(seuratObj$Test2), 2), 41.61)
   expect_equal(round(min(seuratObj$Test2), 2), -6.69)
-  
+
+  seuratObj <- CalculateUCellScores(seuratObj)
+  expect_true('TandNK_Activation_UCell' %in% names(seuratObj@meta.data))
+  expect_true('MAIT_Markers_UCell' %in% names(seuratObj@meta.data))
 })
