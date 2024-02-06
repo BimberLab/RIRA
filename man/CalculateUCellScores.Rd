@@ -10,7 +10,7 @@ CalculateUCellScores(
   seed = GetSeed(),
   ncores = 1,
   assayName = "RNA",
-  storeRanks = FALSE,
+  storeRanks = TRUE,
   plotCor = TRUE
 )
 }

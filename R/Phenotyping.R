@@ -91,7 +91,7 @@ PlotImmuneMarkers <- function(seuratObj, reductions = c('tsne', 'umap')) {
 	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('HAVCR2'), 'Th1')
 
 	# ZBTB16 = PLZF
-	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('KLRB1', 'CEPBD', 'NCR3', 'ZBTB16', 'RORC', 'SLC4A10', 'DPP4'), 'MAIT')
+	PlotMarkerSeries(seuratObj, reductions = reductions, features = GetGeneSet('MAIT_Markers'), 'MAIT')
 
 	# ZNF683 = HOBIT
 	# LOC100423131 = XCL1, ENSMMUG00000013779, Lymphotactin
@@ -328,6 +328,8 @@ GetGeneSet <- function(name) {
 # TNFSF4 = OX40L
 
 .RegisterGeneSet('MMul10TcrConstantRegion', c('LOC710951', 'LOC114677140', 'LOC711031', 'LOC720538', 'LOC705095'))
+
+.RegisterGeneSet('MAIT_Markers', c('KLRB1', 'CEPBD', 'NCR3', 'ZBTB16', 'RORC', 'SLC4A10', 'DPP4'))
 
 # Dysfunction?
 # 'MT1A', 'MT2A', 'MT1M'

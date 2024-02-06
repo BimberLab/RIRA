@@ -213,7 +213,7 @@ RunCellTypist <- function(seuratObj, modelName = "Immune_All_Low.pkl", pThreshol
 
   # Cell typist expects a single column:
   tbl <- utils::read.table(geneFile, sep = '\t')
-  write.table(tbl$V1, file = geneFile, row.names = FALSE, col.names = FALSE)
+  utils::write.table(tbl$V1, file = geneFile, row.names = FALSE, col.names = FALSE)
 
   # Ensure models present:
   if (updateModels) {
