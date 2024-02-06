@@ -78,7 +78,8 @@ CalculateUCellScores <- function(seuratObj, forceRecalculate = FALSE, seed = Get
       }
 
       if (length(geneList) == 0) {
-        stop(paste0('No shared genes: ', moduleName))
+        warning(paste0('No shared genes, skipping: ', moduleName))
+        next
       }
 
       geneData <- as.data.frame(t(as.matrix(Seurat::GetAssayData(seuratObj, assay = assayName, slot = 'data')[geneList,])))
