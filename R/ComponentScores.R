@@ -37,8 +37,13 @@ ScoreUsingSavedComponent <- function(seuratObj, componentOrName, fieldName) {
 
   cellScores <- Matrix::t(Matrix::as.matrix(ad[names(geneWeights), ]))  %*%  geneWeights
   seuratObj <- Seurat::AddMetaData(seuratObj, cellScores, col.name = fieldName)
-  
-  suppressMessages(print(FeaturePlot(seuratObj, features = fieldName, order = T) & ggplot2::scale_colour_gradientn(colours = c("navy", "dodgerblue", "gold", "red"))))
+
+  if (length(names(seuratObj@reductions)) > 0) {
+    suppressMessages(print(FeaturePlot(seuratObj, features = fieldName, order = T) & ggplot2::scale_colour_gradientn(colours = c("navy", "dodgerblue", "gold", "red"))))
+  } else {
+    print('No reductions present, cannot plot')
+  }
+
   graphics::hist(seuratObj@meta.data[[fieldName]], breaks = 300, main = fieldName)
 
   return(seuratObj)
