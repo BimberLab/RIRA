@@ -30,6 +30,9 @@ PlotImmuneMarkers <- function(seuratObj, reductions = c('tsne', 'umap')) {
 	#SELL = CD62-L / CD-197
 	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('CCR7', 'SELL', 'GZMB', 'CCR5', 'IL2RA', 'PTPRC', 'IL7R', 'CTLA4', 'FAS', 'CD28', 'CD27', 'ITGA4', 'ITGB7', 'ITGB1'), 'Effector vs. Memory')
 
+	# Integrins:
+	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('ITGA2', 'ITGA2B', 'ITGA4', 'ITGAD', 'ITGAE', 'ITGAL', 'ITGAL', 'ITGAX', 'ITGB1', 'ITGB2', 'ITGB3', 'ITGB4', 'ITGB5', 'ITGB6', 'ITGB7', 'ITGB8'), 'Effector vs. Memory')
+
 	#CD8 Activation
 	# XCL1 = ENSMMUG00000060218
 	# CCL4 = ENSMMUG00000008111
@@ -115,7 +118,7 @@ PlotImmuneMarkers <- function(seuratObj, reductions = c('tsne', 'umap')) {
 	#LILR/KIR:
 	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('LILRA5','LILRA6','LILRB4','LILRB5','KIR2DL4','KIR3DX1', 'MAMU-KIR', 'KIR2DL4', 'KIR3DL2'), 'LILR/KIR')
 
-	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('FCGR1A','FCGR2A','FCGR2B','FCGR3', 'FCGR3A'), 'FCGR')
+	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('FCGR1A','FCGR2A','FCGR2B','FCGR3', 'FCGR3A', 'FCER1G'), 'FCGR')
 
 	PlotMarkerSeries(seuratObj, reductions = reductions, features = GetGeneSet('EffectorCytokines'), 'Effector Cytokines')
 
