@@ -364,6 +364,12 @@ humanRibosomalGenes <- read.table(system.file("humanRibosomalGenes_Human_GRCh38_
 humanMitochondrialGenes <- c('MT-ATP6','MT-ATP8','MT-CO1','MT-CO2','MT-CO3','MT-CYB','MT-ND1','MT-ND2','MT-ND3','MT-ND4','MT-ND4L','MT-ND5','MT-ND6','MT-RNR1','MT-RNR2','MT-TA','MT-TC','MT-TD','MT-TE','MT-TF','MT-TG','MT-TH','MT-TI','MT-TK','MT-TL1','MT-TL2','MT-TM','MT-TN','MT-TP','MT-TQ','MT-TR','MT-TS1','MT-TS2','MT-TT','MT-TV','MT-TW','MT-TY')
 .RegisterGeneSet("HumanMitochondrialGenes", humanMitochondrialGenes)
 
+humanTravGenes <- c('TRAV1-1','TRAV1-2','TRAV10','TRAV11','TRAV12-1','TRAV12-2','TRAV12-3','TRAV13-1','TRAV13-2','TRAV14DV4','TRAV15','TRAV16','TRAV17','TRAV18','TRAV19','TRAV2','TRAV20','TRAV21','TRAV22','TRAV23DV6','TRAV24','TRAV25','TRAV26-1','TRAV26-2','TRAV27','TRAV28','TRAV29DV5','TRAV3','TRAV30','TRAV31','TRAV32','TRAV33','TRAV34','TRAV35','TRAV36DV7','TRAV37','TRAV38-1','TRAV38-2DV8','TRAV39','TRAV4','TRAV40','TRAV41','TRAV5','TRAV6','TRAV7','TRAV8-1','TRAV8-2','TRAV8-3','TRAV8-4','TRAV8-5','TRAV8-6','TRAV8-7','TRAV9-1','TRAV9-2')
+humanTrbvGenes <- c('TRBV1','TRBV10-1','TRBV10-2','TRBV10-3','TRBV11-1','TRBV11-2','TRBV11-3','TRBV12-1','TRBV12-2','TRBV12-3','TRBV12-4','TRBV12-5','TRBV13','TRBV14','TRBV15','TRBV16','TRBV17','TRBV18','TRBV19','TRBV2','TRBV20-1','TRBV20OR9-2','TRBV21-1','TRBV21OR9-2','TRBV22-1','TRBV22OR9-2','TRBV23-1','TRBV23OR9-2','TRBV24-1','TRBV24OR9-2','TRBV25-1','TRBV25OR9-2','TRBV26','TRBV26OR9-2','TRBV27','TRBV28','TRBV29-1','TRBV29OR9-2','TRBV3-1','TRBV30','TRBV4-1','TRBV4-2','TRBV5-1','TRBV5-2','TRBV5-3','TRBV5-4','TRBV5-5','TRBV5-6','TRBV5-7','TRBV6-1','TRBV6-2','TRBV6-4','TRBV6-5','TRBV6-6','TRBV6-7','TRBV6-8','TRBV7-1','TRBV7-2','TRBV7-3','TRBV7-4','TRBV7-5','TRBV7-6','TRBV7-7','TRBV7-9','TRBV8-1','TRBV8-2','TRBV9','TRBVA','TRBVB')
+humanTrajGenes <- c('TRAJ1','TRAJ10','TRAJ11','TRAJ12','TRAJ13','TRAJ14','TRAJ16','TRAJ17','TRAJ18','TRAJ19','TRAJ2','TRAJ20','TRAJ21','TRAJ22','TRAJ23','TRAJ24','TRAJ25','TRAJ26','TRAJ27','TRAJ28','TRAJ29','TRAJ3','TRAJ30','TRAJ31','TRAJ32','TRAJ33','TRAJ34','TRAJ35','TRAJ36','TRAJ37','TRAJ38','TRAJ39','TRAJ4','TRAJ40','TRAJ41','TRAJ42','TRAJ43','TRAJ44','TRAJ45','TRAJ46','TRAJ47','TRAJ48','TRAJ49','TRAJ5','TRAJ50','TRAJ51','TRAJ52','TRAJ53','TRAJ54','TRAJ55','TRAJ56','TRAJ57','TRAJ58','TRAJ59','TRAJ6','TRAJ60','TRAJ61','TRAJ7','TRAJ8','TRAJ9')
+humanTrbjGenes <- c('TRBJ1-1','TRBJ1-2','TRBJ1-3','TRBJ1-4','TRBJ1-5','TRBJ1-6','TRBJ2-1','TRBJ2-2','TRBJ2-2P','TRBJ2-3','TRBJ2-4','TRBJ2-5','TRBJ2-6','TRBJ2-7')
+.RegisterGeneSet("HumanTcrGenes", c(humanTravGenes, humanTrbvGenes, humanTrajGenes, humanTrbjGenes))
+
 # NOTE: this has been deprecated in favor of .2, which omits TCR constant region
 .RegisterGeneSet('VariableGenes_Exclusion.1', unique(c(
 	GetGeneSet('MMul10TcrGenes'),
@@ -386,7 +392,8 @@ humanMitochondrialGenes <- c('MT-ATP6','MT-ATP8','MT-CO1','MT-CO2','MT-CO3','MT-
 
 .RegisterGeneSet('HumanVariableGenes_Exclusion', unique(c(
   GetGeneSet('HumanMitochondrialGenes'), 
-  GetGeneSet('HumanRibosomalGenes')
+  GetGeneSet('HumanRibosomalGenes'), 
+  GetGeneSet('HumanTcrGenes')
                  )))
 
 .RegisterGeneSet("Glycolysis", c("ALDOA", "BPGM", "ENO1", "ENO2", "GAPDH", "HK1", "HK2", "HKDC1", "PFKL", "PGAM1", "PGAM2", "PGK1", "PKLR", "PKM", "TPI1"))
