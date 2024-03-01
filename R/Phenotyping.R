@@ -358,7 +358,7 @@ igLambdaVariable <-c("LOC107000570", "LOC106992425", "LOC701976", "LOC708547", "
 
 ## Human gene sets
 # Generated using: sort(rownames(seuratObj[['RNA']])[grepl(rownames(seuratObj[['RNA']]), pattern = '^RP[SL]')])
-humanRibosomalGenes <- read.table(system.file("humanRibosomalGenes_Human_GRCh38_p13_Ensembl.tsv", package = "RIRA"), header = T)$ribosomal_genes
+humanRibosomalGenes <- read.table(system.file("extdata/humanRibosomalGenes_Human_GRCh38_p13_Ensembl.tsv", package = "RIRA"), header = T)$ribosomal_genes
 .RegisterGeneSet("HumanRibosomalGenes", humanRibosomalGenes)
 # Generated using: sort(rownames(seuratObj[["RNA"]])[grepl(rownames(seuratObj[["RNA"]]), pattern = '^MT-')])
 humanMitochondrialGenes <- c('MT-ATP6','MT-ATP8','MT-CO1','MT-CO2','MT-CO3','MT-CYB','MT-ND1','MT-ND2','MT-ND3','MT-ND4','MT-ND4L','MT-ND5','MT-ND6','MT-RNR1','MT-RNR2','MT-TA','MT-TC','MT-TD','MT-TE','MT-TF','MT-TG','MT-TH','MT-TI','MT-TK','MT-TL1','MT-TL2','MT-TM','MT-TN','MT-TP','MT-TQ','MT-TR','MT-TS1','MT-TS2','MT-TT','MT-TV','MT-TW','MT-TY')
