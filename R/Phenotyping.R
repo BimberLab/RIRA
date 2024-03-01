@@ -382,6 +382,9 @@ humanIgLambda <- c('IGLJ1','IGLJ2','IGLJ3','IGLJ4','IGLJ5','IGLJ6','IGLJ7','IGLJ
 humanIgKappa <- c('IGKJ1','IGKJ2','IGKJ3','IGKJ4','IGKJ5','IGKV1-12','IGKV1-13','IGKV1-16','IGKV1-17','IGKV1-22','IGKV1-27','IGKV1-32','IGKV1-33','IGKV1-35','IGKV1-37','IGKV1-39','IGKV1-5','IGKV1-6','IGKV1-8','IGKV1-9','IGKV1D-12','IGKV1D-13','IGKV1D-16','IGKV1D-17','IGKV1D-22','IGKV1D-27','IGKV1D-32','IGKV1D-33','IGKV1D-35','IGKV1D-37','IGKV1D-39','IGKV1D-42','IGKV1D-43','IGKV1D-8','IGKV1OR-2','IGKV1OR-3','IGKV1OR1-1','IGKV1OR10-1','IGKV1OR2-1','IGKV1OR2-108','IGKV1OR2-11','IGKV1OR2-118','IGKV1OR2-2','IGKV1OR2-3','IGKV1OR2-6','IGKV1OR2-9','IGKV1OR22-1','IGKV1OR22-5','IGKV1OR9-1','IGKV1OR9-2','IGKV2-10','IGKV2-14','IGKV2-18','IGKV2-19','IGKV2-23','IGKV2-24','IGKV2-26','IGKV2-28','IGKV2-29','IGKV2-30','IGKV2-36','IGKV2-38','IGKV2-4','IGKV2-40','IGKV2D-10','IGKV2D-14','IGKV2D-18','IGKV2D-19','IGKV2D-23','IGKV2D-24','IGKV2D-26','IGKV2D-28','IGKV2D-29','IGKV2D-30','IGKV2D-36','IGKV2D-38','IGKV2D-40','IGKV2OR2-1','IGKV2OR2-10','IGKV2OR2-2','IGKV2OR2-7','IGKV2OR2-7D','IGKV2OR2-8','IGKV2OR22-3','IGKV2OR22-4','IGKV3-11','IGKV3-15','IGKV3-20','IGKV3-25','IGKV3-31','IGKV3-34','IGKV3-7','IGKV3D-11','IGKV3D-15','IGKV3D-20','IGKV3D-25','IGKV3D-31','IGKV3D-34','IGKV3D-7','IGKV3OR2-268','IGKV3OR2-5','IGKV3OR22-2','IGKV4-1','IGKV5-2','IGKV6-21','IGKV6D-21','IGKV6D-41','IGKV7-3')
 .RegisterGeneSet("HumanBcrGenes", c(humanIgHeavyVariable, humanIgHeavyJoining, humanIgHeavyDiversity, humanIgLambda, humanIgKappa))
 
+# Generated via sort(rownames(seuratObj[["RNA"]])[grepl(rownames(seuratObj[["RNA"]]), pattern = '^KIR')]). 
+humanKIRGenes <- c('KIR2DL1','KIR2DL3','KIR2DL4','KIR2DP1','KIR2DS4','KIR3DL1','KIR3DL2','KIR3DL3','KIR3DP1','KIR3DX1','KIRREL1','KIRREL1-IT1','KIRREL2','KIRREL3','KIRREL3-AS1','KIRREL3-AS2','KIRREL3-AS3')
+.RegisterGeneSet("HumanKIRGenes", humanKIRGenes)
 
 # NOTE: this has been deprecated in favor of .2, which omits TCR constant region
 .RegisterGeneSet('VariableGenes_Exclusion.1', unique(c(
@@ -407,7 +410,8 @@ humanIgKappa <- c('IGKJ1','IGKJ2','IGKJ3','IGKJ4','IGKJ5','IGKV1-12','IGKV1-13',
   GetGeneSet('HumanMitochondrialGenes'), 
   GetGeneSet('HumanRibosomalGenes'), 
   GetGeneSet('HumanTcrGenes'), 
-  GetGeneSet('HumanBcrGenes')
+  GetGeneSet('HumanBcrGenes'), 
+  GetGeneSet('HumanKIRGenes')
 )))
 
 .RegisterGeneSet("Glycolysis", c("ALDOA", "BPGM", "ENO1", "ENO2", "GAPDH", "HK1", "HK2", "HKDC1", "PFKL", "PGAM1", "PGAM2", "PGK1", "PKLR", "PKM", "TPI1"))
