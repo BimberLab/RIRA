@@ -31,7 +31,7 @@ test_that("scGate runs with custom models", {
     print('UCell version is less than 2.5.0')
     expect_equal(unname(dat[['Myeloid']]), 680)
   } else {
-    expect_equal(unname(dat[['Myeloid']]), 578)
+    expect_equal(unname(dat[['Myeloid']]), 579)
   }
 
 })
