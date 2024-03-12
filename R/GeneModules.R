@@ -53,41 +53,7 @@ CalculateUCellScores <- function(seuratObj, forceRecalculate = FALSE, seed = Get
   }
 
   if (plotCor) {
-    for (moduleName in names(toCalculate)) {
-      geneList <- gsub(toCalculate[[moduleName]], pattern = '-$', replacement = '')
-      missingGenes <- dplyr::setdiff(geneList, rownames(seuratObj@assays[[assayName]]))
-      if (length(missingGenes) > 0) {
-        print(paste0('The following genes were not present in the object: ', paste0(missingGenes, collapse = ',')))
-      }
-
-      geneList <- intersect(geneList, rownames(seuratObj@assays[[assayName]]))
-
-      # Drop any genes with all zeros
-      genesToSkip <- c()
-      for (gene in geneList) {
-        if (sum(Seurat::GetAssayData(seuratObj, assay = assayName, slot = 'data')[gene,] > 0) == 0) {
-          genesToSkip <- c(genesToSkip, gene)
-        }
-      }
-
-      if (length(genesToSkip) > 0) {
-        print(paste0('Skipping genes with zero counts: ', paste0(genesToSkip, collapse = ',')))
-        geneList <- geneList[!geneList %in% genesToSkip]
-      }
-
-      if (length(geneList) == 0) {
-        warning(paste0('No shared genes, skipping: ', moduleName))
-        next
-      }
-
-      geneData <- as.data.frame(t(as.matrix(Seurat::GetAssayData(seuratObj, assay = assayName, slot = 'data')[geneList,])))
-
-      geneData$UCell <- unlist(seuratObj[[paste0(moduleName, '_UCell')]])
-
-      ret <- stats::cor(geneData, method = "spearman")
-      p.mat <- ggcorrplot::cor_pmat(ret, method = 'spearman')
-      print(ggcorrplot::ggcorrplot(ret, hc.order = TRUE, type = "lower", p.mat = p.mat) + ggtitle(paste0(moduleName, " UCell-Gene Correlations")))
-    }
+    PlotUcellCorrelation(seuratObj, toCalculate)
   }
 
   hasReductions <- length(seuratObj@reductions) > 0
@@ -107,4 +73,55 @@ CalculateUCellScores <- function(seuratObj, forceRecalculate = FALSE, seed = Get
   }
 
   return(seuratObj)
+}
+
+#' @title PlotUcellCorrelation
+#'
+#' @description This will plot the correlation between a UCell score and a gene set of interest
+#' @param seuratObj The seurat object
+#' @param toCalculate A named list where each item is a character vector of genes
+#' @param assayName The assay to use
+#' @return A list with moduleName and the spearman correlation matrix
+#' @export
+PlotUcellCorrelation <- function(seuratObj, toCalculate, assayName = 'RNA') {
+  corData <- list()
+  for (moduleName in names(toCalculate)) {
+    geneList <- gsub(toCalculate[[moduleName]], pattern = '-$', replacement = '')
+    missingGenes <- dplyr::setdiff(geneList, rownames(seuratObj@assays[[assayName]]))
+    if (length(missingGenes) > 0) {
+      print(paste0('The following genes were not present in the object: ', paste0(missingGenes, collapse = ',')))
+    }
+
+    geneList <- intersect(geneList, rownames(seuratObj@assays[[assayName]]))
+
+    # Drop any genes with all zeros
+    genesToSkip <- NULL
+    for (gene in geneList) {
+      if (sum(Seurat::GetAssayData(seuratObj, assay = assayName, slot = 'data')[gene,] > 0) == 0) {
+        genesToSkip <- c(genesToSkip, gene)
+      }
+    }
+
+    if (length(genesToSkip) > 0) {
+      print(paste0('Skipping genes with zero counts: ', paste0(genesToSkip, collapse = ',')))
+      geneList <- geneList[!geneList %in% genesToSkip]
+    }
+
+    if (length(geneList) == 0) {
+      warning(paste0('No shared genes, skipping: ', moduleName))
+      next
+    }
+
+    geneData <- as.data.frame(t(as.matrix(Seurat::GetAssayData(seuratObj, assay = assayName, slot = 'data')[geneList,])))
+
+    geneData$UCell <- unlist(seuratObj[[paste0(moduleName, '_UCell')]])
+
+    ret <- stats::cor(geneData, method = "spearman")
+    corData[[moduleName]] <- ret
+
+    p.mat <- ggcorrplot::cor_pmat(ret, method = 'spearman')
+    print(ggcorrplot::ggcorrplot(ret, hc.order = TRUE, type = "lower", p.mat = p.mat) + ggtitle(paste0(moduleName, " UCell-Gene Correlations")))
+  }
+
+  return(corData)
 }
