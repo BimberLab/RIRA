@@ -95,7 +95,7 @@ PlotUcellCorrelation <- function(seuratObj, toCalculate, assayName = 'RNA') {
     geneList <- intersect(geneList, rownames(seuratObj@assays[[assayName]]))
 
     # Drop any genes with all zeros
-    genesToSkip <- c()
+    genesToSkip <- NULL
     for (gene in geneList) {
       if (sum(Seurat::GetAssayData(seuratObj, assay = assayName, slot = 'data')[gene,] > 0) == 0) {
         genesToSkip <- c(genesToSkip, gene)
