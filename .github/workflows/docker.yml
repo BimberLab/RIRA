@@ -58,6 +58,6 @@ jobs:
           labels: |
             ${{ steps.docker_meta.outputs.labels }}
             org.opencontainers.image.title=rira
-            org.opencontainers.image.description=RIRA is an R package for demultiplexing cell hashing data, developed and maintained by the Bimber Lab.
+            org.opencontainers.image.description=RIRA is an R package for interpreting single-cell RNA-seq data, developed and maintained by the Bimber Lab.
 
 
