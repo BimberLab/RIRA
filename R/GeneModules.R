@@ -112,7 +112,10 @@ PlotUcellCorrelation <- function(seuratObj, toCalculate, assayName = 'RNA') {
       next
     }
 
-    geneData <- as.data.frame(t(as.matrix(Seurat::GetAssayData(seuratObj, assay = assayName, slot = 'data')[geneList,])))
+    geneData <- as.data.frame(t(as.matrix(Seurat::GetAssayData(seuratObj, assay = assayName, slot = 'data')[geneList,, drop = FALSE])))
+    if (! paste0(moduleName, '_UCell') %in% names(seuratObj@meta.data)) {
+      stop(paste0('Missing column: ', paste0(moduleName, '_UCell')))
+    }
 
     geneData$UCell <- unlist(seuratObj[[paste0(moduleName, '_UCell')]])
 
