@@ -126,7 +126,7 @@ PlotUcellCorrelation <- function(seuratObj, toCalculate, assayName = 'RNA') {
       p.mat <- ggcorrplot::cor_pmat(ret, method = 'spearman')
       print(ggcorrplot::ggcorrplot(ret, hc.order = TRUE, type = "lower", p.mat = p.mat) + ggtitle(paste0(moduleName, " UCell-Gene Correlations")))
     }, error = function(e){
-      print('Error generating ggcorrplot')
+      print(paste0('Error generating ggcorrplot for: ', moduleName))
       print(str(geneData))
       print(str(ret))
       print(conditionMessage(e))
