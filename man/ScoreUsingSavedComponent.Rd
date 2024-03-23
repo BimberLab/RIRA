@@ -4,7 +4,12 @@
 \alias{ScoreUsingSavedComponent}
 \title{ScoreUsingSavedComponent}
 \usage{
-ScoreUsingSavedComponent(seuratObj, componentOrName, fieldName)
+ScoreUsingSavedComponent(
+  seuratObj,
+  componentOrName,
+  fieldName,
+  assayName = "RNA"
+)
 }
 \arguments{
 \item{seuratObj}{The seurat object}
@@ -12,6 +17,8 @@ ScoreUsingSavedComponent(seuratObj, componentOrName, fieldName)
 \item{componentOrName}{Either a data frame with the columns 'feature' and 'weight', or the name of a previously saved component available in RIRA}
 
 \item{fieldName}{The name of the field in which to save the resulting scores}
+
+\item{assayName}{The assay to use}
 }
 \description{
 Scores a seurat object using the gene weights from a saved component
