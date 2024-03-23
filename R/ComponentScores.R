@@ -15,9 +15,10 @@
 #' @param seuratObj The seurat object
 #' @param componentOrName Either a data frame with the columns 'feature' and 'weight', or the name of a previously saved component available in RIRA
 #' @param fieldName The name of the field in which to save the resulting scores
+#' @param assayName The assay to use
 #'
 #' @export
-ScoreUsingSavedComponent <- function(seuratObj, componentOrName, fieldName) {
+ScoreUsingSavedComponent <- function(seuratObj, componentOrName, fieldName, assayName = 'RNA') {
   if (is.data.frame(componentOrName)) {
     savedComponent <- componentOrName
   } else {
@@ -27,7 +28,7 @@ ScoreUsingSavedComponent <- function(seuratObj, componentOrName, fieldName) {
   geneWeights <- savedComponent$weight
   names(geneWeights) <- savedComponent$feature
 
-  ad <- Seurat::GetAssayData(seuratObj)
+  ad <- Seurat::GetAssayData(seuratObj, assay = assayName)
   toDrop <- names(geneWeights)[!names(geneWeights) %in% rownames(ad)]
   if (length(toDrop) > 0) {
     print(paste0('The following ', length(toDrop), ' genes were in the component but not the assay, skipping: ', paste0(toDrop, collapse = ',')))
@@ -35,7 +36,12 @@ ScoreUsingSavedComponent <- function(seuratObj, componentOrName, fieldName) {
     print(paste0('Remaining: ', length(geneWeights)))
   }
 
+  if (length(geneWeights) == 0) {
+    stop('No genes overlap between the score and this object')
+  }
+
   cellScores <- Matrix::t(Matrix::as.matrix(ad[names(geneWeights), ]))  %*%  geneWeights
+  rownames(cellScores) <- colnames(ad)
   seuratObj <- Seurat::AddMetaData(seuratObj, cellScores, col.name = fieldName)
 
   if (length(names(seuratObj@reductions)) > 0) {
