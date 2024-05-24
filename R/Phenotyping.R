@@ -101,7 +101,7 @@ PlotImmuneMarkers <- function(seuratObj, reductions = c('tsne', 'umap')) {
 	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('NCR3', 'CD69', 'KLRC2', 'XCL1', 'LOC100423131', 'ZNF683', 'CD7'), 'NKT')
 
 	# ZNF683 = HOBIT
-	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('TBX21', 'GATA3', 'RORC', 'FOXP3', 'BCL6', 'EOMES', 'TOX', 'GATA2', 'TCF7', 'KLF2', 'NR4A1', 'LEF1', 'PRDM1', 'ID2', 'ID3', 'ZNF683', 'BHLHE40'), 'Transcription Factors')
+	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('TBX21', 'GATA3', 'RORC', 'FOXP3', 'BCL6', 'EOMES', 'TOX', 'GATA2', 'TCF7', 'KLF2', 'NR4A1', 'LEF1', 'PRDM1', 'ID2', 'ID3', 'ZNF683', 'BHLHE40', 'EGR1', 'EGR2', 'EGR3'), 'Transcription Factors')
 
 	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('TIGIT', 'CTLA4', 'BTLA', 'PDCD1', 'CD274'), 'Inhibitory Markers')
 
