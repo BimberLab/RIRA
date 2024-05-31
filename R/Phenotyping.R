@@ -301,7 +301,7 @@ GetGeneSet <- function(name) {
 
 .RegisterGeneSet('Cytotoxicity.ABH', c('PRF1', 'GNLY', 'NKG7', 'GZMA','GZMB','GZMH'))
 .RegisterGeneSet('Cytotoxicity.KM', c('GZMK','GZMM'))
-.RegisterGeneSet('Metallothionein', c('MT1X', 'MT2A', 'MT1E'))
+.RegisterGeneSet('Metallothionein', c('MT1A', 'MT1E', 'MT1M', 'MT1X', 'MT2A', 'MT1JP'))
 .RegisterGeneSet('IEGs', c('FOS', 'JUN', 'ZFP36'))
 
 .RegisterGeneSet('EffectorT', c('CCL4L1','CCL5','CCR7-','CD7-','FUOM-','GNLY','GZMB','GZMH','HOPX','LTB-','NKG7','PECAM1-','PRF1','RGS9','S100A4','SELL-','SPOCK2-','JUNB-'))
