@@ -17,6 +17,8 @@ CalculateUCellScores <- function(seuratObj, forceRecalculate = FALSE, seed = Get
     TandNK_Activation = GetGeneSet('TandNK_Activation.1'),
     TandNK_ActivationCore = GetGeneSet('TandNK_Activation.Core'),
     Cytotoxicity = GetGeneSet('Cytotoxicity'),
+    Cytotoxicity.ABH = GetGeneSet('Cytotoxicity.ABH'),
+    Cytotoxicity.KM = GetGeneSet('Cytotoxicity.KM'),
     EffectorT = GetGeneSet('EffectorT'),
     NaiveT = GetGeneSet('NaiveT'),
     Glycolysis = GetGeneSet('Glycolysis'),
@@ -25,7 +27,9 @@ CalculateUCellScores <- function(seuratObj, forceRecalculate = FALSE, seed = Get
     Mitochondrial = GetGeneSet('MMul10_Mitochondrial'),
     EffectorCytokines = GetGeneSet('EffectorCytokines'),
     ExhaustionOrInhibitory = GetGeneSet('ExhaustionOrInhibitory'),
-    MAIT_Markers = GetGeneSet('MAIT_Markers')
+    MAIT_Markers = GetGeneSet('MAIT_Markers'),
+    Metallothionein = GetGeneSet('Metallothionein'),
+    IEGs = GetGeneSet('IEGs')
   )
 
   needsRecalc <- forceRecalculate || any(!paste0(names(toCalculate), '_UCell') %in% names(seuratObj@meta.data))

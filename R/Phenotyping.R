@@ -299,6 +299,11 @@ GetGeneSet <- function(name) {
 
 .RegisterGeneSet('Cytotoxicity', c('PRF1', 'GNLY', 'NKG7', 'GZMA','GZMB','GZMH','GZMK','GZMM'))
 
+.RegisterGeneSet('Cytotoxicity.ABH', c('PRF1', 'GNLY', 'NKG7', 'GZMA','GZMB','GZMH'))
+.RegisterGeneSet('Cytotoxicity.KM', c('GZMK','GZMM'))
+.RegisterGeneSet('Metallothionein', c('MT1X', 'MT2A', 'MT1E'))
+.RegisterGeneSet('IEGs', c('FOS', 'JUN', 'ZFP36'))
+
 .RegisterGeneSet('EffectorT', c('CCL4L1','CCL5','CCR7-','CD7-','FUOM-','GNLY','GZMB','GZMH','HOPX','LTB-','NKG7','PECAM1-','PRF1','RGS9','S100A4','SELL-','SPOCK2-','JUNB-'))
 
 .RegisterGeneSet('CentralMemT', c('CCR7', 'CLDND1', 'GPR183'))
