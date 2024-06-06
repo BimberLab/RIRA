@@ -78,9 +78,8 @@ test_that("celltypist runs for RIRA models", {
   seuratObj <- getBaseSeuratData()
   seuratObj <- Seurat::NormalizeData(seuratObj, verbose = FALSE)
   seuratObj <- Classify_TNK(seuratObj, retainProbabilityMatrix = TRUE)
-
   print(table(seuratObj$RIRA_TNK_v2.cellclass))
-  
+
   expect_equal(4, length(unique(seuratObj$RIRA_TNK_v2.cellclass)), info = 'using RIRA T_NK', tolerance = 1)
   expect_equal(221, unname(table(seuratObj$RIRA_TNK_v2.cellclass)['CD4+ T Cells']), tolerance = 1)
   expect_equal(1028, unname(table(seuratObj$RIRA_TNK_v2.cellclass)['CD8+ T Cells']), tolerance = 1)
@@ -88,6 +87,10 @@ test_that("celltypist runs for RIRA models", {
   expect_equal(1366, unname(table(seuratObj$RIRA_TNK_v2.cellclass)['Unassigned']), tolerance = 1)
 
   expect_equal(6.64e-08, min(seuratObj$RIRA_TNK_v2.prob.NK.Cells), tolerance = 0.00001)
+
+  seuratObj <- Classify_Myeloid(seuratObj, retainProbabilityMatrix = TRUE)
+  print(table(seuratObj$RIRA_Myeloid_v3.cellclass))
+  print(table(seuratObj$RIRA_Myeloid_v3.coarseclass))
 })
 
 test_that("FilterDisallowedClasses works as expected", {

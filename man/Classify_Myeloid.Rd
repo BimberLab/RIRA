@@ -7,7 +7,7 @@
 Classify_Myeloid(
   seuratObj,
   assayName = Seurat::DefaultAssay(seuratObj),
-  columnPrefix = "RIRA_FineScope_Myeloid_v3.",
+  columnPrefix = "RIRA_Myeloid_v3.",
   maxAllowableClasses = 6,
   minFractionToInclude = 0.01,
   minCellsToRun = 200,
