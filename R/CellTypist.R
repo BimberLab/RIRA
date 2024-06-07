@@ -480,19 +480,14 @@ Classify_Myeloid <- function(seuratObj, assayName = Seurat::DefaultAssay(seuratO
                        retainProbabilityMatrix = retainProbabilityMatrix
   )
 
-  fn <- paste0(columnPrefix, 'coarseclass')
-  if (! fn %in% names(seuratObj@meta.data)) {
-    stop(paste0('Missing field: ', fn))
-  }
-
   fn2 <- paste0(columnPrefix, 'cellclass')
   if (! fn2 %in% names(seuratObj@meta.data)) {
     stop(paste0('Missing field: ', fn2))
   }
 
   seuratObj[[fn]] <- as.character(seuratObj[[fn2]])
-  seuratObj[[fn]][seuratObj[[paste0(columnPrefix, 'cellclass')]] %in% c('CD14+ Monocytes', 'CD16+ Monocytes', 'Inflammatory Monocytes')] <- 'Monocytes'
-  seuratObj[[fn]][seuratObj[[paste0(columnPrefix, 'cellclass')]] %in% c('DC', 'Mature DC')] <- 'DC'
+  seuratObj[[fn]][seuratObj[[fn2]] %in% c('CD14+ Monocytes', 'CD16+ Monocytes', 'Inflammatory Monocytes')] <- 'Monocytes'
+  seuratObj[[fn]][seuratObj[[fn2]] %in% c('DC', 'Mature DC')] <- 'DC'
   seuratObj[[fn]] <- as.factor(seuratObj[[fn]])
 
   return(seuratObj)
@@ -600,7 +595,7 @@ FilterDisallowedClasses <- function(seuratObj, sourceField = 'RIRA_Immune_v2.maj
     }
   }
 
-  allCells <- data.frame(cellbarcode = colnames(seuratObj), sortOrder = 1:ncol(seuratObj))
+  allCells <- data.frame(cellbarcode = colnames(seuratObj), sortOrder = seq_len(ncol(seuratObj)))
   if (nrow(toDrop) > 0) {
     allCells <- merge(allCells, toDrop, by = 'cellbarcode', all.x = T)
     allCells <- dplyr::arrange(allCells, sortOrder)
