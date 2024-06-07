@@ -485,6 +485,7 @@ Classify_Myeloid <- function(seuratObj, assayName = Seurat::DefaultAssay(seuratO
     stop(paste0('Missing field: ', fn2))
   }
 
+  fn <- paste0(columnPrefix, 'coarseclass')
   seuratObj[[fn]] <- as.character(seuratObj[[fn2]])
   seuratObj[[fn]][seuratObj[[fn2]] %in% c('CD14+ Monocytes', 'CD16+ Monocytes', 'Inflammatory Monocytes')] <- 'Monocytes'
   seuratObj[[fn]][seuratObj[[fn2]] %in% c('DC', 'Mature DC')] <- 'DC'
