@@ -486,10 +486,10 @@ Classify_Myeloid <- function(seuratObj, assayName = Seurat::DefaultAssay(seuratO
   }
 
   fn <- paste0(columnPrefix, 'coarseclass')
-  seuratObj[[fn]] <- as.character(seuratObj[[fn2]])
-  seuratObj[[fn]][seuratObj[[fn2]] %in% c('CD14+ Monocytes', 'CD16+ Monocytes', 'Inflammatory Monocytes')] <- 'Monocytes'
-  seuratObj[[fn]][seuratObj[[fn2]] %in% c('DC', 'Mature DC')] <- 'DC'
-  seuratObj[[fn]] <- as.factor(seuratObj[[fn]])
+  vect <- as.character(seuratObj@meta.data[[fn2]])
+  vect[seuratObj@meta.data[[fn2]] %in% c('CD14+ Monocytes', 'CD16+ Monocytes', 'Inflammatory Monocytes')] <- 'Monocytes'
+  vect[seuratObj@meta.data[[fn2]] %in% c('DC', 'Mature DC')] <- 'DC'
+  seuratObj[[fn]] <- as.factor(vect)
 
   return(seuratObj)
 }
