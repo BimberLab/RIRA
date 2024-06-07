@@ -89,8 +89,13 @@ test_that("celltypist runs for RIRA models", {
   expect_equal(6.64e-08, min(seuratObj$RIRA_TNK_v2.prob.NK.Cells), tolerance = 0.00001)
 
   seuratObj <- Classify_Myeloid(seuratObj, retainProbabilityMatrix = TRUE)
+  print('RIRA_Myeloid_v3:')
   print(table(seuratObj$RIRA_Myeloid_v3.cellclass))
   print(table(seuratObj$RIRA_Myeloid_v3.coarseclass))
+
+  expect_equal(5, length(unique(seuratObj$RIRA_Myeloid_v3.cellclass)), info = 'using RIRA Myeloid')
+  expect_equal(32, unname(table(seuratObj$RIRA_Myeloid_v3.cellclass)['DC']), tolerance = 1)
+  expect_equal(32, unname(table(seuratObj$RIRA_Myeloid_v3.coarseclass)['DC']), tolerance = 1)
 })
 
 test_that("FilterDisallowedClasses works as expected", {
