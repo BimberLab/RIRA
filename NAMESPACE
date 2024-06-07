@@ -3,6 +3,7 @@
 export(AssignCellType)
 export(CalculateUCellScores)
 export(Classify_ImmuneCells)
+export(Classify_Myeloid)
 export(Classify_TNK)
 export(ExpandGeneList)
 export(ExtractGeneWeights)

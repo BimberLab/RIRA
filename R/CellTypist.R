@@ -452,6 +452,49 @@ Classify_TNK <- function(seuratObj, assayName = Seurat::DefaultAssay(seuratObj),
 }
 
 
+#' @title Classify T/NK
+#'
+#' @description Runs celltypist using the RIRA Myeloid model to score cells using CellTypist with optimized parameters.
+#' @param seuratObj The seurat object
+#' @param assayName The name of the assay to use. Others will be dropped
+#' @param columnPrefix A prefix that will be added to the beginning of the resulting columns, added the seurat@meta.data
+#' @param maxAllowableClasses Celltypist can assign a cell to many classes, creating extremely long labels. Any cell with more than this number of labels will be set to NA
+#' @param minFractionToInclude If non-null, any labels with fewer than this fraction of cells will be set to NA.
+#' @param minCellsToRun If the input seurat object has fewer than this many cells, NAs will be added for all expected columns and celltypist will not be run.
+#' @param maxBatchSize If more than this many cells are in the object, it will be split into batches of this size and run in serial.
+#' @param retainProbabilityMatrix If true, the celltypist probability_matrix with per-class probabilities will be stored in meta.data
+#'
+#' @export
+Classify_Myeloid <- function(seuratObj, assayName = Seurat::DefaultAssay(seuratObj), columnPrefix = 'RIRA_Myeloid_v3.', maxAllowableClasses = 6, minFractionToInclude = 0.01, minCellsToRun = 200, maxBatchSize = 600000, retainProbabilityMatrix = FALSE) {
+  seuratObj <- RunCellTypist(seuratObj = seuratObj,
+                       modelName = "RIRA_FineScope_Myeloid_v3",
+                       # These are optimized for this model:
+                       pThreshold = 0.5, minProp = 0, useMajorityVoting = FALSE, mode = "prob_match",
+
+                       assayName = assayName,
+                       columnPrefix = columnPrefix,
+                       maxAllowableClasses = maxAllowableClasses,
+                       minFractionToInclude = minFractionToInclude,
+                       minCellsToRun = minCellsToRun,
+                       maxBatchSize = maxBatchSize,
+                       retainProbabilityMatrix = retainProbabilityMatrix
+  )
+
+  fn2 <- paste0(columnPrefix, 'cellclass')
+  if (! fn2 %in% names(seuratObj@meta.data)) {
+    stop(paste0('Missing field: ', fn2))
+  }
+
+  fn <- paste0(columnPrefix, 'coarseclass')
+  vect <- as.character(seuratObj@meta.data[[fn2]])
+  vect[seuratObj@meta.data[[fn2]] %in% c('CD14+ Monocytes', 'CD16+ Monocytes', 'Inflammatory Monocytes')] <- 'Monocytes'
+  vect[seuratObj@meta.data[[fn2]] %in% c('DC', 'Mature DC')] <- 'DC'
+  seuratObj[[fn]] <- as.factor(vect)
+
+  return(seuratObj)
+}
+
+
 #' @title Classify Bulk Immune cells
 #'
 #' @description Runs celltypist using the RIRA bulk immune model to score cells using CellTypist with optimized parameters.
@@ -553,7 +596,7 @@ FilterDisallowedClasses <- function(seuratObj, sourceField = 'RIRA_Immune_v2.maj
     }
   }
 
-  allCells <- data.frame(cellbarcode = colnames(seuratObj), sortOrder = 1:ncol(seuratObj))
+  allCells <- data.frame(cellbarcode = colnames(seuratObj), sortOrder = seq_len(ncol(seuratObj)))
   if (nrow(toDrop) > 0) {
     allCells <- merge(allCells, toDrop, by = 'cellbarcode', all.x = T)
     allCells <- dplyr::arrange(allCells, sortOrder)
