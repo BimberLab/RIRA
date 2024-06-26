@@ -49,9 +49,7 @@ Suggests:
 Remotes:
     pengminshi/cFIT,
     satijalab/seurat-data,
-    mojaveazure/seurat-disk,
-    carmonalab/UCell,
-    carmonalab/scGate
+    mojaveazure/seurat-disk
 RoxygenNote: 7.3.1
 Collate: 
     'Utils.R'
