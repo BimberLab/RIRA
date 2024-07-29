@@ -29,6 +29,7 @@ CalculateUCellScores <- function(seuratObj, forceRecalculate = FALSE, seed = Get
     ExhaustionOrInhibitory = GetGeneSet('ExhaustionOrInhibitory'),
     MAIT_Markers = GetGeneSet('MAIT_Markers'),
     Metallothionein = GetGeneSet('Metallothionein'),
+    Metallothionein.Core = GetGeneSet('Metallothionein.Core'),
     IEGs = GetGeneSet('IEGs')
   )
 
