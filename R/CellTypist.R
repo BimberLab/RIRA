@@ -436,7 +436,7 @@ TrainCellTypist <- function(seuratObj, labelField, modelFile, minCellsPerClass =
 #'
 #' @export
 Classify_TNK <- function(seuratObj, assayName = Seurat::DefaultAssay(seuratObj), columnPrefix = 'RIRA_TNK_v2.', maxAllowableClasses = 6, minFractionToInclude = 0.01, minCellsToRun = 200, maxBatchSize = 600000, retainProbabilityMatrix = FALSE) {
-  return(RunCellTypist(seuratObj = seuratObj,
+  seuratObj <- RunCellTypist(seuratObj = seuratObj,
          modelName = "RIRA_TNK_v2",
          # These are optimized for this model:
          pThreshold = 0.5, minProp = 0, useMajorityVoting = FALSE, mode = "prob_match",
@@ -448,7 +448,14 @@ Classify_TNK <- function(seuratObj, assayName = Seurat::DefaultAssay(seuratObj),
          minCellsToRun = minCellsToRun,
          maxBatchSize = maxBatchSize,
          retainProbabilityMatrix = retainProbabilityMatrix
-  ))
+  )
+
+  # Limit the resulting calls to just RIRA T/NK cells:
+  if ('RIRA_Immune_v2.majority_voting' %in% names(seuratObj@meta.data)) {
+    seuratObj$RIRA_TNK_v2.cellclass[seuratObj$RIRA_Immune_v2.majority_voting != 'T_NK'] <- 'Other'
+  }
+
+  return(seuratObj)
 }
 
 
@@ -510,6 +517,14 @@ Classify_Myeloid <- function(seuratObj, assayName = Seurat::DefaultAssay(seuratO
 #'
 #' @export
 Classify_ImmuneCells <- function(seuratObj, assayName = Seurat::DefaultAssay(seuratObj), columnPrefix = 'RIRA_Immune_v2.', maxAllowableClasses = 6, minFractionToInclude = 0.01, minCellsToRun = 200, maxBatchSize = 600000, retainProbabilityMatrix = FALSE, filterDisallowedClasses = TRUE) {
+  if ('RIRA_Immune_v1.cellclass' %in% names(seuratObj@meta.data)) {
+    print('Dropping legacy RIRA_Immune_v1 columns')
+    toDrop <- grep(names(seuratObj@meta.data), pattern = 'RIRA_Immune_v1', value = TRUE)
+    for (fn in toDrop) {
+      seuratObj[[fn]] <- NULL
+    }
+  }
+
   seuratObj <- RunCellTypist(seuratObj = seuratObj,
                        modelName = 'RIRA_Immune_v2',
 
