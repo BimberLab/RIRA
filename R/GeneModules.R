@@ -19,8 +19,6 @@ CalculateUCellScores <- function(seuratObj, forceRecalculate = FALSE, seed = Get
     Cytotoxicity = GetGeneSet('Cytotoxicity'),
     Cytotoxicity.GzmABH = GetGeneSet('Cytotoxicity.GzmABH'),
     Cytotoxicity.GzmKM = GetGeneSet('Cytotoxicity.GzmKM'),
-    EffectorT = GetGeneSet('EffectorT'),
-    NaiveT = GetGeneSet('NaiveT'),
     Glycolysis = GetGeneSet('Glycolysis'),
     Interferon_Response = GetGeneSet('Interferon_Response'),
     Interferon_Response_IFI6 = GetGeneSet('Interferon_Response_IFI6_correlated'),
