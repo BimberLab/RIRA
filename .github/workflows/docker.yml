@@ -18,7 +18,7 @@ jobs:
         id: docker_meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/bimberlabinternal/rira
+          images: ghcr.io/bimberlab/rira
           tags: |
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
@@ -52,7 +52,7 @@ jobs:
             "GH_PAT=${{ secrets.PAT }}"
           pull: true
           push: ${{github.ref == 'refs/heads/master'}}
-          tags: ghcr.io/bimberlabinternal/rira:nightly,ghcr.io/bimberlabinternal/rira:latest
+          tags: ghcr.io/bimberlab/rira:nightly,ghcr.io/bimberlab/rira:latest
           labels: |
             ${{ steps.docker_meta.outputs.labels }}
             org.opencontainers.image.title=rira
