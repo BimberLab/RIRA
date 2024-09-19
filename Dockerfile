@@ -1,4 +1,4 @@
-FROM ghcr.io/bimberlab/discvr-base:latest
+FROM ghcr.io/bimberlabinternal/discvr-base:latest
 
 ARG GH_PAT='NOT_SET'
 
