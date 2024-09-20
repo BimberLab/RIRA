@@ -441,6 +441,9 @@ humanHLAGenes <-  c('HLA-A','HLA-B','HLA-C','HLA-E','HLA-F','HLA-F-AS1','HLA-G',
 .RegisterGeneSet('Short-lived plasmablast', c('CD19', 'CD38', 'TNFRSF17', 'CXCR4')) # Also CD27
 .RegisterGeneSet('Marginal Zone B cells (spleen)', c('CD19', 'MS4A1', 'CR2', 'FCER2', 'FCRL3', 'CD1C', 'EBF1', 'TCF3', 'PAX5')) # Also CD27
 
+# SLC2A1 = Glut-1, SLC3A2 = CD98
+.RegisterGeneSet('Redox', c('SLC2A1', 'SLC3A2'))
+
 #' @title GetMMul10TcrGenes
 #' @param includeConstantRegion If true, the MMul10TcrConstantRegion GeneSet will be included.
 #' @description Returns a vector with MMul10 gene IDs (NCBI build) for TCR genes.
