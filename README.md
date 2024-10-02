@@ -14,6 +14,8 @@ RIRA is a multi-tissue single-cell RNA-seq atlas from Rhesus macaque cells, incl
 It provides highly annotated reference data, and a number of pipelines to assign cell type to your data using RIRA's built-in models.
 Finally, it includes pipelines to replicate the process used to generate RIRA's reference labels, which might be useful for generating a similar reference for another species.      
 
+The raw expression data are available, including a seurat object, through the NIH GEO database under accession [GSE277821](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE277821).
+
 ### <a name = "usage">Data</a>
 
 RIRA's data was generated and labeled using the following process:
