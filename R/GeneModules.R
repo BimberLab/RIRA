@@ -28,7 +28,8 @@ CalculateUCellScores <- function(seuratObj, forceRecalculate = FALSE, seed = Get
     MAIT_Markers = GetGeneSet('MAIT_Markers'),
     Metallothionein = GetGeneSet('Metallothionein'),
     Metallothionein.Core = GetGeneSet('Metallothionein.Core'),
-    IEGs = GetGeneSet('IEGs')
+    IEGs = GetGeneSet('IEGs'),
+    MHCII = GetGeneSet('MHC-II')
   )
 
   needsRecalc <- forceRecalculate || any(!paste0(names(toCalculate), '_UCell') %in% names(seuratObj@meta.data))
