@@ -132,7 +132,7 @@ PlotImmuneMarkers <- function(seuratObj, reductions = c('tsne', 'umap')) {
 	cytokines <- c(cytokines, c('LOC114675338', 'LOC114675718', 'LOC100426853'))
 	PlotMarkerSeries(seuratObj, reductions = reductions, features = cytokines, 'Cytokines/Receptors')
 
-    PlotMarkerSeries(seuratObj, reductions = reductions, GetGeneSet('MHC-II') = cytokines, 'MHC-II')
+    PlotMarkerSeries(seuratObj, reductions = reductions, features = GetGeneSet('MHC-II'), 'MHC-II')
 
 	# KLRC2 = ENSMMUG00000050862
 	klrs <- c('KLRB1', 'KLRC1', 'KLRD1', 'KLRF1', 'KLRF2', 'KLRG1', 'KLRG2', 'KLRC2', 'KLRC3', 'KLRK1', 'ENSMMUG00000050862')
