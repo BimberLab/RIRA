@@ -52,7 +52,7 @@ Remotes:
     mojaveazure/seurat-disk,
     carmonalab/UCell,
     carmonalab/scGate
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.2
 Collate: 
     'Utils.R'
     'CellTypist.R'
