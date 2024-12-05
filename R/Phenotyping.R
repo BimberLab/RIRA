@@ -135,6 +135,10 @@ PlotImmuneMarkers <- function(seuratObj, reductions = c('tsne', 'umap')) {
 
 	PlotMarkerSeries(seuratObj, reductions = reductions, features = GetGeneSet('MHC-II'), 'MHC-II')
 
+	PlotMarkerSeries(seuratObj, features = c('TGFB1', 'TGFB2', 'TGFB3'), title = 'TGFB')
+
+	PlotMarkerSeries(seuratObj, features = c('TGFBR1', 'TGFBR2', 'TGFBR3'), title = 'TGFB Receptor')
+
 	# KLRC2 = ENSMMUG00000050862
 	klrs <- c('KLRB1', 'KLRC1', 'KLRD1', 'KLRF1', 'KLRF2', 'KLRG1', 'KLRG2', 'KLRC2', 'KLRC3', 'KLRK1', 'ENSMMUG00000050862')
 	PlotMarkerSeries(seuratObj, reductions = reductions, features = klrs, 'KLRs')
