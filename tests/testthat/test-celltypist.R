@@ -80,6 +80,7 @@ test_that("celltypist runs for RIRA models", {
   seuratObj <- Classify_TNK(seuratObj, retainProbabilityMatrix = TRUE)
   print(table(seuratObj$RIRA_TNK_v2.cellclass))
 
+  expect_equal('RIRA_TNK_v2', seuratObj@misc$RIRA_TNK_Model)
   expect_equal(4, length(unique(seuratObj$RIRA_TNK_v2.cellclass)), info = 'using RIRA T_NK', tolerance = 1)
   expect_equal(221, unname(table(seuratObj$RIRA_TNK_v2.cellclass)['CD4+ T Cells']), tolerance = 1)
   expect_equal(1028, unname(table(seuratObj$RIRA_TNK_v2.cellclass)['CD8+ T Cells']), tolerance = 1)
@@ -93,6 +94,7 @@ test_that("celltypist runs for RIRA models", {
   print(table(seuratObj$RIRA_Myeloid_v3.cellclass))
   print(table(seuratObj$RIRA_Myeloid_v3.coarseclass))
 
+  expect_equal('RIRA_FineScope_Myeloid_v3', seuratObj@misc$RIRA_Myeloid_Model)
   expect_equal(5, length(unique(seuratObj$RIRA_Myeloid_v3.cellclass)), info = 'using RIRA Myeloid')
   expect_equal(32, unname(table(seuratObj$RIRA_Myeloid_v3.cellclass)['DC']), tolerance = 1)
   expect_equal(32, unname(table(seuratObj$RIRA_Myeloid_v3.coarseclass)['DC']), tolerance = 1)
@@ -108,6 +110,7 @@ test_that("FilterDisallowedClasses works as expected", {
   print('RIRA_Immune_v2.cellclass:')
   print(table(seuratObj$RIRA_Immune_v2.cellclass))
 
+  expect_equal('RIRA_Immune_v2', seuratObj@misc$RIRA_Immune_Model)
   expect_equal(256, sum(seuratObj$RIRA_Immune_v2.cellclass == 'Bcell', na.rm = T), tolerance = 1)
   expect_equal(571, sum(seuratObj$RIRA_Immune_v2.cellclass == 'Myeloid', na.rm = T))
   expect_equal(1303, sum(seuratObj$RIRA_Immune_v2.cellclass == 'T_NK', na.rm = T))
