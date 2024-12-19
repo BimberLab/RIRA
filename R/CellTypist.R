@@ -436,8 +436,9 @@ TrainCellTypist <- function(seuratObj, labelField, modelFile, minCellsPerClass =
 #'
 #' @export
 Classify_TNK <- function(seuratObj, assayName = Seurat::DefaultAssay(seuratObj), columnPrefix = 'RIRA_TNK_v2.', maxAllowableClasses = 6, minFractionToInclude = 0.01, minCellsToRun = 200, maxBatchSize = 600000, retainProbabilityMatrix = FALSE) {
+  modelName <- "RIRA_TNK_v2"
   seuratObj <- RunCellTypist(seuratObj = seuratObj,
-         modelName = "RIRA_TNK_v2",
+         modelName = modelName,
          # These are optimized for this model:
          pThreshold = 0.5, minProp = 0, useMajorityVoting = FALSE, mode = "prob_match",
 
@@ -454,6 +455,8 @@ Classify_TNK <- function(seuratObj, assayName = Seurat::DefaultAssay(seuratObj),
   if ('RIRA_Immune_v2.majority_voting' %in% names(seuratObj@meta.data)) {
     seuratObj$RIRA_TNK_v2.cellclass[seuratObj$RIRA_Immune_v2.majority_voting != 'T_NK'] <- 'Other'
   }
+
+  seuratObj@misc$RIRA_TNK_Model <- modelName
 
   return(seuratObj)
 }
@@ -473,8 +476,9 @@ Classify_TNK <- function(seuratObj, assayName = Seurat::DefaultAssay(seuratObj),
 #'
 #' @export
 Classify_Myeloid <- function(seuratObj, assayName = Seurat::DefaultAssay(seuratObj), columnPrefix = 'RIRA_Myeloid_v3.', maxAllowableClasses = 6, minFractionToInclude = 0.01, minCellsToRun = 200, maxBatchSize = 600000, retainProbabilityMatrix = FALSE) {
+  modelName <- "RIRA_FineScope_Myeloid_v3"
   seuratObj <- RunCellTypist(seuratObj = seuratObj,
-                       modelName = "RIRA_FineScope_Myeloid_v3",
+                       modelName = modelName,
                        # These are optimized for this model:
                        pThreshold = 0.5, minProp = 0, useMajorityVoting = FALSE, mode = "prob_match",
 
@@ -498,6 +502,8 @@ Classify_Myeloid <- function(seuratObj, assayName = Seurat::DefaultAssay(seuratO
   vect[seuratObj@meta.data[[fn2]] %in% c('DC', 'Mature DC')] <- 'DC'
   seuratObj[[fn]] <- as.factor(vect)
 
+  seuratObj@misc$RIRA_Myeloid_Model <- modelName
+
   return(seuratObj)
 }
 
@@ -517,6 +523,7 @@ Classify_Myeloid <- function(seuratObj, assayName = Seurat::DefaultAssay(seuratO
 #'
 #' @export
 Classify_ImmuneCells <- function(seuratObj, assayName = Seurat::DefaultAssay(seuratObj), columnPrefix = 'RIRA_Immune_v2.', maxAllowableClasses = 6, minFractionToInclude = 0.01, minCellsToRun = 200, maxBatchSize = 600000, retainProbabilityMatrix = FALSE, filterDisallowedClasses = TRUE) {
+  modelName <- 'RIRA_Immune_v2'
   if ('RIRA_Immune_v1.cellclass' %in% names(seuratObj@meta.data)) {
     print('Dropping legacy RIRA_Immune_v1 columns')
     toDrop <- grep(names(seuratObj@meta.data), pattern = 'RIRA_Immune_v1', value = TRUE)
@@ -526,7 +533,7 @@ Classify_ImmuneCells <- function(seuratObj, assayName = Seurat::DefaultAssay(seu
   }
 
   seuratObj <- RunCellTypist(seuratObj = seuratObj,
-                       modelName = 'RIRA_Immune_v2',
+                       modelName = modelName,
 
                        # These are optimized for this model:
                        minProp = 0.5, useMajorityVoting = TRUE, mode = "prob_match",
@@ -568,6 +575,8 @@ Classify_ImmuneCells <- function(seuratObj, assayName = Seurat::DefaultAssay(seu
         axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)
       )
   )
+
+  seuratObj@misc$RIRA_Immune_Model <- modelName
 
   return(seuratObj)
 }
