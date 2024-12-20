@@ -448,7 +448,8 @@ Classify_TNK <- function(seuratObj, assayName = Seurat::DefaultAssay(seuratObj),
          minFractionToInclude = minFractionToInclude,
          minCellsToRun = minCellsToRun,
          maxBatchSize = maxBatchSize,
-         retainProbabilityMatrix = retainProbabilityMatrix
+         retainProbabilityMatrix = retainProbabilityMatrix,
+         runCelltypistUpdate = FALSE
   )
 
   # Limit the resulting calls to just RIRA T/NK cells:
@@ -488,7 +489,8 @@ Classify_Myeloid <- function(seuratObj, assayName = Seurat::DefaultAssay(seuratO
                        minFractionToInclude = minFractionToInclude,
                        minCellsToRun = minCellsToRun,
                        maxBatchSize = maxBatchSize,
-                       retainProbabilityMatrix = retainProbabilityMatrix
+                       retainProbabilityMatrix = retainProbabilityMatrix,
+                       runCelltypistUpdate = FALSE
   )
 
   fn2 <- paste0(columnPrefix, 'cellclass')
@@ -544,7 +546,8 @@ Classify_ImmuneCells <- function(seuratObj, assayName = Seurat::DefaultAssay(seu
                        minFractionToInclude = minFractionToInclude,
                        minCellsToRun = minCellsToRun,
                        maxBatchSize = maxBatchSize,
-                       retainProbabilityMatrix = retainProbabilityMatrix
+                       retainProbabilityMatrix = retainProbabilityMatrix,
+                       runCelltypistUpdate = FALSE
   )
 
   # Create a simplified final column:
