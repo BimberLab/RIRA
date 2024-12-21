@@ -10,4 +10,5 @@ RUN cd /RIRA \
 	&& Rscript -e "BiocManager::install(ask = F, upgrade = 'always');" \
 	&& Rscript -e "devtools::install_deps(pkg = '.', dependencies = TRUE, upgrade = 'always');" \
 	&& R CMD INSTALL --build *.tar.gz \
-	&& rm -Rf /tmp/downloaded_packages/ /tmp/*.rds
+	&& rm -Rf /tmp/downloaded_packages/ /tmp/*.rds \
+	&& python3 -m celltypist.command_line --update-models --quiet
