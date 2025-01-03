@@ -312,6 +312,7 @@ GetGeneSet <- function(name) {
 .RegisterGeneSet('Metallothionein', c('MT1A', 'MT1E', 'MT1M', 'MT1X', 'MT2A', 'MT1JP'))
 .RegisterGeneSet('Metallothionein.Core', c('MT1E', 'MT1M', 'MT1X', 'MT2A'))
 .RegisterGeneSet('IEGs', c('FOS', 'JUN', 'ZFP36'))
+.RegisterGeneSet('TCellMemoryS100', c('S100A4', 'S100A6','S100A10','S100A11'))
 
 .RegisterGeneSet('EffectorT', c('CCL4L1','CCL5','CCR7-','CD7-','FUOM-','GNLY','GZMB','GZMH','HOPX','LTB-','NKG7','PECAM1-','PRF1','RGS9','S100A4','SELL-','SPOCK2-','JUNB-'))
 
