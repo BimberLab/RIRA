@@ -49,7 +49,7 @@ PlotImmuneMarkers <- function(seuratObj, reductions = c('tsne', 'umap')) {
 	# CD154 = CD40L
 	# LAMP1 = CD107a, cytotoxic capacity
 	# NR4A1 = Nur77
-	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('IFNG', 'CD69', 'TNF', 'NFKBID', 'LTB', 'CSF2', 'IL2', 'TNFRSF9', 'CCL4L1', 'NR4A3', 'TNFSF14', 'CD82', 'PIGT', 'IRF8', 'IRF4', 'IRF2', 'RGCC', 'PD1', 'PDCD1', 'TNFAIP3', 'LOC100423131', 'LOC100430627', 'ENSMMUG00000013779', 'XCL1', 'ENSMMUG00000060218', 'CCL4', 'CCL3', 'PLEK', 'NR4A2', 'LOC100426537', 'LOC114673087', 'KLF10', 'GADD45B', 'CD154', 'LAMP1', 'NR4A1', 'TIMP1', 'LOC703222', 'LOC701946', 'LOC100429751', 'LOC100423954'), 'CD8 Activation Markers')
+	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('IFNG', 'CD69', 'TNF', 'NFKBID', 'LTB', 'CSF1', 'CSF2', 'CSF3', 'IL2', 'TNFRSF9', 'CCL4L1', 'NR4A3', 'TNFSF14', 'CD82', 'PIGT', 'IRF8', 'IRF4', 'IRF2', 'RGCC', 'PD1', 'PDCD1', 'TNFAIP3', 'LOC100423131', 'LOC100430627', 'ENSMMUG00000013779', 'XCL1', 'ENSMMUG00000060218', 'CCL4', 'CCL3', 'PLEK', 'NR4A2', 'LOC100426537', 'LOC114673087', 'KLF10', 'GADD45B', 'CD154', 'LAMP1', 'NR4A1', 'TIMP1', 'LOC703222', 'LOC701946', 'LOC100429751', 'LOC100423954'), 'CD8 Activation Markers')
 
 	# LEF1 = naive
 	# STAT1 = Th1 helper
@@ -333,7 +333,7 @@ GetGeneSet <- function(name) {
 # TNFRSF6 = Fas
 .RegisterGeneSet('Apoptosis', c('FASLG', 'FAS', 'BCL2', 'IRF9', 'JAK3', 'CASP3', 'CASP8', 'BAX', 'TNFRSF1A', 'TP53', 'CYCS', 'PARP1'))
 
-.RegisterGeneSet('EffectorCytokines', c('IFNG', 'TNF', 'IL17A', 'IL2', 'CSF2', 'CCL3', 'CCL3L1', 'CCL4', 'CCL4L1'))
+.RegisterGeneSet('EffectorCytokines', c('IFNG', 'TNF', 'IL17A', 'IL2', 'CSF1', 'CSF2', 'CCL3', 'CCL3L1', 'CCL4', 'CCL4L1'))
 .RegisterGeneSet('ExhaustionOrInhibitory', c('PDCD1', 'TIGIT', 'HAVCR2', 'LAG3', 'CTLA4', 'VTCN1', 'CD244', 'KLRG1', 'TNFRSF14', 'BTLA', 'CD160'))
 
 .RegisterGeneSet('Myelocytes', c("OLFM4", "LTF", "CAMP", "LCN2"))
