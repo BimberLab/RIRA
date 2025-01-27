@@ -126,9 +126,7 @@ SeuratToMatrix <- function(seuratObj, outDir, assayName, slot = 'counts'){
   toRemove <- d$Label[d$Fraction < minFraction]
   if (length(toRemove) > 0) {
     print(paste0('Will remove: ', paste0(toRemove, collapse = ', ')))
-  }
 
-  if (length(toRemove) > 0) {
     l <- as.character(unlist(seuratObj[[label]]))
     names(l) <- colnames(seuratObj)
     l[l %in% toRemove] <- labelToAssign

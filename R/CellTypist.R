@@ -625,6 +625,10 @@ FilterDisallowedClasses <- function(seuratObj, sourceField = 'RIRA_Immune_v2.maj
 
   allCells <- data.frame(cellbarcode = colnames(seuratObj), sortOrder = seq_len(ncol(seuratObj)))
   if (nrow(toDrop) > 0) {
+    toDrop <- toDrop %>%
+      group_by(cellbarcode) %>%
+      summarize(reason = paste0(sort(unique(reason)), collapse = ','))
+
     allCells <- merge(allCells, toDrop, by = 'cellbarcode', all.x = T)
     allCells <- dplyr::arrange(allCells, sortOrder)
 
