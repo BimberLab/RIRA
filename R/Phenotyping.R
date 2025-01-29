@@ -228,7 +228,7 @@ PlotMarkerSeries <- function(seuratObj, features, reductions = c('umap'), title 
 	tryCatch({
 		df <- Seurat::FetchData(seuratObj, vars = unique(features), cells = 1)
 		return(unique(names(df)))
-	}, error = function(){
+	}, error = function(e){
 		return(NULL)
 	})
 }
