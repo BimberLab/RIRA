@@ -206,7 +206,7 @@ PlotImmuneMarkers <- function(seuratObj, reductions = c('tsne', 'umap')) {
 #' @export
 #' @import Seurat
 PlotMarkerSeries <- function(seuratObj, features, reductions = c('umap'), title = NULL, setSize = 4) {
-	featuresToPlot <- unique(intersect(features, row.names(seuratObj)))
+	featuresToPlot <- .FindPlotableFeatures(seuratObj, features)
 	steps <- ceiling(length(featuresToPlot) / setSize) - 1
 
 	for (i in 0:steps) {
@@ -217,6 +217,11 @@ PlotMarkerSeries <- function(seuratObj, features, reductions = c('umap'), title 
 
 		PlotMarkerSet(seuratObj, reductions = reductions, title = title, features = genes)
 	}
+}
+
+.FindPlotableFeatures <- function(seuratObj, features) {
+	df <- Seurat::FetchData(seuratObj, vars = unique(features), cells = 1)
+	return(unique(names(df)))
 }
 
 .RemoveUnchangedOrZero <- function(seuratObj, reduction, features) {
@@ -239,7 +244,7 @@ PlotMarkerSet <- function(seuratObj, reductions, title, features) {
 	P <- NULL
 	missingFeats <- c()
 	for (reduction in reductions) {
-		featuresToPlot <- intersect(features, row.names(seuratObj))
+		featuresToPlot <- .FindPlotableFeatures(seuratObj, features)
 		featuresToPlot <- .RemoveUnchangedOrZero(seuratObj, reduction, featuresToPlot)
 
 		if (length(features) != length(featuresToPlot)){
