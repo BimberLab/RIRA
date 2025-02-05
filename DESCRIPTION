@@ -26,7 +26,9 @@ Imports:
     cFIT,
     DALEX,
     DALEXtra,
+    mlr3verse,
     mlr3learners,
+    mlr3tuning,
     mlr3,
     ranger,
     knitr,
@@ -64,3 +66,4 @@ Collate:
     'GeneModules.R'
     'cFIT.R'
     'scGate.R'
+VignetteBuilder: knitr
