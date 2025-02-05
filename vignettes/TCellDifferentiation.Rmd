@@ -1,0 +1,75 @@
+---
+title: "T Cell Type/State Scoring"
+output:
+  rmdformats::html_clean:
+    highlight: kate
+    self_contained: yes
+    thumbnails: yes
+    fig_width: 12
+    code_folding: hide
+vignette: >
+  %\VignetteIndexEntry{RIRA Cell Type/State Scoring}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+This vignette provides examples on how to use the rhesus macaque cell type scoring models generated and provided by RIRA. RIRA's data was generated and labeled using the following process
+
+```{r setup, eval=FALSE}
+
+library(RIRA)
+library(Seurat)
+library(ggplot2)
+library(patchwork)
+
+```
+
+# Getting Started
+
+First download the data as a Seurat object (or use your own input data):
+
+```{r download, eval=FALSE}
+seuratObj <- DownloadFromGEO(subset = 'T_NK', outfile = 'RIRA_T_NK.rds.gz')
+```
+
+These are the cell labels used in the RIRA manuscript, also provided in the seurat object:
+
+```{r classify, eval=FALSE}
+Seurat::DimPlot(seuratObj, group.by = 'TCellSubtype')
+
+```
+
+```{r, echo=FALSE, fig.width=5, fig.alt='UMAP plot of T and NK cells colored based on subtype label'}
+knitr::include_graphics('img/TCellSubtype.png')
+```
+
+# Modeling T Cell Naive-Effector Differentiation
+
+Using sorted T cell data, we empirically defined a trajectory (gene component) that models T cell naive-to-memory differentiation, which can be used to categorize cells according to this property. This can be imputed into any seurat object, following the example below.
+
+A practical usage of this score could be to subset/gate a dataset
+
+```{r eds, eval=FALSE}
+
+seuratObj <- ScoreUsingSavedComponent(seuratObj, componentOrName = 'Tcell_EffectorDifferentiation', fieldName = 'EDS')
+
+UMAP_ED <- FeaturePlot(seuratObj, features = 'Tcell_EffectorDifferentiation', min.cutoff = 'q02', max.cutoff = 'q98') +
+        ggtitle('EDS Is a Trajectory Modeling\nNaive-Effector Differentiation') +
+        scale_color_gradientn(
+                colors = c("navy", "dodgerblue", "yellow", "gold", "orange", "red", "maroon")
+        ) +
+        NoLegend()
+
+Pheno <- VlnPlot(seuratObj, features = 'Tcell_EffectorDifferentiation', group.by = 'TCellSubtype', pt.size = 0) + NoLegend() + ggtitle('EDS As Tool\nFor Gating') +
+        geom_hline(yintercept = 6, linetype = 'dashed') +
+        geom_hline(yintercept = 2, linetype = 'dashed') +
+        labs(x = '')
+
+P <- UMAP_ED + Pheno + patchwork::plot_layout(ncol = 2)
+P
+
+```
+
+```{r, echo=FALSE, fig.alt='UMAP plot of T and NK cells colored based on Effector-Differentiation Score'}
+knitr::include_graphics('img/TCell_EDS.png')
+```

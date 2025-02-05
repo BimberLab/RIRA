@@ -289,10 +289,6 @@ TrainModelsFromSeurat <- function(seuratObj, celltype_column, assay = "RNA", slo
   }
 }
 
-#' @title Helper function for printing information about the metrics files
-#'
-#' @description Parses the .rds file saved during TrainModelsFromSeurat and prints accuracy information
-#' @param metrics_file Path to a metrics file written by TrainModelsFromSeurat()
 .ParseMetricsFile <- function(metrics_file){
   data <- NULL
   if (grepl("ConfusionMatrix", metrics_file)){

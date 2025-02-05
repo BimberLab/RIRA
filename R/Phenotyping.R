@@ -545,10 +545,6 @@ ExpandGeneList <- function(genes, verbose = TRUE) {
 	return(ret)
 }
 
-#' @title .FindGeneSetsContaining
-#'
-#' @description A helper function that Takes an input gene and identifies any entries matching registered gene sets. This function is the complement to GetGeneSet.
-#' @param genes A vector of genes 
 .FindGeneSetsContaining <- function(genes){
   
   matchingGeneSets <- unlist(pkg.env$GENE_SETS)[ unlist(pkg.env$GENE_SETS) %in% genes]
