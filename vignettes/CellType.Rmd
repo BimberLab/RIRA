@@ -44,12 +44,14 @@ Seurat::DimPlot(seuratObj, group.by = 'RIRA_Immune_v2.cellclass')
 ```
 
 ```{r, echo=FALSE, fig.width=5, fig.alt = 'UMAP plot of bulk immune colored based on cell type label'}
-#knitr::include_graphics('img/RIRA_UMAP.png')
+knitr::include_graphics('img/RIRA_UMAP.png')
 ```
 
 We also provide two specialist models designed for sub-typing within T/NK cells and within Myeloid cells. While in our experience these models are useful for automatic cell type/subtype scoring, it is important to note that these are not perfect, and there are predictable biological processes that cause cells of different lineages to have highly similar transcriptomes (e.g., a highly cytotoxic T cell and an NK cell, or highly cytotoxic TEM-like CD4+ T cells and cytotoxic CD8+ T cells). These issues are explored in more detail in the RIRA manuscript.
 
 ```{r tnk, eval=FALSE}
+
+seuratObj <- DownloadFromGEO(subset = 'T_NK', outfile = 'RIRA_TNK.rds.gz')
 seuratObj <- RIRA::Classify_TNK(seuratObj)
 Seurat::DimPlot(seuratObj, group.by = 'RIRA_TNK_v2.cellclass')
 ```
@@ -59,6 +61,7 @@ knitr::include_graphics('img/RIRA_UMAP_TNK.png')
 ```
 
 ```{r myeloid, eval=FALSE}
+seuratObj <- DownloadFromGEO(subset = 'Myeloid', outfile = 'RIRA_Myeloid.rds.gz')
 seuratObj <- RIRA::Classify_Myeloid(seuratObj)
 Seurat::DimPlot(seuratObj, group.by = 'RIRA_Myeloid_v3.cellclass')
 ```
