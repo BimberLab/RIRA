@@ -30,7 +30,11 @@ It is also possible to download the count matrix from GEO, such as with the GEOq
 Due to the large size, in practice it might be more useful to download the 'T_NK', 'Bcell', or 'Myeloid' subsets.
 
 ```{r download, eval=FALSE}
-seuratObj <- DownloadFromGEO(subset = 'All', outfile = 'RIRA_All.rds.gz')
+seuratObj <- DownloadFromGEO(subset = 'All', outfile = 'RIRA_All.rds')
+
+# or:
+seuratObj <- DownloadFromGEO(subset = 'T_NK', outfile = 'RIRA_All.rds')
+
 ```
 # Basic Exploration
 

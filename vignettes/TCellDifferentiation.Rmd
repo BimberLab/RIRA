@@ -29,7 +29,7 @@ library(patchwork)
 First download the data as a Seurat object (or use your own input data):
 
 ```{r download, eval=FALSE}
-seuratObj <- DownloadFromGEO(subset = 'T_NK', outfile = 'RIRA_T_NK.rds.gz')
+seuratObj <- DownloadFromGEO(subset = 'T_NK', outfile = 'RIRA_T_NK.rds')
 ```
 
 These are the cell labels used in the RIRA manuscript, also provided in the seurat object:
@@ -72,4 +72,47 @@ P
 
 ```{r, echo=FALSE, fig.alt='UMAP plot of T and NK cells colored based on Effector-Differentiation Score'}
 knitr::include_graphics('img/TCell_EDS.png')
+```
+
+# Memory and Cytotoxic Differentiation
+
+As might be predicted, the RNA features that are most robust at distinguishing lineage/state are not always identical to the canonical protein markers.
+In the RIRA manuscript, we demonstrated the expression of S100A proteins was correlated with naive-memory differentiation, and that the pattern of granzyme expression was also correlated with differentiation, with T-central memory cells being skewed toward granzymes K/M, and T effector memory being skewed toward granzymes B/H.
+
+The code below demonstrate
+
+```{r ucell, eval=FALSE}
+
+seuratObj <- UCell::AddModuleScore_UCell(seuratObj, features = list(
+        TCellMemory = GetGeneSet('TCellMemoryS100'),
+        Cytotoxicity.GzmABH = GetGeneSet('Cytotoxicity.GzmABH'),
+        Cytotoxicity.GzmKM = GetGeneSet('Cytotoxicity.GzmKM')
+  ))
+
+dat <- seuratObj@meta.data %>%
+        group_by(TCellSubtype) %>%
+        summarize(
+                Cytotoxicity.GzmKM_UCell = mean(Cytotoxicity.GzmKM_UCell),
+                Cytotoxicity.GzmABH_UCell = mean(Cytotoxicity.GzmABH_UCell)
+        )
+
+GZM_Plot <- ggplot(dat, aes(x = Cytotoxicity.GzmABH_UCell, y = Cytotoxicity.GzmKM_UCell, color = TCellSubtype)) +
+        geom_point(size = 5) +
+        ggrepel::geom_label_repel(aes(label = TCellSubtype), color = 'black', size = 3, max.overlaps = 3) +
+        egg::theme_article(base_size = 12) +
+        theme(
+                legend.position = 'none',
+                plot.title = element_text(hjust = 0.5),
+                axis.text.x = element_text(angle = 45, hjust = 1)
+        ) +
+        labs(
+                title = 'Granzyme Expression\nSeparates Populations',
+                x = 'Avg. Gzm A/B/H Score',
+                y = 'Avg. Gzm K/M Score'
+        )
+
+```
+
+```{r, echo=FALSE, fig.alt='UMAP plot of T and NK cells colored based on Effector-Differentiation Score'}
+knitr::include_graphics('img/GZM_Plot.png')
 ```

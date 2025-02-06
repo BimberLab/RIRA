@@ -31,7 +31,7 @@ library(patchwork)
 First download the data as a Seurat object (or use your own input data):
 
 ```{r download, eval=FALSE}
-seuratObj <- DownloadFromGEO(subset = 'All', outfile = 'RIRA_All.rds.gz')
+seuratObj <- DownloadFromGEO(subset = 'All', outfile = 'RIRA_All.rds')
 ```
 
 Use the built-in celltypist model to score cells according to coarse cell types (T/NK, Bcell, Myeloid, Other). The rationale for selecting this level of classification is that these should be mutually exclusive cell types and these cell types should robustly separate (i.e., other factors that impact cell state should not cause collisions). After the initial classification, it will also score cells for a panel of UCell markers designed to identify incompatible cell types, such as T/NK cells and Erythrocytes), which likely indicate doublets. See FilterDisallowedClasses() for more detail.
@@ -51,7 +51,7 @@ We also provide two specialist models designed for sub-typing within T/NK cells 
 
 ```{r tnk, eval=FALSE}
 
-seuratObj <- DownloadFromGEO(subset = 'T_NK', outfile = 'RIRA_TNK.rds.gz')
+seuratObj <- DownloadFromGEO(subset = 'T_NK', outfile = 'RIRA_TNK.rds')
 seuratObj <- RIRA::Classify_TNK(seuratObj)
 Seurat::DimPlot(seuratObj, group.by = 'RIRA_TNK_v2.cellclass')
 ```
@@ -61,7 +61,7 @@ knitr::include_graphics('img/RIRA_UMAP_TNK.png')
 ```
 
 ```{r myeloid, eval=FALSE}
-seuratObj <- DownloadFromGEO(subset = 'Myeloid', outfile = 'RIRA_Myeloid.rds.gz')
+seuratObj <- DownloadFromGEO(subset = 'Myeloid', outfile = 'RIRA_Myeloid.rds')
 seuratObj <- RIRA::Classify_Myeloid(seuratObj)
 Seurat::DimPlot(seuratObj, group.by = 'RIRA_Myeloid_v3.cellclass')
 ```

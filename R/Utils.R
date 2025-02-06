@@ -154,13 +154,13 @@ DownloadFromGEO <- function(outfile = NULL, subset = c('All', 'T_NK', 'Myeloid',
   }
 
   if (subset == 'All'){
-    fn <- 'GSE277821_RIRA.All.seurat.rds.gz'
+    fn <- 'GSE277821_RIRA.All.seurat.rds'
   } else if (subset == 'T_NK') {
-    fn <- 'GSE277821_RIRA.T_NK.seurat.rds.gz'
+    fn <- 'GSE277821_RIRA.T_NK.seurat.rds'
   } else if (subset == 'Myeloid') {
-    fn <- 'GSE277821_RIRA.Myeloid.seurat.rds.gz'
+    fn <- 'GSE277821_RIRA.Myeloid.seurat.rds'
   } else if (subset == 'Bcell') {
-    fn <- 'GSE277821_RIRA.BCell.seurat.rds.gz'
+    fn <- 'GSE277821_RIRA.Bcell.seurat.rds'
   } else {
     stop(paste0('Unknown value for subset: ', subset))
   }
