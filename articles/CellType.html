@@ -103,6 +103,7 @@ FilterDisallowedClasses() for more detail.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">seuratObj</span> <span class="op">&lt;-</span> <span class="fu">RIRA</span><span class="fu">::</span><span class="fu"><a href="../reference/Classify_ImmuneCells.html">Classify_ImmuneCells</a></span><span class="op">(</span><span class="va">seuratObj</span><span class="op">)</span></span>
 <span><span class="fu">Seurat</span><span class="fu">::</span><span class="fu"><a href="https://satijalab.org/seurat/reference/DimPlot.html" class="external-link">DimPlot</a></span><span class="op">(</span><span class="va">seuratObj</span>, group.by <span class="op">=</span> <span class="st">'RIRA_Immune_v2.cellclass'</span><span class="op">)</span></span></code></pre></div>
+<p><img src="img%2FRIRA_UMAP.png" alt="UMAP plot of bulk immune colored based on cell type label" width="1050"></p>
 <p>We also provide two specialist models designed for sub-typing within
 T/NK cells and within Myeloid cells. While in our experience these
 models are useful for automatic cell type/subtype scoring, it is
@@ -113,11 +114,13 @@ cell, or highly cytotoxic TEM-like CD4+ T cells and cytotoxic CD8+ T
 cells). These issues are explored in more detail in the RIRA
 manuscript.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">seuratObj</span> <span class="op">&lt;-</span> <span class="fu">RIRA</span><span class="fu">::</span><span class="fu"><a href="../reference/Classify_TNK.html">Classify_TNK</a></span><span class="op">(</span><span class="va">seuratObj</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">seuratObj</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/DownloadFromGEO.html">DownloadFromGEO</a></span><span class="op">(</span>subset <span class="op">=</span> <span class="st">'T_NK'</span>, outfile <span class="op">=</span> <span class="st">'RIRA_TNK.rds.gz'</span><span class="op">)</span></span>
+<span><span class="va">seuratObj</span> <span class="op">&lt;-</span> <span class="fu">RIRA</span><span class="fu">::</span><span class="fu"><a href="../reference/Classify_TNK.html">Classify_TNK</a></span><span class="op">(</span><span class="va">seuratObj</span><span class="op">)</span></span>
 <span><span class="fu">Seurat</span><span class="fu">::</span><span class="fu"><a href="https://satijalab.org/seurat/reference/DimPlot.html" class="external-link">DimPlot</a></span><span class="op">(</span><span class="va">seuratObj</span>, group.by <span class="op">=</span> <span class="st">'RIRA_TNK_v2.cellclass'</span><span class="op">)</span></span></code></pre></div>
 <p><img src="img%2FRIRA_UMAP_TNK.png" alt="UMAP plot of T/NK cells colored based on cell subtype label" width="1050"></p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">seuratObj</span> <span class="op">&lt;-</span> <span class="fu">RIRA</span><span class="fu">::</span><span class="fu"><a href="../reference/Classify_Myeloid.html">Classify_Myeloid</a></span><span class="op">(</span><span class="va">seuratObj</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">seuratObj</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/DownloadFromGEO.html">DownloadFromGEO</a></span><span class="op">(</span>subset <span class="op">=</span> <span class="st">'Myeloid'</span>, outfile <span class="op">=</span> <span class="st">'RIRA_Myeloid.rds.gz'</span><span class="op">)</span></span>
+<span><span class="va">seuratObj</span> <span class="op">&lt;-</span> <span class="fu">RIRA</span><span class="fu">::</span><span class="fu"><a href="../reference/Classify_Myeloid.html">Classify_Myeloid</a></span><span class="op">(</span><span class="va">seuratObj</span><span class="op">)</span></span>
 <span><span class="fu">Seurat</span><span class="fu">::</span><span class="fu"><a href="https://satijalab.org/seurat/reference/DimPlot.html" class="external-link">DimPlot</a></span><span class="op">(</span><span class="va">seuratObj</span>, group.by <span class="op">=</span> <span class="st">'RIRA_Myeloid_v3.cellclass'</span><span class="op">)</span></span></code></pre></div>
 <p><img src="img%2FRIRA_UMAP_Myeloid.png" alt="UMAP plot of myeloid cells colored based on cell subtype label" width="1050"></p>
   </main>
