@@ -43,5 +43,5 @@ DimPlot(seuratObj, group.by = 'RIRA_Immune_v2.cellclass')
 ```
 
 ```{r, echo=FALSE, fig.width=5, fig.alt = 'UMAP plot of bulk immune colored based on cell type label'}
-#knitr::include_graphics('img/RIRA_UMAP.png')
+knitr::include_graphics('img/RIRA_UMAP.png')
 ```

@@ -2,7 +2,7 @@ template:
   bootstrap: 5
 url: https://bimberlab.github.io/RIRA/
 articles:
-  - title: Articles
+  - title: Examples
     navbar: ~
     contents:
       - GetRira
