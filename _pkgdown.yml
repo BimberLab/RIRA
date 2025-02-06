@@ -1,0 +1,10 @@
+template:
+  bootstrap: 5
+url: https://bimberlab.github.io/RIRA/
+articles:
+  - title: Articles
+    navbar: ~
+    contents:
+      - GetRira
+      - CellType
+      - TCellDifferentiation

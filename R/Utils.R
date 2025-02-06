@@ -22,47 +22,6 @@ GetSeed <- function() {
   return(pkg.env$RANDOM_SEED)
 }
 
-#' @title Set the directory where atlas data reside
-#'
-#' @description Sets the directory where atlas data reside.
-#' @param folderPath The atlas directory. Within the folder, there should be sub-folders by version.
-#' @export
-SetAtlasDir <- function(folderPath) {
-  if (!dir.exists(folderPath)) {
-    stop(paste0('Unable to find folder: ', folderPath))
-  }
-
-  folderPath <- gsub(folderPath, pattern = '[/\\]+$', replacement = '')
-  pkg.env$ATLAS_DIR <- folderPath
-}
-
-.GetAtlasDir <- function() {
-  return(pkg.env$ATLAS_DIR)
-}
-
-.GetLatestVersion <- function(){
-  return(utils::packageVersion('RIRA'))
-}
-
-.GetAtlasBaseDir <- function(version) {
-  if (is.null(version)) {
-    version <- .GetLatestVersion()
-  }
-
-  if (is.null(.GetAtlasDir())) {
-    parentFolder <- system.file('inst/data', package = 'RIRA')
-  } else {
-    parentFolder <- .GetAtlasDir()
-  }
-
-  parentFolder <- paste0(parentFolder, '/', version)
-  if (!dir.exists(parentFolder)) {
-    print(paste0('Unknown version: ', version))
-  }
-
-  return(parentFolder)
-}
-
 SeuratToMatrix <- function(seuratObj, outDir, assayName, slot = 'counts'){
   if (endsWith(outDir, "/")){
     outDir <- gsub(outDir, pattern = "/$", replacement = "")
@@ -176,4 +135,42 @@ SeuratToMatrix <- function(seuratObj, outDir, assayName, slot = 'counts'){
   }
 
   return(ret)
+}
+
+#' @title Download RIRA data from GEO
+#'
+#' @description This will download the RIRA raw data from GEO, as a Seurat object
+#' @param outfile This location to initially download the raw data. If omitted or NULL, it will download the RDS to the temporary file folder and delete it on completion. However, because the download is large it may be useful to download to a location you plan to keep.
+#' @param subset The cell subset to download, either All, T_NK, Myeloid, BCell or Other
+#' @export
+DownloadFromGEO <- function(outfile = NULL, subset = c('All', 'T_NK', 'Myeloid', 'Bcell')) {
+  subset <- match.arg(subset)
+
+  deleteDownloadedFile <- FALSE
+  if (all(is.null(outfile))) {
+    print('Downloading data to a temporary file, which will be deleted after loading. If you expect to load these data multiple times, we recommend specifying a permanent download location using the outfile argument')
+    outfile <- tempfile()
+    deleteDownloadedFile <- TRUE
+  }
+
+  if (subset == 'All'){
+    fn <- 'GSE277821_RIRA.All.seurat.rds.gz'
+  } else if (subset == 'T_NK') {
+    fn <- 'GSE277821_RIRA.T_NK.seurat.rds.gz'
+  } else if (subset == 'Myeloid') {
+    fn <- 'GSE277821_RIRA.Myeloid.seurat.rds.gz'
+  } else if (subset == 'Bcell') {
+    fn <- 'GSE277821_RIRA.BCell.seurat.rds.gz'
+  } else {
+    stop(paste0('Unknown value for subset: ', subset))
+  }
+
+  httr::GET(url = paste0('ftp.ncbi.nlm.nih.gov/geo/series/GSE277nnn/GSE277821/suppl/', fn), httr::progress(), httr::write_disk(path = outfile, overwrite = TRUE))
+
+  seuratObj <- readRDS(outfile)
+  if (deleteDownloadedFile) {
+    unlink(outfile)
+  }
+
+  return(seuratObj)
 }

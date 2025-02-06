@@ -1,26 +1,5 @@
 #' @include Utils.R
 
-#' @title Get the integrated cFIT reference object for an atlas version
-#' @description Return the integrated reference for the provided RIRA version
-#' @param version The version string
-#' @export
-GetCFitReference <- function(version = NULL) {
-  fn <- .GetExpectedCfitRef(version)
-  if (!file.exists(fn)) {
-    stop(paste0('Unable to find file: ', fn))
-  }
-
-  return(readRDS(fn))
-}
-
-.GetExpectedCfitRef <- function(version) {
-  parentFolder <- .GetAtlasBaseDir(version)
-  fn <- paste0(parentFolder, '/cFIT/ref.rds')
-
-  return(fn)
-}
-
-
 #' @title GenerateIntegratedReference
 #' @description This function uses cFIT to create an integrated reference for the provided seurat object
 #' @param seuratObj The seurat object

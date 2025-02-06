@@ -75,7 +75,7 @@ TrainModel <- function(training_matrix, celltype, hyperparameter_tuning = F, lea
 
     #Define a tuning space 25% as large as the number of models 
     #In the case of sensitive hyperparameters, resolution = 5 allows for a low/medium-low/medium/medium-high/high type parameter space
-    tuner <- tnr("grid_search", resolution = 5)
+    tuner <- mlr3verse::tnr("grid_search", resolution = 5)
     
     #Define resampling method used for hyperparameter tuning
     if (inner_resampling == "cv" || inner_resampling == "cross-validation"){
@@ -134,7 +134,7 @@ TrainModel <- function(training_matrix, celltype, hyperparameter_tuning = F, lea
   }
     
   #Define the autotuner using the parameter spaces and conditions defined above
-  at <- AutoTuner$new(
+  at <- mlr3tuning::AutoTuner$new(
     learner = learner,
     resampling = inner_resample,
     measure = measure,
@@ -289,10 +289,6 @@ TrainModelsFromSeurat <- function(seuratObj, celltype_column, assay = "RNA", slo
   }
 }
 
-#' @title Helper function for printing information about the metrics files
-#'
-#' @description Parses the .rds file saved during TrainModelsFromSeurat and prints accuracy information
-#' @param metrics_file Path to a metrics file written by TrainModelsFromSeurat()
 .ParseMetricsFile <- function(metrics_file){
   data <- NULL
   if (grepl("ConfusionMatrix", metrics_file)){

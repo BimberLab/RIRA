@@ -460,7 +460,7 @@ humanHLAGenes <-  c('HLA-A','HLA-B','HLA-C','HLA-E','HLA-F','HLA-F-AS1','HLA-G',
   GetGeneSet('HumanTcrGenes'), 
   GetGeneSet('HumanBcrGenes'), 
   GetGeneSet('HumanKIRGenes'), 
-  GetGeneSet('humanHLAGenes')
+  GetGeneSet('HumanHLAGenes')
 )))
 
 .RegisterGeneSet("Glycolysis", c("ALDOA", "BPGM", "ENO1", "ENO2", "GAPDH", "HK1", "HK2", "HKDC1", "PFKL", "PGAM1", "PGAM2", "PGK1", "PKLR", "PKM", "TPI1"))
@@ -545,10 +545,6 @@ ExpandGeneList <- function(genes, verbose = TRUE) {
 	return(ret)
 }
 
-#' @title .FindGeneSetsContaining
-#'
-#' @description A helper function that Takes an input gene and identifies any entries matching registered gene sets. This function is the complement to GetGeneSet.
-#' @param genes A vector of genes 
 .FindGeneSetsContaining <- function(genes){
   
   matchingGeneSets <- unlist(pkg.env$GENE_SETS)[ unlist(pkg.env$GENE_SETS) %in% genes]

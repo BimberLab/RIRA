@@ -1,12 +1,13 @@
 Package: RIRA
 Type: Package
 Title: A package for the Rhesus Immunome Reference Atlas (RIRA): A multi-tissue single-cell landscape of immune cells
-Version: 0.1.0
+Version: 1.0.0
 Author: Bimber Lab
 Description: Wrappers and pipelines to process single-cell RNA-seq data for RIRA
 Encoding: UTF-8
+URL: https://bimberlab.github.io/RIRA/
 LazyData: true
-Maintainer: The package maintainer <bimber@ohsu.edu>
+Maintainer: Bimber Lab <bimber@ohsu.edu>
 License: GPL-3
 Depends:
     R (>= 4.3.0),
@@ -25,7 +26,9 @@ Imports:
     cFIT,
     DALEX,
     DALEXtra,
+    mlr3verse,
     mlr3learners,
+    mlr3tuning,
     mlr3,
     ranger,
     knitr,
@@ -41,11 +44,13 @@ Imports:
     BiocParallel,
     ggcorrplot,
     magrittr,
-    mlr3verse
+    mlr3verse,
+    httr
 Suggests:
     devtools,
     testthat (>= 2.1.0),
-    SeuratData
+    SeuratData,
+    rmdformats
 Remotes:
     pengminshi/cFIT,
     satijalab/seurat-data,
@@ -62,3 +67,4 @@ Collate:
     'GeneModules.R'
     'cFIT.R'
     'scGate.R'
+VignetteBuilder: knitr
