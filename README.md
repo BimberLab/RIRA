@@ -5,6 +5,7 @@
 ## Table of Contents
 * [Overview](#overview)
 * [Installation](#installation)
+* [Download RIRA Data](https://bimberlab.github.io/RIRA/articles/GetRira.html)
 
 
 ### <a name = "overview">Overview</a>

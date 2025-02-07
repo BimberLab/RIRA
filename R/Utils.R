@@ -154,18 +154,20 @@ DownloadFromGEO <- function(outfile = NULL, subset = c('All', 'T_NK', 'Myeloid',
   }
 
   if (subset == 'All'){
-    fn <- 'GSE277821_RIRA.All.seurat.rds'
+    fn <- 'GSE277821_RIRA.All.seurat.rds.gz'
   } else if (subset == 'T_NK') {
-    fn <- 'GSE277821_RIRA.T_NK.seurat.rds'
+    fn <- 'GSE277821_RIRA.T_NK.seurat.rds.gz'
   } else if (subset == 'Myeloid') {
-    fn <- 'GSE277821_RIRA.Myeloid.seurat.rds'
+    fn <- 'GSE277821_RIRA.Myeloid.seurat.rds.gz'
   } else if (subset == 'Bcell') {
-    fn <- 'GSE277821_RIRA.Bcell.seurat.rds'
+    fn <- 'GSE277821_RIRA.Bcell.seurat.rds.gz'
   } else {
     stop(paste0('Unknown value for subset: ', subset))
   }
 
-  httr::GET(url = paste0('ftp.ncbi.nlm.nih.gov/geo/series/GSE277nnn/GSE277821/suppl/', fn), httr::progress(), httr::write_disk(path = outfile, overwrite = TRUE))
+  url <- paste0('ftp.ncbi.nlm.nih.gov/geo/series/GSE277nnn/GSE277821/suppl/', fn)
+  message(paste0('Downloading file: ', url))
+  httr::GET(url = url, httr::progress(), httr::write_disk(path = outfile, overwrite = TRUE))
 
   seuratObj <- readRDS(outfile)
   if (deleteDownloadedFile) {
