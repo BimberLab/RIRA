@@ -83,7 +83,10 @@ are interested in specific information.</p>
 <p>Due to the large size, in practice it might be more useful to
 download the ‘T_NK’, ‘Bcell’, or ‘Myeloid’ subsets.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">seuratObj</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/DownloadFromGEO.html">DownloadFromGEO</a></span><span class="op">(</span>subset <span class="op">=</span> <span class="st">'All'</span>, outfile <span class="op">=</span> <span class="st">'RIRA_All.rds.gz'</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">seuratObj</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/DownloadFromGEO.html">DownloadFromGEO</a></span><span class="op">(</span>subset <span class="op">=</span> <span class="st">'All'</span>, outfile <span class="op">=</span> <span class="st">'RIRA_All.rds'</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># or:</span></span>
+<span><span class="va">seuratObj</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/DownloadFromGEO.html">DownloadFromGEO</a></span><span class="op">(</span>subset <span class="op">=</span> <span class="st">'T_NK'</span>, outfile <span class="op">=</span> <span class="st">'RIRA_All.rds'</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="basic-exploration">Basic Exploration<a class="anchor" aria-label="anchor" href="#basic-exploration"></a>
