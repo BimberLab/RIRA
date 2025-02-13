@@ -50,7 +50,8 @@ Suggests:
     devtools,
     testthat (>= 2.1.0),
     SeuratData,
-    rmdformats
+    rmdformats,
+    RCurl
 Remotes:
     pengminshi/cFIT,
     satijalab/seurat-data,
