@@ -14,6 +14,15 @@ jobs:
       - name: Checkout the repository
         uses: actions/checkout@v4.2.2
 
+      - name: Trigger RDiscvr Docker
+        # NOTE: rely on the source of this event to also trigger RDiscvr
+        if: github.event_name != 'repository_dispatch'
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.PAT }}
+          repository: bimberlabinternal/Rdiscvr
+          event-type: docker
+
       - name: Docker meta
         id: docker_meta
         uses: docker/metadata-action@v5.6.1
