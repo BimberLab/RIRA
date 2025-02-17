@@ -1,6 +1,6 @@
 Package: RIRA
 Type: Package
-Title: A package for the Rhesus Immunome Reference Atlas (RIRA): A multi-tissue single-cell landscape of immune cells
+Title: A package for the Rhesus Immune Reference Atlas (RIRA): A multi-tissue single-cell landscape of immune cells
 Version: 1.0.0
 Author: Bimber Lab
 Description: Wrappers and pipelines to process single-cell RNA-seq data for RIRA
