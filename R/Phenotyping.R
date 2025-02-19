@@ -239,6 +239,10 @@ PlotMarkerSeries <- function(seuratObj, features, reductions = c('umap'), title 
 	dims <- paste0(Key(object = seuratObj[[reduction]]), c(1,2))
 	data <- FetchData(object = seuratObj, vars = c(dims, features), cells = colnames(x = seuratObj))
 	for (feature in features) {
+		if (!feature %in% names(data)) {
+			stop(paste0('Feature not found: ', feature, '. Presend: ', paste0(names(data), collapse = ',')))
+		}
+
 		if (sum(data[,feature] > 0) > 1 && length(unique(data[, feature])) > 1) {
 			ret <- c(ret, feature)
 		}
@@ -251,27 +255,27 @@ PlotMarkerSeries <- function(seuratObj, features, reductions = c('umap'), title 
 #' @import patchwork
 PlotMarkerSet <- function(seuratObj, reductions, title, features) {
 	P <- NULL
+
+	featuresToPlot <- .FindPlotableFeatures(seuratObj, features)
+	if (is.null(featuresToPlot)) {
+		print('None of the requested features were found, aborting')
+		return()
+	}
+
 	missingFeats <- c()
 	for (reduction in reductions) {
-		featuresToPlot <- .FindPlotableFeatures(seuratObj, features)
-		if (is.null(featuresToPlot)) {
-			print('None of the requested features were found, aborting')
-			return()
+		featuresToPlotNonZero <- .RemoveUnchangedOrZero(seuratObj, reduction, featuresToPlot)
+
+		if (length(featuresToPlotNonZero) != length(featuresToPlot)){
+			missingFeats <- unique(c(missingFeats, featuresToPlot[!(featuresToPlot %in% featuresToPlotNonZero)]))
 		}
 
-		featuresToPlot <- .RemoveUnchangedOrZero(seuratObj, reduction, featuresToPlot)
-
-		if (length(features) != length(featuresToPlot)){
-			missing <- features[!(features %in% featuresToPlot)]
-			missingFeats <- unique(c(missingFeats, missing))
-		}
-
-		if (length(featuresToPlot) == 0){
-			print('None of the requested features were present, skipping')
+		if (length(featuresToPlotNonZero) == 0){
+			print(paste0('None of the requested features were present in reduction ', reduction, ', skipping'))
 			next
 		}
 
-		P1 <- FeaturePlot(seuratObj, features = featuresToPlot, reduction = reduction, min.cutoff = 'q05', max.cutoff = 'q95')
+		P1 <- FeaturePlot(seuratObj, features = featuresToPlotNonZero, reduction = reduction, min.cutoff = 'q05', max.cutoff = 'q95')
 		if (all(is.null(P))) {
 			P <- P1
 		} else {
@@ -280,7 +284,7 @@ PlotMarkerSet <- function(seuratObj, reductions, title, features) {
 	}
 
 	if (length(missingFeats) > 0) {
-		print(paste0('The following features were requested, but not present: ', paste0(missingFeats, collapse = ',')))
+		print(paste0('The following features were requested, but not present: ', paste0(unique(missingFeats), collapse = ',')))
 	}
 
 	if (!all(is.null(P))) {
