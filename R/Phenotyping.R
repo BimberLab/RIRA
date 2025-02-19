@@ -262,25 +262,29 @@ PlotMarkerSet <- function(seuratObj, reductions, title, features) {
 		return()
 	}
 
-	featuresToPlotNonZero <- .RemoveUnchangedOrZero(seuratObj, reduction, featuresToPlot)
-
-	if (length(featuresToPlotNonZero) != length(featuresToPlot)){
-		missingFeats <- featuresToPlot[!(featuresToPlot %in% featuresToPlotNonZero)]
-		print(paste0('The following features were requested, but not present: ', paste0(unique(missingFeats), collapse = ',')))
-	}
-
-	if (length(featuresToPlotNonZero) == 0){
-		print('None of the requested features were present, skipping')
-		return()
-	}
-
+	missingFeats <- c()
 	for (reduction in reductions) {
+		featuresToPlotNonZero <- .RemoveUnchangedOrZero(seuratObj, reduction, featuresToPlot)
+
+		if (length(featuresToPlotNonZero) != length(featuresToPlot)){
+			missingFeats <- unique(c(missingFeats, featuresToPlot[!(featuresToPlot %in% featuresToPlotNonZero)]))
+		}
+
+		if (length(featuresToPlotNonZero) == 0){
+			print(paste0('None of the requested features were present in reduction ', reduction, ', skipping'))
+			next
+		}
+
 		P1 <- FeaturePlot(seuratObj, features = featuresToPlotNonZero, reduction = reduction, min.cutoff = 'q05', max.cutoff = 'q95')
 		if (all(is.null(P))) {
 			P <- P1
 		} else {
 			P <- P | P1
 		}
+	}
+
+	if (length(missingFeats) > 0) {
+		print(paste0('The following features were requested, but not present: ', paste0(unique(missingFeats), collapse = ',')))
 	}
 
 	if (!all(is.null(P))) {
