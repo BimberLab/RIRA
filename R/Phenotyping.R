@@ -243,7 +243,7 @@ PlotMarkerSeries <- function(seuratObj, features, reductions = c('umap'), title 
 			stop(paste0('Feature not found: ', feature, '. Colnames present: ', paste0(names(data), collapse = ',')))
 		}
 
-		if (sum(data[,feature] > 0, na.rm = TRUE) > 1 && length(unique(data[, feature])) > 1) {
+		if (!any(is.na(data[[feature]])) && sum(data[[feature]] > 0, na.rm = TRUE) > 1 && length(unique(data[[feature]])) > 1) {
 			ret <- c(ret, feature)
 		}
 	}
