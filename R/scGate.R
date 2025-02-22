@@ -39,6 +39,7 @@ RunScGate <- function(seuratObj, model, min.cells = 30, assay = 'RNA', pos.thr =
                         neg.thr = neg.thr,
                         seed = GetSeed(),
                         ncores = ncores,
+                        keep.ranks = TRUE,
                         output.col.name = output.col.name,
                         genes.blacklist = genes.blacklist
   ))

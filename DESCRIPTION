@@ -54,8 +54,7 @@ Suggests:
     RCurl
 Remotes:
     pengminshi/cFIT,
-    satijalab/seurat-data,
-    mojaveazure/seurat-disk,
+    SeuratData=satijalab/seurat-data,
     carmonalab/UCell,
     carmonalab/scGate
 RoxygenNote: 7.3.2
