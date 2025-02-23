@@ -226,7 +226,7 @@ PlotMarkerSeries <- function(seuratObj, features, reductions = c('umap'), title 
 
 .FindPlotableFeatures <- function(seuratObj, features) {
 	tryCatch({
-		df <- Seurat::FetchData(seuratObj, vars = unique(features), cells = 1)
+		df <- suppressWarnings(Seurat::FetchData(seuratObj, vars = unique(features), cells = 1))
 		return(unique(names(df)))
 	}, error = function(e){
 		return(NULL)
@@ -237,7 +237,7 @@ PlotMarkerSeries <- function(seuratObj, features, reductions = c('umap'), title 
 	ret <- c()
 	#Remove zeros or unchanged:
 	dims <- paste0(Key(object = seuratObj[[reduction]]), c(1,2))
-	data <- FetchData(object = seuratObj, vars = c(dims, features), cells = colnames(x = seuratObj))
+	data <- suppressWarnings(Seurat::FetchData(object = seuratObj, vars = c(dims, features), cells = colnames(x = seuratObj)))
 	for (feature in features) {
 		if (!feature %in% names(data)) {
 			stop(paste0('Feature not found: ', feature, '. Colnames present: ', paste0(names(data), collapse = ',')))

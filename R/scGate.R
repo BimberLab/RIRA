@@ -31,6 +31,8 @@ RunScGate <- function(seuratObj, model, min.cells = 30, assay = 'RNA', pos.thr =
     }
   }
 
+  hasRanks <- 'UCellRanks' %in% names(seuratObj@assays)
+
   seuratObj <- suppressWarnings(scGate::scGate(data = seuratObj,
                         model = model,
                         min.cells = min.cells,
@@ -44,6 +46,9 @@ RunScGate <- function(seuratObj, model, min.cells = 30, assay = 'RNA', pos.thr =
                         genes.blacklist = genes.blacklist
   ))
 
+  if (!hasRanks) {
+    seuratObj@assays[['UCellRanks']] <- NULL
+  }
   if (length(names(seuratObj@reductions)) > 0) {
     print(Seurat::DimPlot(seuratObj, group.by = output.col.name))
     colNames <- names(seuratObj@meta.data)[grepl(names(seuratObj@meta.data), pattern = paste0('^', output.col.name, '.'))]
