@@ -15,7 +15,6 @@
 <url><loc>https://bimberlab.github.io/RIRA/reference/ExpandGeneList.html</loc></url>
 <url><loc>https://bimberlab.github.io/RIRA/reference/ExtractGeneWeights.html</loc></url>
 <url><loc>https://bimberlab.github.io/RIRA/reference/FilterDisallowedClasses.html</loc></url>
-<url><loc>https://bimberlab.github.io/RIRA/reference/GenerateIntegratedReference.html</loc></url>
 <url><loc>https://bimberlab.github.io/RIRA/reference/GetAvailableScGates.html</loc></url>
 <url><loc>https://bimberlab.github.io/RIRA/reference/GetGeneSet.html</loc></url>
 <url><loc>https://bimberlab.github.io/RIRA/reference/GetMMul10IgGenes.html</loc></url>
@@ -25,7 +24,6 @@
 <url><loc>https://bimberlab.github.io/RIRA/reference/InterpretModels.html</loc></url>
 <url><loc>https://bimberlab.github.io/RIRA/reference/ListGeneSets.html</loc></url>
 <url><loc>https://bimberlab.github.io/RIRA/reference/MakePhenotypingDotPlot.html</loc></url>
-<url><loc>https://bimberlab.github.io/RIRA/reference/Perform_CFITTransfer.html</loc></url>
 <url><loc>https://bimberlab.github.io/RIRA/reference/PlotImmuneMarkers.html</loc></url>
 <url><loc>https://bimberlab.github.io/RIRA/reference/PlotMarkerSeries.html</loc></url>
 <url><loc>https://bimberlab.github.io/RIRA/reference/PlotUcellCorrelation.html</loc></url>
