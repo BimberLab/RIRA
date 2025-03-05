@@ -1,4 +1,5 @@
 [![R Build and Checks](https://github.com/bimberlab/RIRA/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/bimberlab/RIRA/actions/workflows/R-CMD-check.yaml)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.14976335.svg)](https://doi.org/10.5281/zenodo.14976335)
 
 ## Rhesus Immune Reference Atlas (RIRA): A multi-tissue single-cell landscape of immune cells
 
