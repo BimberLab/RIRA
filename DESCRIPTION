@@ -23,7 +23,6 @@ Imports:
     ExperimentHub,
     DropletUtils,
     utils,
-    cFIT,
     DALEX,
     DALEXtra,
     mlr3verse,
@@ -44,7 +43,6 @@ Imports:
     BiocParallel,
     ggcorrplot,
     magrittr,
-    mlr3verse,
     httr
 Suggests:
     devtools,
@@ -53,7 +51,6 @@ Suggests:
     rmdformats,
     RCurl
 Remotes:
-    pengminshi/cFIT,
     SeuratData=satijalab/seurat-data,
     carmonalab/UCell,
     carmonalab/scGate
@@ -65,6 +62,5 @@ Collate:
     'ComponentScores.R'
     'Phenotyping.R'
     'GeneModules.R'
-    'cFIT.R'
     'scGate.R'
 VignetteBuilder: knitr

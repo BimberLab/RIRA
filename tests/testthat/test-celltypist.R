@@ -10,6 +10,31 @@ test_that("celltypist is installed", {
   # this provides more useful information if there is an error loading celltypist
   testthat::expect_no_condition(print(reticulate::py_exe()))
   testthat::expect_no_condition(print(reticulate::py_version()))
+
+  if (!reticulate::py_module_available('celltypist')) {
+    print('celltypist module not found, debugging:')
+    print('Python config')
+    pyConfig <- reticulate::py_config()
+    for (pn in names(pyConfig)) {
+      print(paste0(pn, ': ', paste0(pyConfig[[pn]]), collapse = ','))
+    }
+
+    print(paste0('pythonpath: ', reticulate::py_config()$pythonpath))
+
+    print(reticulate::py_list_packages())
+    if ('celltypist' %in% reticulate::py_list_packages()$package) {
+      tryCatch({
+        reticulate::import('celltypist')
+      }, error = function(e){
+        print("Error with reticulate::import('celltypist')")
+        print(reticulate::py_last_error())
+        print(conditionMessage(e))
+        traceback()
+      })
+    } else {
+      print('celltypist not in reticulate::py_list_packages()')
+    }
+  }
   testthat::expect_no_condition(print(reticulate::import('celltypist')))
 })
 
