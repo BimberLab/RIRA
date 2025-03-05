@@ -12,7 +12,7 @@ test_that("celltypist is installed", {
   testthat::expect_no_condition(print(reticulate::py_version()))
 
   if (!reticulate::py_module_available('celltypist')) {
-    print('conga module not found, debugging:')
+    print('celltypist module not found, debugging:')
     print('Python config')
     pyConfig <- reticulate::py_config()
     for (pn in names(pyConfig)) {
@@ -22,7 +22,7 @@ test_that("celltypist is installed", {
     print(paste0('pythonpath: ', reticulate::py_config()$pythonpath))
 
     print(reticulate::py_list_packages())
-    if ('conga' %in% reticulate::py_list_packages()$package) {
+    if ('celltypist' %in% reticulate::py_list_packages()$package) {
       tryCatch({
         reticulate::import('celltypist')
       }, error = function(e){
@@ -31,6 +31,8 @@ test_that("celltypist is installed", {
         print(conditionMessage(e))
         traceback()
       })
+    } else {
+      print('celltypist not in reticulate::py_list_packages()')
     }
   }
   testthat::expect_no_condition(print(reticulate::import('celltypist')))
