@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as follows."
+title: "RIRA: Rhesus Immunome Reference Atlas"
+authors:
+  - name: "Bimber Lab"
+    email: "bimber@ohsu.edu"
+    affiliation: "Oregon Health & Science University"
+date-released: "2025-03-05"
+version: "1.0.0"
+repository-code: "https://github.com/BimberLab/RIRA"
+license: "GPL-3"
+url: "https://bimberlab.github.io/RIRA/"
