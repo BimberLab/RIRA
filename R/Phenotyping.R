@@ -471,7 +471,7 @@ humanHLAGenes <-  c('HLA-A','HLA-B','HLA-C','HLA-E','HLA-F','HLA-F-AS1','HLA-G',
 .RegisterGeneSet('Interferon_Response', c('IFI6','IFI27','MX1','ISG15','STAT1','LOC114672189','MX2','IFIT3'))
 .RegisterGeneSet('Interferon_Response_IFI6_correlated', c('IFI6', 'ISG15', 'MX1', 'RNF213', 'BST2', 'DDX60', 'MX2', 'LOC100427967', 'STAT1', 'OAS2', 'DHX58', 'LY6E-1', 'IFIT3', 'SP100', 'EPSTI1'))
 
-.RegisterGeneSet('MHC-II', c('IFI30', 'CD74', 'MAMU-DRB1', 'MAMU-DRA'))
+.RegisterGeneSet('MHC-II', c('IFI30', 'CD74', 'MAMU-DRB1', 'MAMU-DRA', 'MAMU−DQA1','MAMU−DRB5','CST3'))
 
 # Lists provided by Rebecca Skalsky. NOTE: CD24, CD27 and CEACAM21 not annotated in MMul10
 .RegisterGeneSet('B cells', c('MS4A1', 'CD79A', 'CD79B'))
@@ -488,6 +488,8 @@ humanHLAGenes <-  c('HLA-A','HLA-B','HLA-C','HLA-E','HLA-F','HLA-F-AS1','HLA-G',
 
 # SLC2A1 = Glut-1, SLC3A2 = CD98
 .RegisterGeneSet('Redox', c('SLC2A1', 'SLC3A2'))
+
+.RegisterGeneSet('InflMyeloid', c('CCL3','LOC100426537','LOC114673087','LOC100423954','CCL4L1','LOC100426632','LOC100430627','TNF','TNFAIP3','PTX3','IL1B','NLRP3','CXCL3','CXCL8','PMAIP1'))
 
 #' @title GetMMul10TcrGenes
 #' @param includeConstantRegion If true, the MMul10TcrConstantRegion GeneSet will be included.

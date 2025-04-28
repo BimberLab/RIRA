@@ -30,7 +30,8 @@ CalculateUCellScores <- function(seuratObj, forceRecalculate = FALSE, seed = Get
     Metallothionein.Core = GetGeneSet('Metallothionein.Core'),
     IEGs = GetGeneSet('IEGs'),
     MHCII = GetGeneSet('MHC-II'),
-    TCellMemory = GetGeneSet('TCellMemoryS100')
+    TCellMemory = GetGeneSet('TCellMemoryS100'),
+    InflMyeloid = GetGeneSet('InflMyeloid')
   )
 
   needsRecalc <- forceRecalculate || any(!paste0(names(toCalculate), '_UCell') %in% names(seuratObj@meta.data))
