@@ -1,11 +1,11 @@
 pandoc: 3.1.11
-pkgdown: 2.1.1
+pkgdown: 2.1.2
 pkgdown_sha: ~
 articles:
   CellType: CellType.html
   GetRira: GetRira.html
   TCellDifferentiation: TCellDifferentiation.html
-last_built: 2025-04-10T17:17Z
+last_built: 2025-04-29T01:10Z
 urls:
   reference: https://bimberlab.github.io/RIRA/reference
   article: https://bimberlab.github.io/RIRA/articles
