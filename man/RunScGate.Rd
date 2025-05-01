@@ -9,12 +9,13 @@ RunScGate(
   model,
   min.cells = 30,
   assay = "RNA",
-  pos.thr = 0.13,
-  neg.thr = 0.13,
+  pos.thr = 0.2,
+  neg.thr = 0.2,
   ncores = 1,
   output.col.name = "is.pure",
   genes.blacklist = "default",
-  doPlotUCellScores = TRUE
+  doPlotUCellScores = TRUE,
+  keep.ranks = FALSE
 )
 }
 \arguments{
@@ -37,6 +38,8 @@ RunScGate(
 \item{genes.blacklist}{Passed directly to scGate::scGate. Genes blacklisted from variable features. The default loads the list of genes in scGate::genes.blacklist.default; you may deactivate blacklisting by setting genes.blacklist=NULL}
 
 \item{doPlotUCellScores}{If true, FeaturePlots will be created for each UCell score used in classification}
+
+\item{keep.ranks}{Passed directly to keep.ranks}
 }
 \description{
 Helper function to run scGate
