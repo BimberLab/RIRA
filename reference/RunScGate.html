@@ -48,12 +48,13 @@
 <span>  <span class="va">model</span>,</span>
 <span>  min.cells <span class="op">=</span> <span class="fl">30</span>,</span>
 <span>  assay <span class="op">=</span> <span class="st">"RNA"</span>,</span>
-<span>  pos.thr <span class="op">=</span> <span class="fl">0.13</span>,</span>
-<span>  neg.thr <span class="op">=</span> <span class="fl">0.13</span>,</span>
+<span>  pos.thr <span class="op">=</span> <span class="fl">0.2</span>,</span>
+<span>  neg.thr <span class="op">=</span> <span class="fl">0.2</span>,</span>
 <span>  ncores <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  output.col.name <span class="op">=</span> <span class="st">"is.pure"</span>,</span>
 <span>  genes.blacklist <span class="op">=</span> <span class="st">"default"</span>,</span>
-<span>  doPlotUCellScores <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  doPlotUCellScores <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  keep.ranks <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -99,6 +100,10 @@
 
 <dt id="arg-doplotucellscores">doPlotUCellScores<a class="anchor" aria-label="anchor" href="#arg-doplotucellscores"></a></dt>
 <dd><p>If true, FeaturePlots will be created for each UCell score used in classification</p></dd>
+
+
+<dt id="arg-keep-ranks">keep.ranks<a class="anchor" aria-label="anchor" href="#arg-keep-ranks"></a></dt>
+<dd><p>Passed directly to keep.ranks</p></dd>
 
 </dl></div>
 
