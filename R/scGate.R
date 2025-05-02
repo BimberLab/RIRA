@@ -21,17 +21,16 @@ utils::globalVariables(
 #' @param output.col.name Passed directly to scGate::scGate. Column name with 'pure/impure' annotation
 #' @param genes.blacklist Passed directly to scGate::scGate. Genes blacklisted from variable features. The default loads the list of genes in scGate::genes.blacklist.default; you may deactivate blacklisting by setting genes.blacklist=NULL
 #' @param doPlotUCellScores If true, FeaturePlots will be created for each UCell score used in classification
+#' @param keep.ranks Passed directly to keep.ranks
 #'
 #' @export
-RunScGate <- function(seuratObj, model, min.cells = 30, assay = 'RNA', pos.thr = 0.13, neg.thr = 0.13, ncores = 1, output.col.name = "is.pure", genes.blacklist = 'default', doPlotUCellScores = TRUE) {
+RunScGate <- function(seuratObj, model, min.cells = 30, assay = 'RNA', pos.thr = 0.2, neg.thr = 0.2, ncores = 1, output.col.name = "is.pure", genes.blacklist = 'default', doPlotUCellScores = TRUE, keep.ranks = FALSE) {
   if (is.character(model)) {
     model <- GetScGateModel(model)
     if (is.null(model)) {
       stop(paste0('Unknown gate model: ', model))
     }
   }
-
-  hasRanks <- 'UCellRanks' %in% names(seuratObj@assays)
 
   seuratObj <- suppressWarnings(scGate::scGate(data = seuratObj,
                         model = model,
@@ -41,14 +40,12 @@ RunScGate <- function(seuratObj, model, min.cells = 30, assay = 'RNA', pos.thr =
                         neg.thr = neg.thr,
                         seed = GetSeed(),
                         ncores = ncores,
-                        keep.ranks = TRUE,
+                        keep.ranks = keep.ranks,
+                        progressbar = FALSE,
                         output.col.name = output.col.name,
                         genes.blacklist = genes.blacklist
   ))
 
-  if (!hasRanks) {
-    seuratObj@assays[['UCellRanks']] <- NULL
-  }
   if (length(names(seuratObj@reductions)) > 0) {
     print(Seurat::DimPlot(seuratObj, group.by = output.col.name))
     colNames <- names(seuratObj@meta.data)[grepl(names(seuratObj@meta.data), pattern = paste0('^', output.col.name, '.'))]
@@ -226,6 +223,9 @@ RunScGateWithRhesusModels <- function(seuratObj, min.cells = 30, assay = 'RNA', 
 #' @export
 RunScGateForModels <- function(seuratObj, modelNames, min.cells = 30, assay = 'RNA', pos.thr = 0.13, neg.thr = 0.13, ncores = 1, genes.blacklist = 'default', labelRename = NULL, dropAmbiguousConsensusValues = FALSE, consensusModels = NULL) {
   fieldsToConsiderForConsensus <- c()
+
+  hasRanks <- 'UCellRanks' %in% names(seuratObj@assays)
+
   for (modelName in modelNames){
     print(paste0('Running model: ', modelName))
     cellLabel <- modelName
@@ -240,7 +240,8 @@ RunScGateForModels <- function(seuratObj, modelNames, min.cells = 30, assay = 'R
               ncores = ncores,
               output.col.name = fn,
               genes.blacklist = genes.blacklist,
-              doPlotUCellScores = FALSE
+              doPlotUCellScores = FALSE,
+              keep.ranks = TRUE
     )
 
     if (all(is.null(consensusModels)) || modelName %in% consensusModels) {
@@ -249,6 +250,10 @@ RunScGateForModels <- function(seuratObj, modelNames, min.cells = 30, assay = 'R
 
     seuratObj@meta.data[[fn]] <- as.character(seuratObj@meta.data[[fn]])
     seuratObj@meta.data[[fn]] <- ifelse(seuratObj@meta.data[[fn]] == 'Pure', yes = cellLabel, no = NA)
+  }
+
+  if (!hasRanks) {
+    seuratObj@assays[['UCellRanks']] <- NULL
   }
 
   # Remove intermediate fields:
