@@ -31,7 +31,8 @@ CalculateUCellScores <- function(seuratObj, forceRecalculate = FALSE, seed = Get
     IEGs = GetGeneSet('IEGs'),
     MHCII = GetGeneSet('MHC-II'),
     TCellMemory = GetGeneSet('TCellMemoryS100'),
-    InflMyeloid = GetGeneSet('InflMyeloid')
+    InflMyeloid = GetGeneSet('InflMyeloid'),
+    TNK_ChronicActivation = GetGeneSet('TNK_ChronicActivation')
   )
 
   needsRecalc <- forceRecalculate || any(!paste0(names(toCalculate), '_UCell') %in% names(seuratObj@meta.data))
