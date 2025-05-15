@@ -24,7 +24,6 @@ CalculateUCellScores <- function(seuratObj, forceRecalculate = FALSE, seed = Get
     Interferon_Response_IFI6 = GetGeneSet('Interferon_Response_IFI6_correlated'),
     Mitochondrial = GetGeneSet('MMul10_Mitochondrial'),
     EffectorCytokines = GetGeneSet('EffectorCytokines'),
-    ExhaustionOrInhibitory = GetGeneSet('ExhaustionOrInhibitory'),
     MAIT_Markers = GetGeneSet('MAIT_Markers'),
     Metallothionein = GetGeneSet('Metallothionein'),
     Metallothionein.Core = GetGeneSet('Metallothionein.Core'),

@@ -29,7 +29,7 @@ PlotImmuneMarkers <- function(seuratObj, reductions = c('tsne', 'umap')) {
 	#PTPRC = CD45
 	#SELL = CD62-L / CD-197
 	# TNFRSF6 = Fas
-	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('CCR7', 'SELL', 'GZMB', 'CCR5', 'IL2RA', 'PTPRC', 'IL7R', 'CTLA4', 'FAS', 'CD28', 'CD27', 'ITGA4', 'ITGB7', 'ITGB1'), 'Effector vs. Memory')
+	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('CCR7', 'SELL', 'GZMB', 'CCR5', 'IL2RA', 'PTPRC', 'IL7R', 'CTLA4', 'FAS', 'CD28', 'CD27', 'ITGA4', 'ITGB7', 'ITGB1', 'CX3CR1'), 'Effector vs. Memory')
 
 	# Integrins:
 	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('ITGA2', 'ITGA2B', 'ITGA4', 'ITGAD', 'ITGAE', 'ITGAL', 'ITGAL', 'ITGAX', 'ITGB1', 'ITGB2', 'ITGB3', 'ITGB4', 'ITGB5', 'ITGB6', 'ITGB7', 'ITGB8'), 'Effector vs. Memory')
@@ -95,6 +95,8 @@ PlotImmuneMarkers <- function(seuratObj, reductions = c('tsne', 'umap')) {
 	PlotMarkerSeries(seuratObj, reductions = reductions, title = 'Treg17', features = c('RORA', 'RORB', 'RORC', 'IL4', 'STAT3'))
 
 	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('HAVCR2'), 'Th1')
+
+	PlotMarkerSeries(seuratObj, reductions = reductions, features = c(GetGeneSet('TNK_ChronicActivation'), 'CD44', 'AHNAK', 'CX3CR1'), 'T/NK Activation/Antigen-Exposure')
 
 	# ZBTB16 = PLZF
 	PlotMarkerSeries(seuratObj, reductions = reductions, features = GetGeneSet('MAIT_Markers'), 'MAIT')
