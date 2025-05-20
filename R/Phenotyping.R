@@ -493,7 +493,7 @@ humanHLAGenes <-  c('HLA-A','HLA-B','HLA-C','HLA-E','HLA-F','HLA-F-AS1','HLA-G',
 
 .RegisterGeneSet('InflMyeloid', c('CCL3','LOC100426537','LOC114673087','LOC100423954','CCL4L1','LOC100426632','LOC100430627','TNF','TNFAIP3','PTX3','IL1B','NLRP3','CXCL3','CXCL8','PMAIP1'))
 
-.RegisterGeneSet('TNK_ChronicActivation', c('TNFAPI3','TOX','STAT4','ITK','BCL2','TGFBR2','PTPRC','ITGA4','RORA'))
+.RegisterGeneSet('TNK_ChronicActivation', c('TNFAIP3','TOX','STAT4','ITK','BCL2','TGFBR2','PTPRC','ITGA4','RORA', 'RUNX1'))
 
 #' @title GetMMul10TcrGenes
 #' @param includeConstantRegion If true, the MMul10TcrConstantRegion GeneSet will be included.
