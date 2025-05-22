@@ -8,7 +8,8 @@ ScoreUsingSavedComponent(
   seuratObj,
   componentOrName,
   fieldName,
-  assayName = "RNA"
+  assayName = "RNA",
+  layer = "data"
 )
 }
 \arguments{
@@ -19,6 +20,8 @@ ScoreUsingSavedComponent(
 \item{fieldName}{The name of the field in which to save the resulting scores}
 
 \item{assayName}{The assay to use}
+
+\item{layer}{The layer to use}
 }
 \description{
 Scores a seurat object using the gene weights from a saved component

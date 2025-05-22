@@ -16,9 +16,10 @@
 #' @param componentOrName Either a data frame with the columns 'feature' and 'weight', or the name of a previously saved component available in RIRA
 #' @param fieldName The name of the field in which to save the resulting scores
 #' @param assayName The assay to use
+#' @param layer The layer to use
 #'
 #' @export
-ScoreUsingSavedComponent <- function(seuratObj, componentOrName, fieldName, assayName = 'RNA') {
+ScoreUsingSavedComponent <- function(seuratObj, componentOrName, fieldName, assayName = 'RNA', layer = 'data') {
   if (is.data.frame(componentOrName)) {
     savedComponent <- componentOrName
   } else {
@@ -28,7 +29,7 @@ ScoreUsingSavedComponent <- function(seuratObj, componentOrName, fieldName, assa
   geneWeights <- savedComponent$weight
   names(geneWeights) <- savedComponent$feature
 
-  ad <- Seurat::GetAssayData(seuratObj, assay = assayName)
+  ad <- Seurat::GetAssayData(seuratObj, assay = assayName, layer = layer)
   toDrop <- names(geneWeights)[!names(geneWeights) %in% rownames(ad)]
   if (length(toDrop) > 0) {
     print(paste0('The following ', length(toDrop), ' genes were in the component but not the assay, skipping: ', paste0(toDrop, collapse = ',')))
