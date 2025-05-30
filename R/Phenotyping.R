@@ -31,6 +31,11 @@ PlotImmuneMarkers <- function(seuratObj, reductions = c('tsne', 'umap')) {
 	# TNFRSF6 = Fas
 	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('CCR7', 'SELL', 'GZMB', 'CCR5', 'IL2RA', 'PTPRC', 'IL7R', 'CTLA4', 'FAS', 'CD28', 'CD27', 'ITGA4', 'ITGB7', 'ITGB1', 'CX3CR1'), 'Effector vs. Memory')
 
+	# PTGDR2 = CRTH2 (Th2a marker?)
+	# TNFRSF9 = CD137 / 4-1BB
+	# Th1/17: CCR6+/CXCR3+
+	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('IL2RA', 'CXCR10', 'CXCR5', 'CCR6', 'CXCR3', 'CCR4', 'IL7R', 'PTGDR2'), 'CD4 T Cell Markers')
+
 	# Integrins:
 	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('ITGA2', 'ITGA2B', 'ITGA4', 'ITGAD', 'ITGAE', 'ITGAL', 'ITGAL', 'ITGAX', 'ITGB1', 'ITGB2', 'ITGB3', 'ITGB4', 'ITGB5', 'ITGB6', 'ITGB7', 'ITGB8'), 'Effector vs. Memory')
 
@@ -490,6 +495,15 @@ humanHLAGenes <-  c('HLA-A','HLA-B','HLA-C','HLA-E','HLA-F','HLA-F-AS1','HLA-G',
 
 # SLC2A1 = Glut-1, SLC3A2 = CD98
 .RegisterGeneSet('Redox', c('SLC2A1', 'SLC3A2'))
+
+# https://www.nature.com/articles/s41590-021-00898-1:
+# ATP*: ATPase
+# COX*: Electron transport
+# NDUF*: Mitochondrial activity
+# UQCR*: Mitochondrial respiratory chain
+# KEGG, OXPHOS gene set
+
+.RegisterGeneSet('Metabolism', c('NLRX1', 'FASTKD5', 'GLUT1', 'GLUT2', 'FASTDK5'))
 
 .RegisterGeneSet('InflMyeloid', c('CCL3','LOC100426537','LOC114673087','LOC100423954','CCL4L1','LOC100426632','LOC100430627','TNF','TNFAIP3','PTX3','IL1B','NLRP3','CXCL3','CXCL8','PMAIP1'))
 
