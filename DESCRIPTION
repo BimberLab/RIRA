@@ -43,7 +43,8 @@ Imports:
     BiocParallel,
     ggcorrplot,
     magrittr,
-    httr
+    httr,
+    mixOmics
 Suggests:
     devtools,
     testthat (>= 2.1.0),
@@ -53,7 +54,8 @@ Suggests:
 Remotes:
     SeuratData=satijalab/seurat-data,
     carmonalab/UCell,
-    carmonalab/scGate
+    carmonalab/scGate,
+    mixOmicsTeam/mixOmics
 RoxygenNote: 7.3.2
 Collate: 
     'Utils.R'

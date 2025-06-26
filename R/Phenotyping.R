@@ -62,7 +62,8 @@ PlotImmuneMarkers <- function(seuratObj, reductions = c('tsne', 'umap')) {
 	# FOXP3 = Treg
 	# AQP3, GPR183 = Tcm
 	# ANXA1, GPR183 = Tem
-	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('CD4', 'SELL', 'LEF1', 'STAT1', 'CD40LG', 'GATA3', 'FOXP3', 'AQP3', 'GPR183', 'HOPX', 'ITGB2', 'AHNAK', 'ANXA1'), 'CD4 Phenotypic Markers')
+	# TNFRSF4 = OX40
+	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('CD4', 'SELL', 'LEF1', 'STAT1', 'CD40LG', 'GATA3', 'FOXP3', 'AQP3', 'GPR183', 'HOPX', 'ITGB2', 'AHNAK', 'ANXA1', 'TNFRSF4'), 'CD4 Phenotypic Markers')
 
 	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('PRF1', 'GNLY', 'NKG7', 'GZMA','GZMB','GZMH','GZMK','GZMM'), 'Cytotoxicity')
 
