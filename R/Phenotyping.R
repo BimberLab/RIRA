@@ -197,6 +197,10 @@ PlotImmuneMarkers <- function(seuratObj, reductions = c('tsne', 'umap')) {
 
 	PlotMarkerSeries(seuratObj, reductions = reductions, features = GetGeneSet('TandNK_Activation.1'), 'TandNK_Activation.1')
 
+	PlotMarkerSeries(seuratObj, reductions = reductions, features = GetGeneSet('TandNK_Activation.2'), 'TandNK_Activation.2')
+
+	PlotMarkerSeries(seuratObj, reductions = reductions, features = GetGeneSet('TandNK_Activation.3'), 'TandNK_Activation.3')
+
 	# IGHD, IGHM = naive B and geminal center?
 	# IGHA1 = plasma cells
 	# IGKC = plasma cells
@@ -333,6 +337,10 @@ GetGeneSet <- function(name) {
 .RegisterGeneSet('TandNK_Activation.1', c('CCL4L1','MIR155HG','RGCC','NFKBIA','IFNG','NR4A3','TNFSF14','CCL3'))
 
 .RegisterGeneSet('TandNK_Activation.Core', c('CCL4L1','LOC100430627', 'IFNG','NR4A3','TNFSF14','CCL3', 'LOC100423131'))
+
+.RegisterGeneSet('TandNK_Activation.2', c('TNFRSF14', 'CCL3', 'CCL4L1', 'NFKBID','IFNG', 'TNF'))
+
+.RegisterGeneSet('TandNK_Activation.3', c('CD82', 'IRF8', 'TNFRSF9', 'PIGT', 'IRF4', 'XCL1', 'IL2RA', 'CCL3'))
 
 # This is based on T-cell analysis from lung T/NK cells. This my not be precisely Memory/Naive.
 .RegisterGeneSet('MemoryAndNaive', c('SELL', 'IL7R', 'LTB', 'SPOCK2', 'COTL1', 'JUNB', 'GPR183', 'CCR7', 'FUOM', 'CD7', 'PECAM1'))
