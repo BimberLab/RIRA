@@ -15,6 +15,8 @@
 CalculateUCellScores <- function(seuratObj, forceRecalculate = FALSE, seed = GetSeed(), ncores = 1, assayName = 'RNA', storeRanks = TRUE, plotCor = TRUE) {
   toCalculate <- list(
     TandNK_Activation = GetGeneSet('TandNK_Activation.1'),
+    TandNK_Activation2 = GetGeneSet('TandNK_Activation.2'),
+    TandNK_Activation3 = GetGeneSet('TandNK_Activation.3'),
     TandNK_ActivationCore = GetGeneSet('TandNK_Activation.Core'),
     Cytotoxicity = GetGeneSet('Cytotoxicity'),
     Cytotoxicity.GzmABH = GetGeneSet('Cytotoxicity.GzmABH'),
