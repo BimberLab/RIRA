@@ -102,7 +102,7 @@ PlotImmuneMarkers <- function(seuratObj, reductions = c('tsne', 'umap')) {
 
 	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('HAVCR2'), 'Th1')
 
-	PlotMarkerSeries(seuratObj, reductions = reductions, features = c(GetGeneSet('TNK_ChronicActivation'), 'CD44', 'AHNAK', 'CX3CR1'), 'T/NK Activation/Antigen-Exposure')
+	PlotMarkerSeries(seuratObj, reductions = reductions, features = c(GetGeneSet('TNK_MaybeExhaustion'), 'CD44', 'AHNAK', 'CX3CR1'), 'T/NK: Possibly Antigen-Exposure/Exhaustion')
 
 	# ZBTB16 = PLZF
 	PlotMarkerSeries(seuratObj, reductions = reductions, features = GetGeneSet('MAIT_Markers'), 'MAIT')
@@ -516,7 +516,7 @@ humanHLAGenes <-  c('HLA-A','HLA-B','HLA-C','HLA-E','HLA-F','HLA-F-AS1','HLA-G',
 
 .RegisterGeneSet('InflMyeloid', c('CCL3','LOC100426537','LOC114673087','LOC100423954','CCL4L1','LOC100426632','LOC100430627','TNF','TNFAIP3','PTX3','IL1B','NLRP3','CXCL3','CXCL8','PMAIP1'))
 
-.RegisterGeneSet('TNK_ChronicActivation', c('TNFAIP3','TOX','STAT4','ITK','BCL2','TGFBR2','PTPRC','ITGA4','RORA', 'RUNX1'))
+.RegisterGeneSet('TNK_MaybeExhaustion', c('TNFAIP3','TOX','STAT4','ITK','BCL2','TGFBR2','PTPRC','ITGA4','RORA', 'RUNX1'))
 
 #' @title GetMMul10TcrGenes
 #' @param includeConstantRegion If true, the MMul10TcrConstantRegion GeneSet will be included.
