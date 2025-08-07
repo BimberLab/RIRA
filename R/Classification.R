@@ -567,3 +567,44 @@ InterpretModels <- function(output_dir= "./classifiers", plot_type = "ratio"){
 
   }
 }
+#' @title Predicts T cell activation using sPLS derived components and a trained logistic model on transformed variates
+#' @description Predicts T cell activation using a trained model
+#' @param seuratObj The Seurat Object to be updated
+#' @param model The trained sPLS model to use for prediction. This can be a file path to an RDS file, or a built-in model name.
+#' @return A Seurat object with the sPLS scores and predicted probabilities added to the metadata
+#' @export
+
+PredictTcellActivation <- function(seuratObj, model = NULL) {
+  if (is.null(model)) {
+    model <- system.file("models/ActivatedTCell4ClassModel_v1.rds", package = "RIRA")
+  } else if (file.exists(model)) {
+    model <- readRDS(model)
+  } else {
+    stop("Model file does not exist or is not provided.")
+  }
+
+  comps <- paste0("PLS_Score_", seq_len(6))
+  
+  for(i in comps){
+    seuratObj <- ScoreUsingSavedComponent(seuratObj, componentOrName = i, fieldName = i, layer = "scale.data")
+  }
+  newdata <- FetchData(seuratObj, vars = paste0("PLS_Score_", seq_len(6)))
+  colnames(newdata) <- paste0("comp", seq_len(6))
+  
+  if (!all(rownames(newdata) == colnames(seuratObj))) {
+    stop("Cell names in FetchData() do not match Seurat cell names.")
+  }
+  prob_df <- predict(model, newdata, type = "prob")
+  class_vec <- predict(model, newdata, type = "class")
+  
+  colnames(prob_df) <- paste0("sPLS_prob_", colnames(prob_df))
+  class_df <- data.frame(
+    sPLS_class = as.character(class_vec),
+    row.names = rownames(prob_df),
+    stringsAsFactors = FALSE
+  )
+  
+  seuratObj <- AddMetaData(seuratObj, metadata = prob_df)
+  seuratObj <- AddMetaData(seuratObj, metadata = class_df)
+  return(seuratObj)
+}
