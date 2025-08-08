@@ -577,6 +577,7 @@ InterpretModels <- function(output_dir= "./classifiers", plot_type = "ratio"){
 PredictTcellActivation <- function(seuratObj, model = NULL) {
   if (is.null(model)) {
     model <- system.file("models/ActivatedTCell4ClassModel_v1.rds", package = "RIRA")
+    model <- readRDS(model)
   } else if (file.exists(model)) {
     model <- readRDS(model)
   } else {
