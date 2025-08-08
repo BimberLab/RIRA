@@ -4,7 +4,7 @@
 \alias{PredictTcellActivation}
 \title{Predicts T cell activation using sPLS derived components and a trained logistic model on transformed variates}
 \usage{
-PredictTcellActivation(seuratObj, model)
+PredictTcellActivation(seuratObj, model = NULL)
 }
 \arguments{
 \item{seuratObj}{The Seurat Object to be updated}
