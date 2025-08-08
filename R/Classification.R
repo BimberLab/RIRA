@@ -577,12 +577,19 @@ InterpretModels <- function(output_dir= "./classifiers", plot_type = "ratio"){
 PredictTcellActivation <- function(seuratObj, model = NULL) {
   #check & sanitize model
   if (is.null(model)) {
-    model <- system.file("models/ActivatedTCell4ClassModel_v1.rds", package = "RIRA")
+    #default method
+    print("No model provided, using RIRA's built-in T Cell Activation model.")
+    modelFile <- system.file("models/ActivatedTCell4ClassModel_v1.rds", package = "RIRA")
+    model <- readRDS(modelFile)
+  } else if (grepl(pattern = "\\.rds$", x = model, fixed = TRUE) && file.exists(model)) {
+    #user provides .rds
+    print(paste0("Using model from file: ", model))
     model <- readRDS(model)
-  } else if (file.exists(model)) {
-    model <- readRDS(model)
+  } else if (!.CanPredict(model)) {
+    #user provides some other kind of model object, but it can't predict using stats::predict
+    stop(paste0("Provided model: ", model, " does not have a detectable predict method. Please provide a valid model or file path to an RDS file containing a trained model."))
   } else {
-    stop("Model file does not exist or is not provided.")
+    stop("Model must be one of: NULL (built-in), a file path to an RDS file, built-in model name. If you want to use a custom model, please ensure it is compatible with stats::predict().\nIf you want to use the built-in model, please provide NULL as the model argument.\n")
   }
   if (!all(paste0("comp",1:6) %in% colnames(stats::coef(model)))){
     stop("Model does not contain the expected components. Please ensure the model's features are conformant with this prediction method.\nExpected components: comp1, comp2, comp3, comp4, comp5, comp6")
@@ -613,4 +620,29 @@ PredictTcellActivation <- function(seuratObj, model = NULL) {
   seuratObj <- Seurat::AddMetaData(seuratObj, metadata = prob_df)
   seuratObj <- Seurat::AddMetaData(seuratObj, metadata = class_df)
   return(seuratObj)
+}
+
+#basic predict wrapper to check if the model can be used with stats::predict()
+.CanPredict <- function(model, newdata = NULL) {
+  tryCatch({
+    if (is.null(newdata)) {
+      #naive predict call, no newdata provided
+      result <- predict(model)
+    } else {
+      result <- predict(model, newdata = newdata)
+    }
+    return(TRUE)
+  }, error = function(e) {
+    error_msg <- tolower(conditionMessage(e))
+    #catch common errors that suggest the model is not compatible with stats::predict()
+    if (grepl("newdata|argument.*missing|unused argument", error_msg)) {
+      return(TRUE)
+    }
+    #catch errors that suggest the predict method is not defined for the model
+    if (grepl("no applicable method|could not find function", error_msg)) {
+      return(FALSE)
+    }
+    #for other errors, assume method exists but there's a usage issue
+    return(TRUE)
+  })
 }
