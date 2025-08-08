@@ -5,6 +5,34 @@ testthat::context("Classification")
 
 source('installSeuratData.R')
 
+SimulateSeuratData <- function() {
+  set.seed(GetSeed())
+  
+  savedFile <- system.file(paste0("components/", "PLS_Score_1", ".tsv"), package = "RIRA")
+  component <- utils::read.table(savedFile, header = T, sep = '\t')
+  features <- component$feature
+  
+  # Create a Seurat object with random data
+  mtx <- matrix(
+    rpois(200 * length(features), lambda = 2),
+    nrow = 200,
+    ncol = length(features)
+  )
+  
+  colnames(mtx) <- features
+  rownames(mtx) <- paste0("Cell_", seq_len(nrow(mtx)))
+  
+  seuratObj <- CreateSeuratObject(
+    counts = t(mtx),
+    min.cells = 3,
+    min.features = 200
+  )
+  
+  seuratObj <- Seurat::NormalizeData(seuratObj, verbose = FALSE)
+  seuratObj <- Seurat::ScaleData(seuratObj, features = features, verbose = FALSE)
+  return(seuratObj)
+}
+
 prepareTrainingData <- function(){
   seuratObj <- getBaseSeuratData()
   set.seed(GetSeed())
@@ -91,6 +119,21 @@ test_that("Cell type classification works", {
   
   # Note: this is incredibly slow, so use the feature-limited version:
   InterpretModels(output_dir = './classifiers2')
+})
+
+
+test_that("Predict TCell Activation works ", {
+  
+  SimulateSeuratObj <- SimulateSeuratData()
+  SimulateSeuratObj <- PredictTcellActivation(SimulateSeuratObj)
+  
+  testthat::expect_true(any(grepl("PLS", colnames(SimulateSeuratObj@meta.data))))
+  testthat::expect_equal(
+    SimulateSeuratObj@meta.data[5, "PLS_Score_2"], 
+    0.683150409, 
+    tolerance = 1e-2, 
+    label = "PLS_Score_2 value does not match expected value"
+    )
 })
 
 # test_that("Built-in models work", {
