@@ -634,7 +634,7 @@ PredictTcellActivation <- function(seuratObj, model = NULL) {
     return(TRUE)
   }, error = function(e) {
     error_msg <- tolower(conditionMessage(e))
-    #catch common errors that suggest the model is not compatible with stats::predict()
+    #catch common errors that suggest the model is compatible with stats::predict()
     if (grepl("newdata|argument.*missing|unused argument", error_msg)) {
       return(TRUE)
     }
