@@ -40,22 +40,22 @@ TrainModel <- function(training_matrix, celltype, hyperparameter_tuning = F, lea
   #Fix gene names to conform with Seurat Object processing
   colnames(training_matrix) <- gsub(names(training_matrix), pattern = "-", replacement = ".")
 
-  #create classification matrix 
+  #create classification matrix
   classification.data <- training_matrix
 
-  #Trim the celltype_column containing all of the ground truth celltypes 
+  #Trim the celltype_column containing all of the ground truth celltypes
   #Note, this column is named "celltype" and is not the same as the column named by the passed celltype argument, which changes according to the celltype being predicted
   classification.data <- subset(classification.data, select = -celltype)
 
   #trim the binarized label/celltype/truth column (should be the last column)
   classification.data <- classification.data[,1:(ncol(classification.data)-1)]
-  
+
   celltype_binary <- training_matrix[,ncol(training_matrix)]
   classification.data[,"celltype_binary"] <- as.factor(celltype_binary)
   colnames(classification.data) <- make.names(colnames(classification.data),unique = T)
-  
+
   task <- mlr3::TaskClassif$new(classification.data, id = "CellTypeBinaryClassifier", target = "celltype_binary")
-  
+
   if (!hyperparameter_tuning){
     #Use a ranger random forest tree with default parameters and holdout (80% train, 20% test) resampling
     #classification.data has column number = number_of_genes + 1, so the mtry argument uses the full gene matrix
@@ -67,16 +67,16 @@ TrainModel <- function(training_matrix, celltype, hyperparameter_tuning = F, lea
     confusion <- caret::confusionMatrix(factor(model$response), factor(model$truth))
 
     return(list(model = learner, metrics = confusion))
-    
+
   } else {
     #Set model-independent values for the autotuner
     measure <- msr("classif.ce")
     terminator <- mlr3verse::trm("evals", n_evals = n_models)
 
-    #Define a tuning space 25% as large as the number of models 
+    #Define a tuning space 25% as large as the number of models
     #In the case of sensitive hyperparameters, resolution = 5 allows for a low/medium-low/medium/medium-high/high type parameter space
     tuner <- mlr3verse::tnr("grid_search", resolution = 5)
-    
+
     #Define resampling method used for hyperparameter tuning
     if (inner_resampling == "cv" || inner_resampling == "cross-validation"){
       inner_resample <- rsmp("cv", folds = inner_folds)
@@ -94,7 +94,7 @@ TrainModel <- function(training_matrix, celltype, hyperparameter_tuning = F, lea
     } else {
       stop("Unknown outer_resampling method provided. Please select one of cross-validation, cv, hout, or holdout")
     }
-    
+
     #Set learner and define parameter space
     if (learner == "classif.ranger"){
       #Define learner
@@ -132,7 +132,7 @@ TrainModel <- function(training_matrix, celltype, hyperparameter_tuning = F, lea
       )
     }
   }
-    
+
   #Define the autotuner using the parameter spaces and conditions defined above
   at <- mlr3tuning::AutoTuner$new(
     learner = learner,
@@ -142,7 +142,7 @@ TrainModel <- function(training_matrix, celltype, hyperparameter_tuning = F, lea
     terminator = terminator,
     tuner = tuner
   )
-    
+
   #Train the initial model to optimize hyperparameters
   at$train(task)
 
@@ -161,8 +161,8 @@ TrainModel <- function(training_matrix, celltype, hyperparameter_tuning = F, lea
 #' @param seuratObj The Seurat Object to be updated
 #' @param celltype_column The metadata column containing the celltypes. One classifier will be created for each celltype present in this column.
 #' @param assay SeuratObj assay containing the desired count matrix/metadata
-#' @param slot Slot containing the count data. Should be restricted to counts, data, or scale.data. 
-#' @param output_dir The directory in which models, metrics, and training data will be saved. 
+#' @param slot Slot containing the count data. Should be restricted to counts, data, or scale.data.
+#' @param output_dir The directory in which models, metrics, and training data will be saved.
 #' @param hyperparameter_tuning Logical that determines whether or not hyperparameter tuning should be performed.
 #' @param learner The mlr3 learner that should be used. Currently fixed to "classif.ranger" if hyperparameter tuning is FALSE. Otherwise, "classif.xgboost" and "classif.ranger" are supported.
 #' @param inner_resampling The resampling strategy that is used for hyperparameter optimization. Holdout ("hout" or "holdout") and cross validation ("cv" or "cross-validation") are supported.
@@ -214,9 +214,9 @@ TrainModelsFromSeurat <- function(seuratObj, celltype_column, assay = "RNA", slo
 
   training_matrix <- as.data.frame(Matrix::t(as.matrix(raw_data_matrix)))
   training_matrix$celltype <- seuratObj@meta.data[,celltype_column]
-  
+
   celltypes <- unique(training_matrix[,"celltype"])
-  
+
   #Create output directories
   #Trained binary classifiers will be saved to /models
   #Parseable metrics .rds files will be saved to /metrics
@@ -231,7 +231,7 @@ TrainModelsFromSeurat <- function(seuratObj, celltype_column, assay = "RNA", slo
 
   # TODO: rather than use cell types directly as file names, we should use make.names() or something to ensure they are valid and sane (i.e. 'CD8+ T cells')
   # TODO: rather than saving one RDS per classifier, would it make more sense to save a list of cellType -> classifier? This bundles everything into one file on disk?
-  
+
   #Iterate over celltypes and train a binary classifier for each celltype present in the celltype_column
   print(paste0("Total cell types: ", length(celltypes)))
   for (celltype in celltypes){
@@ -244,11 +244,11 @@ TrainModelsFromSeurat <- function(seuratObj, celltype_column, assay = "RNA", slo
     }
     names(temp_training_matrix) <- make.names(names(temp_training_matrix), unique = T)
     temp_model <- TrainModel(temp_training_matrix, celltype, hyperparameter_tuning = hyperparameter_tuning, learner = learner, inner_resampling = inner_resampling, outer_resampling = outer_resampling, inner_folds = inner_folds,inner_ratio = inner_ratio,  outer_folds = outer_folds, outer_ratio = outer_ratio, n_models = n_models, n_cores = n_cores)
-    
+
     #trim the "celltype" column (leaving just the labeled varible celltype column as truth) and save the training matrix
     temp_training_matrix <- subset(temp_training_matrix, select = -celltype)
     saveRDS(temp_training_matrix, file = paste0(output_dir, "/training_data/", make.names(celltype), "_Training_Matrix.rds"))
-   
+
     if (hyperparameter_tuning){
       #Save the trained model to the output directory
       saveRDS(temp_model$model, file = paste0(output_dir, "/models/", make.names(celltype), "_BinaryClassifier.rds"))
@@ -260,7 +260,7 @@ TrainModelsFromSeurat <- function(seuratObj, celltype_column, assay = "RNA", slo
     }
   }
   print("All models trained!")
-  
+
   #Parse and print accuracy metrics from metrics rds files
   if (verbose){
     #Grab model names from model directory
@@ -566,4 +566,83 @@ InterpretModels <- function(output_dir= "./classifiers", plot_type = "ratio"){
     print(plot(parts, max_vars=12, show_boxplots = FALSE))
 
   }
+}
+#' @title Predicts T cell activation using sPLS derived components and a trained logistic model on transformed variates
+#' @description Predicts T cell activation using a trained model
+#' @param seuratObj The Seurat Object to be updated
+#' @param model The trained sPLS model to use for prediction. This can be a file path to an RDS file, or a built-in model name.
+#' @return A Seurat object with the sPLS scores and predicted probabilities added to the metadata
+#' @export
+
+PredictTcellActivation <- function(seuratObj, model = NULL) {
+  #check & sanitize model
+  if (is.null(model)) {
+    #default method
+    print("No model provided, using RIRA's built-in T Cell Activation model.")
+    modelFile <- system.file("models/ActivatedTCell4ClassModel_v1.rds", package = "RIRA")
+    model <- readRDS(modelFile)
+  } else if (grepl(pattern = "\\.rds$", x = model, fixed = TRUE) && file.exists(model)) {
+    #user provides .rds
+    print(paste0("Using model from file: ", model))
+    model <- readRDS(model)
+  } else if (!.CanPredict(model)) {
+    #user provides some other kind of model object, but it can't predict using stats::predict
+    stop(paste0("Provided model: ", model, " does not have a detectable predict method. Please provide a valid model or file path to an RDS file containing a trained model."))
+  } else {
+    stop("Model must be one of: NULL (built-in), a file path to an RDS file, built-in model name. If you want to use a custom model, please ensure it is compatible with stats::predict().\nIf you want to use the built-in model, please provide NULL as the model argument.\n")
+  }
+  if (!all(paste0("comp",1:6) %in% colnames(stats::coef(model)))){
+    stop("Model does not contain the expected components. Please ensure the model's features are conformant with this prediction method.\nExpected components: comp1, comp2, comp3, comp4, comp5, comp6")
+  }
+  #define components & score
+  comps <- paste0("PLS_Score_", seq_len(6))
+  for(i in comps){
+    seuratObj <- ScoreUsingSavedComponent(seuratObj, componentOrName = i, fieldName = i, layer = "scale.data")
+  }
+  #construct prediction for the model
+  newdata <- Seurat::FetchData(seuratObj, vars = paste0("PLS_Score_", seq_len(6)))
+  colnames(newdata) <- paste0("comp", seq_len(6))
+
+  if (!all(rownames(newdata) == colnames(seuratObj))) {
+    stop("Internal Error: Cell names in FetchData() do not match Seurat cell names.")
+  }
+  #predictions/scoring
+  prob_df <- stats::predict(model, newdata, type = "prob")
+  class_vec <- stats::predict(model, newdata, type = "class")
+
+  colnames(prob_df) <- paste0("sPLS_prob_", colnames(prob_df))
+  class_df <- data.frame(
+    sPLS_class = as.character(class_vec),
+    row.names = rownames(prob_df),
+    stringsAsFactors = FALSE
+  )
+  #add back to seurat & return
+  seuratObj <- Seurat::AddMetaData(seuratObj, metadata = prob_df)
+  seuratObj <- Seurat::AddMetaData(seuratObj, metadata = class_df)
+  return(seuratObj)
+}
+
+#basic predict wrapper to check if the model can be used with stats::predict()
+.CanPredict <- function(model, newdata = NULL) {
+  tryCatch({
+    if (is.null(newdata)) {
+      #naive predict call, no newdata provided
+      result <- predict(model)
+    } else {
+      result <- predict(model, newdata = newdata)
+    }
+    return(TRUE)
+  }, error = function(e) {
+    error_msg <- tolower(conditionMessage(e))
+    #catch common errors that suggest the model is compatible with stats::predict()
+    if (grepl("newdata|argument.*missing|unused argument", error_msg)) {
+      return(TRUE)
+    }
+    #catch errors that suggest the predict method is not defined for the model
+    if (grepl("no applicable method|could not find function", error_msg)) {
+      return(FALSE)
+    }
+    #for other errors, assume method exists but there's a usage issue
+    return(TRUE)
+  })
 }
