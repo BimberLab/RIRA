@@ -599,7 +599,7 @@ PredictTcellActivation <- function(seuratObj, model = NULL) {
     }
 
     if (!all(paste0("comp",1:6) %in% modelCoefs)) {
-      stop("Model does not contain the expected components. Please ensure the model's features are conformant with this prediction method.\nExpected components: comp1, comp2, comp3, comp4, comp5, comp6. Found: " + paste0(colnames(stats::coef(model)), collapse = ','))
+      stop("Model does not contain the expected components. Please ensure the model's features are conformant with this prediction method.\nExpected components: comp1, comp2, comp3, comp4, comp5, comp6. Found: " + paste0(dplyr::coalesce(colnames(stats::coef(model)), 'NULL'), collapse = ','))
     }
   }
 
