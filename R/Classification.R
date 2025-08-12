@@ -628,6 +628,9 @@ PredictTcellActivation <- function(seuratObj, model = NULL) {
   #add back to seurat & return
   seuratObj <- Seurat::AddMetaData(seuratObj, metadata = prob_df)
   seuratObj <- Seurat::AddMetaData(seuratObj, metadata = class_df)
+
+  print(DimPlot(seuratObj, group.by = 'sPLS_class'))
+
   return(seuratObj)
 }
 
