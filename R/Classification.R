@@ -591,12 +591,14 @@ PredictTcellActivation <- function(seuratObj, model = NULL) {
   } else {
     stop("Model must be one of: NULL (built-in), a file path to an RDS file, built-in model name. If you want to use a custom model, please ensure it is compatible with stats::predict().\nIf you want to use the built-in model, please provide NULL as the model argument.\n")
   }
+
   if (!all(paste0("comp",1:6) %in% colnames(stats::coef(model)))){
-    stop("Model does not contain the expected components. Please ensure the model's features are conformant with this prediction method.\nExpected components: comp1, comp2, comp3, comp4, comp5, comp6")
+    stop("Model does not contain the expected components. Please ensure the model's features are conformant with this prediction method.\nExpected components: comp1, comp2, comp3, comp4, comp5, comp6. Found: " + paste0(colnames(stats::coef(model)), collapse = ','))
   }
+
   #define components & score
   comps <- paste0("PLS_Score_", seq_len(6))
-  for(i in comps){
+  for (i in comps){
     seuratObj <- ScoreUsingSavedComponent(seuratObj, componentOrName = i, fieldName = i, layer = "scale.data")
   }
   #construct prediction for the model

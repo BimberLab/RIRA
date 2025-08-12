@@ -639,7 +639,7 @@ MakePhenotypingDotPlot <- function(seuratObj,
   dotplot_df <- dotplot_df |> dplyr::arrange(CellType)
   
   #Determine if the data should be scaled or not, then alter the color scheme accordingly
-  if(scaled){
+  if (scaled){
     colorField <- sym("avg.exp.scaled")
     colors <- c("blue", "white", "red")
     colorLabel <- 'Scaled Average Expression'
