@@ -44,7 +44,8 @@ Imports:
     ggcorrplot,
     magrittr,
     httr,
-    mixOmics
+    mixOmics,
+    nnet
 Suggests:
     devtools,
     testthat (>= 2.1.0),
