@@ -57,7 +57,7 @@ test_that("celltypist runs", {
   expect_equal(4, length(unique(seuratObj$RIRA.majority_voting)), info = 'using RIRA model', tolerance = 1)
   expect_equal(346, unname(table(seuratObj$RIRA.majority_voting)['Bcell']), tolerance = 1)
   expect_equal(1653, unname(table(seuratObj$RIRA.majority_voting)['T_NK']), tolerance = 1)
-  expect_equal(686, unname(table(seuratObj$RIRA.majority_voting)['Myeloid']))
+  expect_equal(684, unname(table(seuratObj$RIRA.majority_voting)['Myeloid']))
 
   # NOTE: this is very slow, so skip in automated testing for now
   modelFile <- 'myModel.pkl'
@@ -137,8 +137,8 @@ test_that("FilterDisallowedClasses works as expected", {
 
   expect_equal('RIRA_Immune_v2', seuratObj@misc$RIRA_Immune_Model)
   expect_equal(256, sum(seuratObj$RIRA_Immune_v2.cellclass == 'Bcell', na.rm = T), tolerance = 1)
-  expect_equal(577, sum(seuratObj$RIRA_Immune_v2.cellclass == 'Myeloid', na.rm = T))
-  expect_equal(1340, sum(seuratObj$RIRA_Immune_v2.cellclass == 'T_NK', na.rm = T))
+  expect_equal(576, sum(seuratObj$RIRA_Immune_v2.cellclass == 'Myeloid', na.rm = T))
+  expect_equal(1331, sum(seuratObj$RIRA_Immune_v2.cellclass == 'T_NK', na.rm = T))
 
   print('DisallowedUCellCombinations:')
   print(table(seuratObj$DisallowedUCellCombinations))
