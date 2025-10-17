@@ -77,15 +77,9 @@ prepareTestData <- function(){
 }
 
 test_that("Cell type classification works", {
-  fn <- 'seurat3k.rds'
-  if (file.exists(fn)) {
-    seuratObjTrain <- Seurat::UpdateSeuratObject(readRDS(fn))
-  } else {
-    seuratObjTrain <- prepareTrainingData()
-    saveRDS(seuratObjTrain, file = fn)
-  }
+  seuratObjTrain <- prepareTrainingData()
 
-  TrainModelsFromSeurat(seuratObj = seuratObjTrain, celltype_column = 'CellType', n_cores = 2, output_dir = "./testClassifiers")
+  TrainModelsFromSeurat(seuratObj = seuratObjTrain, celltype_column = 'CellType', n_cores = 1, output_dir = "./testClassifiers")
   modelFiles <- paste0("./testClassifiers/models/", list.files("./testClassifiers/models/"))
   expect_equal(length(modelFiles), 3)
 
@@ -135,12 +129,3 @@ test_that("Predict TCell Activation works ", {
     label = "PLS_Score_2 value does not match expected value"
   )
 })
-
-# test_that("Built-in models work", {
-#   seuratObj <- prepareTestData()
-#   seuratObj <- PredictCellTypeProbability(seuratObj = seuratObj, models = list(
-#     'T_LR' = 'RIRA_CD4vCD8_LR'
-#   ), fieldName = 'RIRA_TCell')
-#
-#   print(sort(table(seuratObj$RIRA_TCell)))
-# })
