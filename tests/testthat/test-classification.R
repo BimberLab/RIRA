@@ -8,11 +8,25 @@ source('installSeuratData.R')
 SimulateSeuratData <- function() {
   set.seed(GetSeed())
 
-  savedFile <- system.file(paste0("components/", "PLS_Score_1", ".tsv"), package = "RIRA")
-  component <- utils::read.table(savedFile, header = T, sep = '\t')
-  features <- component$feature
+  #union the features from the default T cell activation models
+  features <- c()
+  
+  #CD8 features
+  for (i in 1:6) {
+    savedFile <- system.file(paste0("components/CD8_Activation_sPLSDA_component", i, ".tsv"), package = "RIRA")
+    component <- utils::read.table(savedFile, header = T, sep = '\t')
+    features <- c(features, component$feature)
+  }
+  
+  #CD4 features
+  for (i in 1:6) {
+    savedFile <- system.file(paste0("components/CD4_Activation_sPLSDA_component", i, ".tsv"), package = "RIRA")
+    component <- utils::read.table(savedFile, header = T, sep = '\t')
+    features <- c(features, component$feature)
+  }
+  features <- unique(features)
 
-  # Create a Seurat object with random data
+  #simulate a seurat object with the right features
   mtx <- matrix(
     rpois(200 * length(features), lambda = 2),
     nrow = 200,
@@ -120,12 +134,35 @@ test_that("Predict TCell Activation works ", {
 
   SimulateSeuratObj <- SimulateSeuratData()
   SimulateSeuratObj <- PredictTcellActivation(SimulateSeuratObj)
-
-  testthat::expect_true(any(grepl("PLS", colnames(SimulateSeuratObj@meta.data))))
-  testthat::expect_equal(
-    SimulateSeuratObj@meta.data[5, "PLS_Score_2"],
-    0.8054326,
-    tolerance = 1e-2,
-    label = "PLS_Score_2 value does not match expected value"
-  )
+  
+  #exhaustive check on component scores, since all are necessary for the default parameterization of the function
+  for (i in 1:6) {
+    colName <- paste0("CD8_Activation_sPLSDA_Score_", i)
+    testthat::expect_true(colName %in% colnames(SimulateSeuratObj@meta.data),
+                          label = paste0(colName, " should be present"))
+  }
+  for (i in 1:6) {
+    colName <- paste0("CD4_Activation_sPLSDA_Score_", i)
+    testthat::expect_true(colName %in% colnames(SimulateSeuratObj@meta.data),
+                          label = paste0(colName, " should be present"))
+  }
+  
+  #check that prediction portion of the function worked
+  testthat::expect_true(any(grepl("CD8_sPLS_prob", colnames(SimulateSeuratObj@meta.data))),
+                        label = "CD8 probability columns should be present")
+  testthat::expect_true(any(grepl("CD4_sPLS_prob", colnames(SimulateSeuratObj@meta.data))),
+                        label = "CD4 probability columns should be present")
+  testthat::expect_true("CD8_sPLS_class" %in% colnames(SimulateSeuratObj@meta.data),
+                        label = "CD8 class column should be present")
+  testthat::expect_true("CD4_sPLS_class" %in% colnames(SimulateSeuratObj@meta.data),
+                        label = "CD4 class column should be present")
+  
+  
+  #verify specific score value
+  testthat::expect_equal(SimulateSeuratObj@meta.data[5,"CD4_sPLS_prob_Resting1"], 
+                         expected = 0.012, 
+                         tolerance = 0.001)
+  
+  #more general verification
+  testthat::expect_type(SimulateSeuratObj@meta.data[, "CD8_Activation_sPLSDA_Score_2"], "double")
 })

@@ -576,7 +576,9 @@ InterpretModels <- function(output_dir= "./classifiers", plot_type = "ratio"){
 #' @export
 
 PredictTcellActivation <- function(seuratObj, model = NULL, modelList = NULL) {
-  
+  #################
+  ### Sanitize  ###
+  #################
   #check & sanitize model
   if (is.null(model) && is.null(modelList)) {
     #default method
@@ -585,6 +587,8 @@ PredictTcellActivation <- function(seuratObj, model = NULL, modelList = NULL) {
       CD8 = readRDS(system.file("models/ActivatedCD8TCell4ClassModel_v1.rds", package = "RIRA")),
       CD4 = readRDS(system.file("models/ActivatedCD4TCell4ClassModel_v1.rds", package = "RIRA"))
     )
+    #flag that the defaults were used
+    defaults <- TRUE
   } else if (!is.null(model) && grepl(pattern = "\\.rds$", x = model, fixed = TRUE) && file.exists(model)) {
     #user provides .rds
     print(paste0("Using model from file: ", model))
@@ -593,8 +597,7 @@ PredictTcellActivation <- function(seuratObj, model = NULL, modelList = NULL) {
   } else if (!is.null(model)) {
     stop("Model must be one of: NULL (built-ins), a file path to an RDS file. If you want to use a custom model, please ensure it is compatible with stats::predict().\nIf you want to use the built-in models, please provide NULL as the model argument.\n")
   }
-  
-  #sanitize models 
+  #check that models can predict
   for (modelName in names(modelList)) {
     modelObj <- modelList[[modelName]]
     if (!.CanPredict(modelObj)) {
@@ -607,7 +610,47 @@ PredictTcellActivation <- function(seuratObj, model = NULL, modelList = NULL) {
     }
   }
   
-    
+  #######################################
+  ### Default Model Component Scoring ###
+  #######################################
+  #if the defaults were used, we ensure the component scores are present and valid
+  if (defaults) {
+    #check if component scores already exist in metadata and score if missing or contain NAs
+    metadataNames <- colnames(seuratObj@meta.data)
+    for (modelName in names(modelList)) {
+      needsScoring <- FALSE
+      #check if all 6 component scores exist for this model
+      for (i in seq_len(6)){
+        fieldName <- paste0(modelName, "_Activation_sPLSDA_Score_", i)
+        if (!fieldName %in% metadataNames) {
+          needsScoring <- TRUE
+          print(paste0("Component score '", fieldName, "' not found in metadata. Will calculate."))
+          break
+        } else {
+          #check for NAs in existing column
+          if (any(is.na(seuratObj@meta.data[[fieldName]]))) {
+            needsScoring <- TRUE
+            print(paste0("Component score '", fieldName, "' contains NA values. Will recalculate."))
+            break
+          }
+        }
+      }
+      #score components if needed
+      if (needsScoring) {
+        print(paste0("Scoring sPLSDA components for ", modelName, " model..."))
+        componentPrefix <- paste0(modelName, "_Activation_sPLSDA_component")
+        for (i in seq_len(6)){
+          componentName <- paste0(componentPrefix, i)
+          fieldName <- paste0(modelName, "_Activation_sPLSDA_Score_", i)
+          seuratObj <- ScoreUsingSavedComponent(seuratObj, componentOrName = componentName, fieldName = fieldName, layer = "scale.data")
+        }
+      }
+    }
+  }
+  
+  ###############
+  ### Scoring ###
+  ###############
   #iterate models
   for (modelIdx in seq_along(modelList)) {
     modelName <- names(modelList)[modelIdx]
@@ -615,6 +658,7 @@ PredictTcellActivation <- function(seuratObj, model = NULL, modelList = NULL) {
     
     print(paste0("Processing model: ", modelName))
     #TODO: assuming the logistic regression models all use 6 components is probably going to break on the next iteration of T cell activation models. 
+    #TODO: we can probably split this into "component based models" and "non component based models", but for now we'll stick to the defaults. 
     modelCoefs <- colnames(stats::coef(modelObj))
     if (!all(paste0("comp",1:6) %in% modelCoefs)) {
       if ('nnet' %in% class(modelObj)) {
@@ -626,16 +670,8 @@ PredictTcellActivation <- function(seuratObj, model = NULL, modelList = NULL) {
       }
     }
     
-    #define components & score based on model type
-    componentPrefix <- paste0(modelName, "_Activation_sPLSDA_component")
-    for (i in seq_len(6)){
-      componentName <- paste0(componentPrefix, i)
-      fieldName <- paste0(modelName, "_Activation_sPLSDA_Score_", i)
-      seuratObj <- ScoreUsingSavedComponent(seuratObj, componentOrName = componentName, fieldName = fieldName, layer = "scale.data")
-    }
-    
-    #construct prediction for the model
-    newdata <- Seurat::FetchData(seuratObj, vars = paste0(modelName, "_PLS_Score_", seq_len(6)))
+    #construct prediction for the model, forcing conformance in component names
+    newdata <- Seurat::FetchData(seuratObj, vars = paste0(modelName, "_Activation_sPLSDA_Score_", seq_len(6)))
     colnames(newdata) <- paste0("comp", seq_len(6))
     
     if (!all(rownames(newdata) == colnames(seuratObj))) {
@@ -654,7 +690,7 @@ PredictTcellActivation <- function(seuratObj, model = NULL, modelList = NULL) {
     )
     colnames(class_df) <- paste0(modelName, "_sPLS_class")
     
-    #add back to seurat object
+    #add predictions back to Seurat object
     seuratObj <- Seurat::AddMetaData(seuratObj, metadata = prob_df)
     seuratObj <- Seurat::AddMetaData(seuratObj, metadata = class_df)
     
