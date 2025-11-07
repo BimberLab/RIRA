@@ -570,69 +570,99 @@ InterpretModels <- function(output_dir= "./classifiers", plot_type = "ratio"){
 #' @title Predicts T cell activation using sPLS derived components and a trained logistic model on transformed variates
 #' @description Predicts T cell activation using a trained model
 #' @param seuratObj The Seurat Object to be updated
-#' @param model The trained sPLS model to use for prediction. This can be a file path to an RDS file, or a built-in model name.
-#' @return A Seurat object with the sPLS scores and predicted probabilities added to the metadata
+#' @param model The trained sPLSDA model to use for prediction. This can be a file path to an RDS file, or a built-in model name.
+#' @param modelList A list of trained sPLSDA models to use for prediction. This can be a list of file paths to RDS files, or built-in model names.
+#' @return A Seurat object with the sPLSDA scores and predicted probabilities added to the metadata
 #' @export
 
-PredictTcellActivation <- function(seuratObj, model = NULL) {
+PredictTcellActivation <- function(seuratObj, model = NULL, modelList = NULL) {
+  
   #check & sanitize model
-  if (is.null(model)) {
+  if (is.null(model) && is.null(modelList)) {
     #default method
-    print("No model provided, using RIRA's built-in T Cell Activation model.")
-    modelFile <- system.file("models/ActivatedTCell4ClassModel_v1.rds", package = "RIRA")
-    model <- readRDS(modelFile)
-  } else if (grepl(pattern = "\\.rds$", x = model, fixed = TRUE) && file.exists(model)) {
+    print("No model provided, using RIRA's built-in CD8 and CD4 T Cell Activation models.")
+    modelList <- list(
+      CD8 = readRDS(system.file("models/ActivatedCD8TCell4ClassModel_v1.rds", package = "RIRA")),
+      CD4 = readRDS(system.file("models/ActivatedCD4TCell4ClassModel_v1.rds", package = "RIRA"))
+    )
+  } else if (!is.null(model) && grepl(pattern = "\\.rds$", x = model, fixed = TRUE) && file.exists(model)) {
     #user provides .rds
     print(paste0("Using model from file: ", model))
     model <- readRDS(model)
-  } else if (!.CanPredict(model)) {
-    #user provides some other kind of model object, but it can't predict using stats::predict
-    stop(paste0("Provided model: ", model, " does not have a detectable predict method. Please provide a valid model or file path to an RDS file containing a trained model."))
-  } else {
-    stop("Model must be one of: NULL (built-in), a file path to an RDS file, built-in model name. If you want to use a custom model, please ensure it is compatible with stats::predict().\nIf you want to use the built-in model, please provide NULL as the model argument.\n")
+    modelList <- list(Custom = model)
+  } else if (!is.null(model)) {
+    stop("Model must be one of: NULL (built-ins), a file path to an RDS file. If you want to use a custom model, please ensure it is compatible with stats::predict().\nIf you want to use the built-in models, please provide NULL as the model argument.\n")
   }
-
-  modelCoefs <- colnames(stats::coef(model))
-  if (!all(paste0("comp",1:6) %in% modelCoefs)) {
-    if ('nnet' %in% class(model)) {
-      modelCoefs <- colnames(nnet:::coef.multinom(model))
+  
+  #sanitize models 
+  for (modelName in names(modelList)) {
+    modelObj <- modelList[[modelName]]
+    if (!.CanPredict(modelObj)) {
+      #user provides some other kind of model object, but it can't predict using stats::predict
+      if (length(modelList) == 1) { 
+        stop(paste0("Provided model does not have a detectable predict method. Please provide a valid model or file path to an RDS file containing a trained model."))
+      } else {
+        stop(paste0("Model '", modelName, "' does not have a detectable predict method. Please provide valid models or file paths to RDS files containing trained models."))
+      }
     }
-
+  }
+  
+    
+  #iterate models
+  for (modelIdx in seq_along(modelList)) {
+    modelName <- names(modelList)[modelIdx]
+    modelObj <- modelList[[modelIdx]]
+    
+    print(paste0("Processing model: ", modelName))
+    #TODO: assuming the logistic regression models all use 6 components is probably going to break on the next iteration of T cell activation models. 
+    modelCoefs <- colnames(stats::coef(modelObj))
     if (!all(paste0("comp",1:6) %in% modelCoefs)) {
-      stop("Model does not contain the expected components. Please ensure the model's features are conformant with this prediction method.\nExpected components: comp1, comp2, comp3, comp4, comp5, comp6. Found: " + paste0(dplyr::coalesce(colnames(stats::coef(model)), 'NULL'), collapse = ','))
+      if ('nnet' %in% class(modelObj)) {
+        modelCoefs <- colnames(nnet:::coef.multinom(modelObj))
+      }
+      
+      if (!all(paste0("comp",1:6) %in% modelCoefs)) {
+        stop("Model does not contain the expected components. Please ensure the model's features are conformant with this prediction method.\nExpected components: comp1, comp2, comp3, comp4, comp5, comp6. Found: ", paste0(dplyr::coalesce(colnames(stats::coef(modelObj)), 'NULL'), collapse = ','))
+      }
+    }
+    
+    #define components & score based on model type
+    componentPrefix <- paste0(modelName, "_Activation_sPLSDA_component")
+    for (i in seq_len(6)){
+      componentName <- paste0(componentPrefix, i)
+      fieldName <- paste0(modelName, "_Activation_sPLSDA_Score_", i)
+      seuratObj <- ScoreUsingSavedComponent(seuratObj, componentOrName = componentName, fieldName = fieldName, layer = "scale.data")
+    }
+    
+    #construct prediction for the model
+    newdata <- Seurat::FetchData(seuratObj, vars = paste0(modelName, "_PLS_Score_", seq_len(6)))
+    colnames(newdata) <- paste0("comp", seq_len(6))
+    
+    if (!all(rownames(newdata) == colnames(seuratObj))) {
+      stop("Internal Error: Cell names in FetchData() do not match Seurat cell names.")
+    }
+    
+    #predictions/scoring
+    prob_df <- stats::predict(modelObj, newdata, type = "prob")
+    class_vec <- stats::predict(modelObj, newdata, type = "class")
+    
+    colnames(prob_df) <- paste0(modelName, "_sPLS_prob_", colnames(prob_df))
+    class_df <- data.frame(
+      sPLS_class = as.character(class_vec),
+      row.names = rownames(prob_df),
+      stringsAsFactors = FALSE
+    )
+    colnames(class_df) <- paste0(modelName, "_sPLS_class")
+    
+    #add back to seurat object
+    seuratObj <- Seurat::AddMetaData(seuratObj, metadata = prob_df)
+    seuratObj <- Seurat::AddMetaData(seuratObj, metadata = class_df)
+    
+    if (length(names(seuratObj@reductions)) > 0) {
+      print(Seurat::DimPlot(seuratObj, group.by = paste0(modelName, "_sPLS_class")))
     }
   }
-
-  #define components & score
-  comps <- paste0("PLS_Score_", seq_len(6))
-  for (i in comps){
-    seuratObj <- ScoreUsingSavedComponent(seuratObj, componentOrName = i, fieldName = i, layer = "scale.data")
-  }
-  #construct prediction for the model
-  newdata <- Seurat::FetchData(seuratObj, vars = paste0("PLS_Score_", seq_len(6)))
-  colnames(newdata) <- paste0("comp", seq_len(6))
-
-  if (!all(rownames(newdata) == colnames(seuratObj))) {
-    stop("Internal Error: Cell names in FetchData() do not match Seurat cell names.")
-  }
-  #predictions/scoring
-  prob_df <- stats::predict(model, newdata, type = "prob")
-  class_vec <- stats::predict(model, newdata, type = "class")
-
-  colnames(prob_df) <- paste0("sPLS_prob_", colnames(prob_df))
-  class_df <- data.frame(
-    sPLS_class = as.character(class_vec),
-    row.names = rownames(prob_df),
-    stringsAsFactors = FALSE
-  )
-  #add back to seurat & return
-  seuratObj <- Seurat::AddMetaData(seuratObj, metadata = prob_df)
-  seuratObj <- Seurat::AddMetaData(seuratObj, metadata = class_df)
-
-  if (length(names(seuratObj@reductions)) > 0) {
-    print(DimPlot(seuratObj, group.by = 'sPLS_class'))
-  }
-
+  
   return(seuratObj)
 }
 
