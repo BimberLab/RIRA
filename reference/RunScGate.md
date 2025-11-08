@@ -1,0 +1,77 @@
+# Run scGate
+
+Helper function to run scGate
+
+## Usage
+
+``` r
+RunScGate(
+  seuratObj,
+  model,
+  min.cells = 30,
+  assay = "RNA",
+  pos.thr = 0.2,
+  neg.thr = 0.2,
+  ncores = 1,
+  output.col.name = "is.pure",
+  genes.blacklist = "default",
+  doPlotUCellScores = TRUE,
+  keep.ranks = FALSE
+)
+```
+
+## Arguments
+
+- seuratObj:
+
+  The seurat object
+
+- model:
+
+  Either an scGate model, or a character that will be passed to
+  GetScGateModel()
+
+- min.cells:
+
+  Passed directly to scGate::scGate. Stop iterating if fewer than this
+  number of cells is left
+
+- assay:
+
+  Passed directly to scGate::scGate. Seurat assay to use
+
+- pos.thr:
+
+  Passed directly to scGate::scGate. Minimum UCell score value for
+  positive signatures
+
+- neg.thr:
+
+  Passed directly to scGate::scGate. Maximum UCell score value for
+  negative signatures
+
+- ncores:
+
+  Passed directly to scGate::scGate. Number of processors for parallel
+  processing (requires future.apply)
+
+- output.col.name:
+
+  Passed directly to scGate::scGate. Column name with 'pure/impure'
+  annotation
+
+- genes.blacklist:
+
+  Passed directly to scGate::scGate. Genes blacklisted from variable
+  features. The default loads the list of genes in
+  scGate::genes.blacklist.default; you may deactivate blacklisting by
+  setting genes.blacklist=NULL
+
+- doPlotUCellScores:
+
+  If true, FeaturePlots will be created for each UCell score used in
+  classification
+
+- keep.ranks:
+
+  Passed directly to keep.ranks

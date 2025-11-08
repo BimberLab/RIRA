@@ -1,0 +1,124 @@
+## Rhesus Immune Reference Atlas (RIRA): A multi-tissue single-cell landscape of immune cells
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Installation](#installation)
+- [Download RIRA
+  Data](https://bimberlab.github.io/RIRA/articles/GetRira.html)
+
+### Overview
+
+RIRA is a multi-tissue single-cell RNA-seq atlas from Rhesus macaque
+cells, including data from 7 tissues and 47 animals. It provides highly
+annotated reference data, and a number of pipelines to assign cell type
+to your data using RIRA’s built-in models. Finally, it includes
+pipelines to replicate the process used to generate RIRA’s reference
+labels, which might be useful for generating a similar reference for
+another species.
+
+The raw expression data are available, including a seurat object,
+through the NIH GEO database under accession
+[GSE277821](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE277821).
+
+[Please see our documentation for more detail and usage
+examples](https://bimberlab.github.io/RIRA/)
+
+### Installation
+
+    # Make sure to update your Rprofile to include Bioconductor repos, such as adding this line to ~/.Rprofile:
+    local({options(repos = BiocManager::repositories())})
+
+    #Latest version:
+    devtools::install_github(repo = 'bimberlab/RIRA', ref = 'master', dependencies = TRUE, upgrade = 'always')
+
+Pre-packaged Docker images with all needed dependencies installed can be
+found on our [GitHub Packages
+page](https://github.com/orgs/bimberlab/RIRA/pkgs/container/rira):
+
+    docker pull ghcr.io/bimberlab/rira:latest
+
+# Package index
+
+## All functions
+
+- [`AssignCellType()`](https://bimberlab.github.io/RIRA/reference/AssignCellType.md)
+  : Assigns celltype label based on probabilities in the metadata
+- [`CalculateUCellScores()`](https://bimberlab.github.io/RIRA/reference/CalculateUCellScores.md)
+  : CalculateUCellScores
+- [`Classify_ImmuneCells()`](https://bimberlab.github.io/RIRA/reference/Classify_ImmuneCells.md)
+  : Classify Bulk Immune cells
+- [`Classify_Myeloid()`](https://bimberlab.github.io/RIRA/reference/Classify_Myeloid.md)
+  : Classify T/NK
+- [`Classify_TNK()`](https://bimberlab.github.io/RIRA/reference/Classify_TNK.md)
+  : Classify T/NK
+- [`DownloadFromGEO()`](https://bimberlab.github.io/RIRA/reference/DownloadFromGEO.md)
+  : Download RIRA data from GEO
+- [`ExpandGeneList()`](https://bimberlab.github.io/RIRA/reference/ExpandGeneList.md)
+  : ExpandGeneList
+- [`ExtractGeneWeights()`](https://bimberlab.github.io/RIRA/reference/ExtractGeneWeights.md)
+  : ExtractGeneWeights
+- [`FilterDisallowedClasses()`](https://bimberlab.github.io/RIRA/reference/FilterDisallowedClasses.md)
+  : Filter Disallowed Classes
+- [`GetAvailableScGates()`](https://bimberlab.github.io/RIRA/reference/GetAvailableScGates.md)
+  : GetAvailableScGates
+- [`GetGeneSet()`](https://bimberlab.github.io/RIRA/reference/GetGeneSet.md)
+  : GetGeneSet
+- [`GetMMul10IgGenes()`](https://bimberlab.github.io/RIRA/reference/GetMMul10IgGenes.md)
+  : GetMMul10IgGenes
+- [`GetMMul10TcrGenes()`](https://bimberlab.github.io/RIRA/reference/GetMMul10TcrGenes.md)
+  : GetMMul10TcrGenes
+- [`GetScGateModel()`](https://bimberlab.github.io/RIRA/reference/GetScGateModel.md)
+  : GetScGateModel
+- [`GetSeed()`](https://bimberlab.github.io/RIRA/reference/GetSeed.md) :
+  Get random seed
+- [`InterpretModels()`](https://bimberlab.github.io/RIRA/reference/InterpretModels.md)
+  : Interprets the feature importance of each model
+- [`ListGeneSets()`](https://bimberlab.github.io/RIRA/reference/ListGeneSets.md)
+  : ListGeneSets
+- [`MakePhenotypingDotPlot()`](https://bimberlab.github.io/RIRA/reference/MakePhenotypingDotPlot.md)
+  : MakePhenotypingDotPlot
+- [`PlotImmuneMarkers()`](https://bimberlab.github.io/RIRA/reference/PlotImmuneMarkers.md)
+  : PlotImmuneMarkers
+- [`PlotMarkerSeries()`](https://bimberlab.github.io/RIRA/reference/PlotMarkerSeries.md)
+  : PlotMarkerSeries
+- [`PlotUcellCorrelation()`](https://bimberlab.github.io/RIRA/reference/PlotUcellCorrelation.md)
+  : PlotUcellCorrelation
+- [`PredictCellTypeProbability()`](https://bimberlab.github.io/RIRA/reference/PredictCellTypeProbability.md)
+  : Applies trained models to get celltype probabilities
+- [`PredictTcellActivation()`](https://bimberlab.github.io/RIRA/reference/PredictTcellActivation.md)
+  : Predicts T cell activation using sPLS derived components and a
+  trained logistic model on transformed variates
+- [`RunCellTypist()`](https://bimberlab.github.io/RIRA/reference/RunCellTypist.md)
+  : Run Celltypist
+- [`RunScGate()`](https://bimberlab.github.io/RIRA/reference/RunScGate.md)
+  : Run scGate
+- [`RunScGateForModels()`](https://bimberlab.github.io/RIRA/reference/RunScGateForModels.md)
+  : Run scGate for models
+- [`RunScGateWithDefaultModels()`](https://bimberlab.github.io/RIRA/reference/RunScGateWithDefaultModels.md)
+  : Run scGate With DefaultModels
+- [`RunScGateWithRhesusModels()`](https://bimberlab.github.io/RIRA/reference/RunScGateWithRhesusModels.md)
+  : Run scGate using Rhesus macaque models
+- [`ScoreCellsWithSavedModel()`](https://bimberlab.github.io/RIRA/reference/ScoreCellsWithSavedModel.md)
+  : Applies a trained binary classifier to get per-cell probabilities.
+- [`ScoreUsingSavedComponent()`](https://bimberlab.github.io/RIRA/reference/ScoreUsingSavedComponent.md)
+  : ScoreUsingSavedComponent
+- [`SetSeed()`](https://bimberlab.github.io/RIRA/reference/SetSeed.md) :
+  Set random seed
+- [`TrainCellTypist()`](https://bimberlab.github.io/RIRA/reference/TrainCellTypist.md)
+  : Train Celltypist
+- [`TrainModel()`](https://bimberlab.github.io/RIRA/reference/TrainModel.md)
+  : Creates a binary classifier to classify cells within a Seurat object
+- [`TrainModelsFromSeurat()`](https://bimberlab.github.io/RIRA/reference/TrainModelsFromSeurat.md)
+  : Wrapper function for TrainModel to train a suite of binary
+  classifiers for each cell type present in the data
+
+# Articles
+
+### Examples
+
+- [Download RIRA](https://bimberlab.github.io/RIRA/articles/GetRira.md):
+- [Immune Cell Type/State
+  Scoring](https://bimberlab.github.io/RIRA/articles/CellType.md):
+- [T Cell Type/State
+  Scoring](https://bimberlab.github.io/RIRA/articles/TCellDifferentiation.md):
