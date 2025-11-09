@@ -572,6 +572,7 @@ InterpretModels <- function(output_dir= "./classifiers", plot_type = "ratio"){
 #' @param seuratObj The Seurat Object to be updated
 #' @param model The trained sPLSDA model to use for prediction. This can be a file path to an RDS file, or a built-in model name.
 #' @param modelList A list of trained sPLSDA models to use for prediction. This can be a list of file paths to RDS files, or built-in model names.
+#' @import nnet
 #' @return A Seurat object with the sPLSDA scores and predicted probabilities added to the metadata
 #' @export
 
