@@ -28,7 +28,7 @@ test_that("ScoreUsingSavedComponent works", {
 
   seuratObj <- ScoreUsingSavedComponent(seuratObj, componentOrName = df, fieldName = 'Test1')
   expect_equal(round(min(seuratObj$Test1), 2), -2.52)
-  expect_equal(round(max(seuratObj$Test1), 2), 199)
+  expect_equal(round(max(seuratObj$Test1), 2), 199.21)
   
   seuratObj <- ScoreUsingSavedComponent(seuratObj, componentOrName = 'Tcell_NaiveToEffector', fieldName = 'Test2')
   expect_equal(round(max(seuratObj$Test2), 2), 41.61)
