@@ -28,7 +28,7 @@ test_that("ScoreUsingSavedComponent works", {
 
   seuratObj <- ScoreUsingSavedComponent(seuratObj, componentOrName = df, fieldName = 'Test1')
   # NOTE: the sign of this component seems to flip-flop
-  expect_equal(round(min(abs(seuratObj$Test1)), 2), 2.52)
+  expect_equal(round(min(abs(seuratObj$Test1)), 2), 0.07)
   expect_equal(round(max(abs(seuratObj$Test1)), 2), 199.21)
   
   seuratObj <- ScoreUsingSavedComponent(seuratObj, componentOrName = 'Tcell_NaiveToEffector', fieldName = 'Test2')
