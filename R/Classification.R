@@ -586,7 +586,8 @@ PredictTcellActivation <- function(seuratObj, model = NULL, modelList = NULL) {
     print("No model provided, using RIRA's built-in CD8 and CD4 T Cell Activation models.")
     modelList <- list(
       CD8 = readRDS(system.file("models/ActivatedCD8TCell4ClassModel_v1.rds", package = "RIRA")),
-      CD4 = readRDS(system.file("models/ActivatedCD4TCell4ClassModel_v1.rds", package = "RIRA"))
+      CD4 = readRDS(system.file("models/ActivatedCD4TCell4ClassModel_v1.rds", package = "RIRA")), 
+      General = readRDS(system.file("models/GeneralActivatedTCellModel_v1.rds", package = "RIRA"))
     )
     #flag that the defaults were used
     defaults <- TRUE
@@ -619,9 +620,13 @@ PredictTcellActivation <- function(seuratObj, model = NULL, modelList = NULL) {
     #check if component scores already exist in metadata and score if missing or contain NAs
     metadataNames <- colnames(seuratObj@meta.data)
     for (modelName in names(modelList)) {
+      #determine number of components for this model
+      nComponents <- .GetModelComponentCount(modelName)
+      print(paste0("Model '", modelName, "' uses ", nComponents, " components"))
+      
       needsScoring <- FALSE
-      #check if all 6 component scores exist for this model
-      for (i in seq_len(6)){
+      #check if all component scores exist for this model
+      for (i in seq_len(nComponents)){
         fieldName <- paste0(modelName, "_Activation_sPLSDA_Score_", i)
         if (!fieldName %in% metadataNames) {
           needsScoring <- TRUE
@@ -640,7 +645,7 @@ PredictTcellActivation <- function(seuratObj, model = NULL, modelList = NULL) {
       if (needsScoring) {
         print(paste0("Scoring sPLSDA components for ", modelName, " model..."))
         componentPrefix <- paste0(modelName, "_Activation_sPLSDA_component")
-        for (i in seq_len(6)){
+        for (i in seq_len(nComponents)){
           componentName <- paste0(componentPrefix, i)
           fieldName <- paste0(modelName, "_Activation_sPLSDA_Score_", i)
           seuratObj <- ScoreUsingSavedComponent(seuratObj, componentOrName = componentName, fieldName = fieldName, layer = "scale.data")
@@ -658,22 +663,33 @@ PredictTcellActivation <- function(seuratObj, model = NULL, modelList = NULL) {
     modelObj <- modelList[[modelIdx]]
     
     print(paste0("Processing model: ", modelName))
-    #TODO: assuming the logistic regression models all use 6 components is probably going to break on the next iteration of T cell activation models. 
-    #TODO: we can probably split this into "component based models" and "non component based models", but for now we'll stick to the defaults. 
+    
+    #determine expected number of components from model coefficients
     modelCoefs <- colnames(stats::coef(modelObj))
-    if (!all(paste0("comp",1:6) %in% modelCoefs)) {
+    if (!'nnet' %in% class(modelObj) || is.null(modelCoefs) || !any(grepl("^comp", modelCoefs))) {
       if ('nnet' %in% class(modelObj)) {
         modelCoefs <- colnames(nnet:::coef.multinom(modelObj))
       }
-      
-      if (!all(paste0("comp",1:6) %in% modelCoefs)) {
-        stop("Model does not contain the expected components. Please ensure the model's features are conformant with this prediction method.\nExpected components: comp1, comp2, comp3, comp4, comp5, comp6. Found: ", paste0(dplyr::coalesce(colnames(stats::coef(modelObj)), 'NULL'), collapse = ','))
-      }
+    }
+    
+    #extract component numbers from coefficient names
+    compNames <- modelCoefs[grepl("^comp[0-9]+$", modelCoefs)]
+    if (length(compNames) == 0) {
+      stop("Model does not contain component features (comp1, comp2, etc.). Please ensure the model's features are conformant with this prediction method.\nFound coefficients: ", paste0(dplyr::coalesce(modelCoefs, 'NULL'), collapse = ','))
+    }
+    
+    #determine number of components from the highest numbered component
+    compNumbers <- as.numeric(gsub("comp", "", compNames))
+    nComponents <- max(compNumbers)
+    expectedComps <- paste0("comp", seq_len(nComponents))
+    
+    if (!all(expectedComps %in% modelCoefs)) {
+      stop("Model does not contain all expected components. Please ensure the model's features are conformant with this prediction method.\nExpected components: ", paste0(expectedComps, collapse = ', '), ". Found: ", paste0(compNames, collapse = ','))
     }
     
     #construct prediction for the model, forcing conformance in component names
-    newdata <- Seurat::FetchData(seuratObj, vars = paste0(modelName, "_Activation_sPLSDA_Score_", seq_len(6)))
-    colnames(newdata) <- paste0("comp", seq_len(6))
+    newdata <- Seurat::FetchData(seuratObj, vars = paste0(modelName, "_Activation_sPLSDA_Score_", seq_len(nComponents)))
+    colnames(newdata) <- paste0("comp", seq_len(nComponents))
     
     if (!all(rownames(newdata) == colnames(seuratObj))) {
       stop("Internal Error: Cell names in FetchData() do not match Seurat cell names.")
@@ -701,6 +717,25 @@ PredictTcellActivation <- function(seuratObj, model = NULL, modelList = NULL) {
   }
   
   return(seuratObj)
+}
+
+#helper function to determine the number of components for a built-in model
+.GetModelComponentCount <- function(modelName) {
+  #list all component files for this model
+  componentPattern <- paste0(modelName, "_Activation_sPLSDA_component")
+  componentFiles <- list.files(system.file("components", package = "RIRA"), 
+                               pattern = paste0("^", componentPattern, "[0-9]+\\.tsv$"),
+                               full.names = FALSE)
+  
+  if (length(componentFiles) == 0) {
+    stop(paste0("No component files found for model '", modelName, "'. Expected files matching pattern: ", componentPattern, "N.tsv"))
+  }
+  
+  #extract component numbers from filenames
+  compNumbers <- as.numeric(gsub(paste0(componentPattern, "(\\d+)\\.tsv"), "\\1", componentFiles))
+  
+  #return the highest component number
+  return(max(compNumbers))
 }
 
 #basic predict wrapper to check if the model can be used with stats::predict()
