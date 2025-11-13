@@ -8,25 +8,33 @@ source('installSeuratData.R')
 SimulateSeuratData <- function() {
   set.seed(GetSeed())
 
-  #union the features from the default T cell activation models
+  #union features from all activation component files
   features <- c()
   
-  #CD8 features
+  #grab CD8 component files
   for (i in 1:6) {
     savedFile <- system.file(paste0("components/CD8_Activation_sPLSDA_component", i, ".tsv"), package = "RIRA")
     component <- utils::read.table(savedFile, header = T, sep = '\t')
     features <- c(features, component$feature)
   }
   
-  #CD4 features
+  #grab CD4 component files
   for (i in 1:6) {
     savedFile <- system.file(paste0("components/CD4_Activation_sPLSDA_component", i, ".tsv"), package = "RIRA")
     component <- utils::read.table(savedFile, header = T, sep = '\t')
     features <- c(features, component$feature)
   }
+  
+  #grab General component files (9 components)
+  for (i in 1:9) {
+    savedFile <- system.file(paste0("components/General_Activation_sPLSDA_component", i, ".tsv"), package = "RIRA")
+    component <- utils::read.table(savedFile, header = T, sep = '\t')
+    features <- c(features, component$feature)
+  }
+  
   features <- unique(features)
 
-  #simulate a seurat object with the right features
+  #simulate a seurat object with all features
   mtx <- matrix(
     rpois(200 * length(features), lambda = 2),
     nrow = 200,
@@ -134,35 +142,49 @@ test_that("Predict TCell Activation works ", {
 
   SimulateSeuratObj <- SimulateSeuratData()
   SimulateSeuratObj <- PredictTcellActivation(SimulateSeuratObj)
-  
+
   #exhaustive check on component scores, since all are necessary for the default parameterization of the function
   for (i in 1:6) {
     colName <- paste0("CD8_Activation_sPLSDA_Score_", i)
     testthat::expect_true(colName %in% colnames(SimulateSeuratObj@meta.data),
                           label = paste0(colName, " should be present"))
   }
+  
   for (i in 1:6) {
     colName <- paste0("CD4_Activation_sPLSDA_Score_", i)
     testthat::expect_true(colName %in% colnames(SimulateSeuratObj@meta.data),
                           label = paste0(colName, " should be present"))
   }
   
+  for (i in 1:9) {
+    colName <- paste0("General_Activation_sPLSDA_Score_", i)
+    testthat::expect_true(colName %in% colnames(SimulateSeuratObj@meta.data),
+                          label = paste0(colName, " should be present"))
+  }
+  
+  #check that the scores are numeric
+  testthat::expect_type(SimulateSeuratObj@meta.data[5, "CD8_Activation_sPLSDA_Score_2"], "double")
+  testthat::expect_type(SimulateSeuratObj@meta.data[5, "CD4_Activation_sPLSDA_Score_3"], "double")
+  testthat::expect_type(SimulateSeuratObj@meta.data[5, "General_Activation_sPLSDA_Score_7"], "double")
+
   #check that prediction portion of the function worked
+  #probabilities
   testthat::expect_true(any(grepl("CD8_sPLS_prob", colnames(SimulateSeuratObj@meta.data))),
                         label = "CD8 probability columns should be present")
   testthat::expect_true(any(grepl("CD4_sPLS_prob", colnames(SimulateSeuratObj@meta.data))),
                         label = "CD4 probability columns should be present")
+  testthat::expect_true(any(grepl("General_sPLS_prob", colnames(SimulateSeuratObj@meta.data))),
+                        label = "General probability columns should be present")
+  #classes
   testthat::expect_true("CD8_sPLS_class" %in% colnames(SimulateSeuratObj@meta.data),
                         label = "CD8 class column should be present")
   testthat::expect_true("CD4_sPLS_class" %in% colnames(SimulateSeuratObj@meta.data),
                         label = "CD4 class column should be present")
+  testthat::expect_true("General_sPLS_class" %in% colnames(SimulateSeuratObj@meta.data),
+                        label = "General class column should be present")
   
-  
-  #verify specific score value
+  #verify specific probability value
   testthat::expect_equal(SimulateSeuratObj@meta.data[5,"CD4_sPLS_prob_Resting1"], 
                          expected = 0.012, 
                          tolerance = 0.001)
-  
-  #more general verification
-  testthat::expect_type(SimulateSeuratObj@meta.data[, "CD8_Activation_sPLSDA_Score_2"], "double")
 })
