@@ -43,12 +43,13 @@ SimulateSeuratData <- function() {
 
   colnames(mtx) <- features
   rownames(mtx) <- paste0("Cell_", seq_len(nrow(mtx)))
-
-  seuratObj <- CreateSeuratObject(
+  
+  #suppress warnings about dgCMatrix coercion
+  seuratObj <- suppressWarnings(CreateSeuratObject(
     counts = t(mtx),
     min.cells = 3,
     min.features = 200
-  )
+  ))
 
   seuratObj <- Seurat::NormalizeData(seuratObj, verbose = FALSE)
   seuratObj <- Seurat::ScaleData(seuratObj, features = features, verbose = FALSE)
