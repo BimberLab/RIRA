@@ -146,46 +146,54 @@ test_that("Predict TCell Activation works ", {
 
   #exhaustive check on component scores, since all are necessary for the default parameterization of the function
   for (i in 1:6) {
-    colName <- paste0("CD8_Activation_sPLSDA_Score_", i)
-    testthat::expect_true(colName %in% colnames(SimulateSeuratObj@meta.data),
-                          label = paste0(colName, " should be present"))
+    pattern <- paste0("^CD8_Activation_sPLSDA_Score_", i, "_v\\d+$")
+    matchingCols <- grep(pattern, colnames(SimulateSeuratObj@meta.data), value = TRUE)
+    testthat::expect_true(length(matchingCols) > 0,
+                          label = paste0("CD8_Activation_sPLSDA_Score_", i, " (with version) should be present"))
   }
   
   for (i in 1:6) {
-    colName <- paste0("CD4_Activation_sPLSDA_Score_", i)
-    testthat::expect_true(colName %in% colnames(SimulateSeuratObj@meta.data),
-                          label = paste0(colName, " should be present"))
+    pattern <- paste0("^CD4_Activation_sPLSDA_Score_", i, "_v\\d+$")
+    matchingCols <- grep(pattern, colnames(SimulateSeuratObj@meta.data), value = TRUE)
+    testthat::expect_true(length(matchingCols) > 0,
+                          label = paste0("CD4_Activation_sPLSDA_Score_", i, " (with version) should be present"))
   }
   
   for (i in 1:9) {
-    colName <- paste0("General_Activation_sPLSDA_Score_", i)
-    testthat::expect_true(colName %in% colnames(SimulateSeuratObj@meta.data),
-                          label = paste0(colName, " should be present"))
+    pattern <- paste0("^General_Activation_sPLSDA_Score_", i, "_v\\d+$")
+    matchingCols <- grep(pattern, colnames(SimulateSeuratObj@meta.data), value = TRUE)
+    testthat::expect_true(length(matchingCols) > 0,
+                          label = paste0("General_Activation_sPLSDA_Score_", i, " (with version) should be present"))
   }
   
   #check that the scores are numeric
-  testthat::expect_type(SimulateSeuratObj@meta.data[5, "CD8_Activation_sPLSDA_Score_2"], "double")
-  testthat::expect_type(SimulateSeuratObj@meta.data[5, "CD4_Activation_sPLSDA_Score_3"], "double")
-  testthat::expect_type(SimulateSeuratObj@meta.data[5, "General_Activation_sPLSDA_Score_7"], "double")
+  cd8_score_2 <- grep("^CD8_Activation_sPLSDA_Score_2_v\\d+$", colnames(SimulateSeuratObj@meta.data), value = TRUE)[1]
+  cd4_score_3 <- grep("^CD4_Activation_sPLSDA_Score_3_v\\d+$", colnames(SimulateSeuratObj@meta.data), value = TRUE)[1]
+  general_score_7 <- grep("^General_Activation_sPLSDA_Score_7_v\\d+$", colnames(SimulateSeuratObj@meta.data), value = TRUE)[1]
+  
+  testthat::expect_type(SimulateSeuratObj@meta.data[5, cd8_score_2], "double")
+  testthat::expect_type(SimulateSeuratObj@meta.data[5, cd4_score_3], "double")
+  testthat::expect_type(SimulateSeuratObj@meta.data[5, general_score_7], "double")
 
   #check that prediction portion of the function worked
   #probabilities
-  testthat::expect_true(any(grepl("CD8_sPLS_prob", colnames(SimulateSeuratObj@meta.data))),
-                        label = "CD8 probability columns should be present")
-  testthat::expect_true(any(grepl("CD4_sPLS_prob", colnames(SimulateSeuratObj@meta.data))),
-                        label = "CD4 probability columns should be present")
-  testthat::expect_true(any(grepl("General_sPLS_prob", colnames(SimulateSeuratObj@meta.data))),
-                        label = "General probability columns should be present")
+  testthat::expect_true(any(grepl("^CD8_sPLS_prob.*_v\\d+$", colnames(SimulateSeuratObj@meta.data))),
+                        label = "CD8 probability columns (with version) should be present")
+  testthat::expect_true(any(grepl("^CD4_sPLS_prob.*_v\\d+$", colnames(SimulateSeuratObj@meta.data))),
+                        label = "CD4 probability columns (with version) should be present")
+  testthat::expect_true(any(grepl("^General_sPLS_prob.*_v\\d+$", colnames(SimulateSeuratObj@meta.data))),
+                        label = "General probability columns (with version) should be present")
   #classes
-  testthat::expect_true("CD8_sPLS_class" %in% colnames(SimulateSeuratObj@meta.data),
-                        label = "CD8 class column should be present")
-  testthat::expect_true("CD4_sPLS_class" %in% colnames(SimulateSeuratObj@meta.data),
-                        label = "CD4 class column should be present")
-  testthat::expect_true("General_sPLS_class" %in% colnames(SimulateSeuratObj@meta.data),
-                        label = "General class column should be present")
+  testthat::expect_true(any(grepl("^CD8_sPLS_class_v\\d+$", colnames(SimulateSeuratObj@meta.data))),
+                        label = "CD8 class column (with version) should be present")
+  testthat::expect_true(any(grepl("^CD4_sPLS_class_v\\d+$", colnames(SimulateSeuratObj@meta.data))),
+                        label = "CD4 class column (with version) should be present")
+  testthat::expect_true(any(grepl("^General_sPLS_class_v\\d+$", colnames(SimulateSeuratObj@meta.data))),
+                        label = "General class column (with version) should be present")
   
   #verify specific probability value
-  testthat::expect_equal(SimulateSeuratObj@meta.data[5,"CD4_sPLS_prob_Resting1"], 
+  cd4_prob_resting1 <- grep("^CD4_sPLS_prob_Resting1_v\\d+$", colnames(SimulateSeuratObj@meta.data), value = TRUE)[1]
+  testthat::expect_equal(SimulateSeuratObj@meta.data[5, cd4_prob_resting1], 
                          expected = 0.012, 
                          tolerance = 0.001)
 })
