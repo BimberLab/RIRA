@@ -592,7 +592,7 @@ PredictTcellActivation <- function(seuratObj, model = NULL, modelList = NULL) {
     modelFiles <- list(
       CD8 = "models/ActivatedCD8TCell4ClassModel_v1.rds",
       CD4 = "models/ActivatedCD4TCell4ClassModel_v1.rds", 
-      General = "models/GeneralActivatedTCellModel_v2.rds"
+      General = "models/GeneralActivatedTCellModel_v3.rds"
     )
     
     modelList <- list()
