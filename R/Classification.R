@@ -581,21 +581,39 @@ PredictTcellActivation <- function(seuratObj, model = NULL, modelList = NULL) {
   ### Sanitize  ###
   #################
   #check & sanitize model
+  #track model paths and versions
+  modelPaths <- list()
+  modelVersions <- list()
+  defaults <- FALSE
+  
   if (is.null(model) && is.null(modelList)) {
     #default method
     print("No model provided, using RIRA's built-in CD8 and CD4 T Cell Activation models.")
-    modelList <- list(
-      CD8 = readRDS(system.file("models/ActivatedCD8TCell4ClassModel_v1.rds", package = "RIRA")),
-      CD4 = readRDS(system.file("models/ActivatedCD4TCell4ClassModel_v1.rds", package = "RIRA")), 
-      General = readRDS(system.file("models/GeneralActivatedTCellModel_v1.rds", package = "RIRA"))
+    modelFiles <- list(
+      CD8 = "models/ActivatedCD8TCell4ClassModel_v1.rds",
+      CD4 = "models/ActivatedCD4TCell4ClassModel_v1.rds", 
+      General = "models/GeneralActivatedTCellModel_v3.rds"
     )
+    
+    modelList <- list()
+    for (modelName in names(modelFiles)) {
+      modelPath <- system.file(modelFiles[[modelName]], package = "RIRA")
+      modelList[[modelName]] <- readRDS(modelPath)
+      modelPaths[[modelName]] <- modelFiles[[modelName]]
+      #extract version from filename (e.g., _v1.rds -> v1)
+      version <- gsub(".*_(v\\d+)\\.rds$", "\\1", modelFiles[[modelName]])
+      modelVersions[[modelName]] <- version
+    }
     #flag that the defaults were used
     defaults <- TRUE
   } else if (!is.null(model) && grepl(pattern = "\\.rds$", x = model, fixed = TRUE) && file.exists(model)) {
     #user provides .rds
     print(paste0("Using model from file: ", model))
-    model <- readRDS(model)
-    modelList <- list(Custom = model)
+    modelList <- list(Custom = readRDS(model))
+    modelPaths[["Custom"]] <- model
+    #try to extract version from filename, default to "custom" if no version found
+    version <- gsub(".*_(v\\d+)\\.rds$", "\\1", basename(model))
+    modelVersions[["Custom"]] <- ifelse(grepl("^v\\d+$", version), version, "custom")
   } else if (!is.null(model)) {
     stop("Model must be one of: NULL (built-ins), a file path to an RDS file. If you want to use a custom model, please ensure it is compatible with stats::predict().\nIf you want to use the built-in models, please provide NULL as the model argument.\n")
   }
@@ -622,12 +640,13 @@ PredictTcellActivation <- function(seuratObj, model = NULL, modelList = NULL) {
     for (modelName in names(modelList)) {
       #determine number of components for this model
       nComponents <- .GetModelComponentCount(modelName)
-      print(paste0("Model '", modelName, "' uses ", nComponents, " components"))
+      modelVersion <- modelVersions[[modelName]]
+      print(paste0("Model '", modelName, "' (", modelVersion, ") uses ", nComponents, " components"))
       
       needsScoring <- FALSE
       #check if all component scores exist for this model
       for (i in seq_len(nComponents)){
-        fieldName <- paste0(modelName, "_Activation_sPLSDA_Score_", i)
+        fieldName <- paste0(modelName, "_Activation_sPLSDA_Score_", i, "_", modelVersion)
         if (!fieldName %in% metadataNames) {
           needsScoring <- TRUE
           print(paste0("Component score '", fieldName, "' not found in metadata. Will calculate."))
@@ -643,11 +662,11 @@ PredictTcellActivation <- function(seuratObj, model = NULL, modelList = NULL) {
       }
       #score components if needed
       if (needsScoring) {
-        print(paste0("Scoring sPLSDA components for ", modelName, " model..."))
+        print(paste0("Scoring sPLSDA components for ", modelName, " model (", modelVersion, ")..."))
         componentPrefix <- paste0(modelName, "_Activation_sPLSDA_component")
         for (i in seq_len(nComponents)){
           componentName <- paste0(componentPrefix, i)
-          fieldName <- paste0(modelName, "_Activation_sPLSDA_Score_", i)
+          fieldName <- paste0(modelName, "_Activation_sPLSDA_Score_", i, "_", modelVersion)
           seuratObj <- ScoreUsingSavedComponent(seuratObj, componentOrName = componentName, fieldName = fieldName, layer = "scale.data")
         }
       }
@@ -661,8 +680,9 @@ PredictTcellActivation <- function(seuratObj, model = NULL, modelList = NULL) {
   for (modelIdx in seq_along(modelList)) {
     modelName <- names(modelList)[modelIdx]
     modelObj <- modelList[[modelIdx]]
+    modelVersion <- modelVersions[[modelName]]
     
-    print(paste0("Processing model: ", modelName))
+    print(paste0("Processing model: ", modelName, " (", modelVersion, ")"))
     
     #determine expected number of components from model coefficients
     modelCoefs <- colnames(stats::coef(modelObj))
@@ -688,7 +708,9 @@ PredictTcellActivation <- function(seuratObj, model = NULL, modelList = NULL) {
     }
     
     #construct prediction for the model, forcing conformance in component names
-    newdata <- Seurat::FetchData(seuratObj, vars = paste0(modelName, "_Activation_sPLSDA_Score_", seq_len(nComponents)))
+    #look for component scores with version number
+    scoreVars <- paste0(modelName, "_Activation_sPLSDA_Score_", seq_len(nComponents), "_", modelVersion)
+    newdata <- Seurat::FetchData(seuratObj, vars = scoreVars)
     colnames(newdata) <- paste0("comp", seq_len(nComponents))
     
     if (!all(rownames(newdata) == colnames(seuratObj))) {
@@ -699,20 +721,21 @@ PredictTcellActivation <- function(seuratObj, model = NULL, modelList = NULL) {
     prob_df <- stats::predict(modelObj, newdata, type = "prob")
     class_vec <- stats::predict(modelObj, newdata, type = "class")
     
-    colnames(prob_df) <- paste0(modelName, "_sPLS_prob_", colnames(prob_df))
+    #include version in column names
+    colnames(prob_df) <- paste0(modelName, "_sPLS_prob_", colnames(prob_df), "_", modelVersion)
     class_df <- data.frame(
       sPLS_class = as.character(class_vec),
       row.names = rownames(prob_df),
       stringsAsFactors = FALSE
     )
-    colnames(class_df) <- paste0(modelName, "_sPLS_class")
+    colnames(class_df) <- paste0(modelName, "_sPLS_class_", modelVersion)
     
     #add predictions back to Seurat object
     seuratObj <- Seurat::AddMetaData(seuratObj, metadata = prob_df)
     seuratObj <- Seurat::AddMetaData(seuratObj, metadata = class_df)
     
     if (length(names(seuratObj@reductions)) > 0) {
-      print(Seurat::DimPlot(seuratObj, group.by = paste0(modelName, "_sPLS_class")))
+      print(Seurat::DimPlot(seuratObj, group.by = paste0(modelName, "_sPLS_class_", modelVersion)))
     }
   }
   
