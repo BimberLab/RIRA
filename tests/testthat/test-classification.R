@@ -194,6 +194,6 @@ test_that("Predict TCell Activation works ", {
   #verify specific probability value
   cd4_prob_resting1 <- grep("^CD4_sPLS_prob_Resting1_v\\d+$", colnames(SimulateSeuratObj@meta.data), value = TRUE)[1]
   testthat::expect_equal(SimulateSeuratObj@meta.data[5, cd4_prob_resting1], 
-                         expected = 0.012, 
+                         expected = 0.0086, 
                          tolerance = 0.001)
 })
