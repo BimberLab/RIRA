@@ -810,8 +810,24 @@ PredictTcellActivation <- function(seuratObj, model = NULL, modelList = NULL) {
 #' seuratObj <- CombineTcellActivationClasses(
 #'   seuratObj,
 #'   classMapping = list(
-#'     "Activated" = c("Early_Activated", "Late_Activated"),
-#'     "Resting" = c("Naive", "Resting")
+#'     "Th1" = c("Th1_MIP1B.neg_CD137.neg", "Th1_MIP1B.neg_CD137.pos", "Th1_MIP1B.pos"),
+#'     "Th17" = c("Th17"), 
+#'     "Bystander Activated" = c("NonSpecificActivated_L1", "NonSpecificActivated_L2"), 
+#'     "Bulk Tissue T cell" = c("Uncultured"), 
+#'     "Naive T cell" = c("Cultured_Bystander_NoBFA", "Cultured_Bystander_BFA")
+#'   )
+#' )
+#' 
+#' # Using Guidelines for T cell nomenclature (https://www.nature.com/articles/s41577-025-01238-2)
+#' # with a slight augmentation that antigen specific T cells are "star" for antigens, rather than plus or zero.
+#' seuratObj <- CombineTcellActivationClasses(
+#'   seuratObj,
+#'   classMapping = list(
+#'     "CD4posOrCD8pos_Th1_U_B_A_t_star" = c("Th1_MIP1B.neg_CD137.neg", "Th1_MIP1B.neg_CD137.pos", "Th1_MIP1B.pos"),
+#'     "CD4pos_Th17_U_B_A_t_star" = c("Th17"), 
+#'     "CD4posOrCD8pos_Th1_U_B_A_t_O" = c("NonSpecificActivated_L1", "NonSpecificActivated_L2"), 
+#'     "CD4posOrCD8pos_T_U_R_N_t_O" = c("Uncultured"), 
+#'     "CD4posOrCD8pos_T_U_B_N_t_O" = c("Cultured_Bystander_NoBFA", "Cultured_Bystander_BFA")
 #'   )
 #' )
 #' }
