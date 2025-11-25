@@ -785,3 +785,201 @@ PredictTcellActivation <- function(seuratObj, model = NULL, modelList = NULL) {
     return(TRUE)
   })
 }
+
+#' @title Combine T cell activation classes using custom logic
+#' @description Takes a Seurat object with T cell activation predictions (from PredictTcellActivation) 
+#' and combines classes based on user-defined logic. This is useful for collapsing fine-grained 
+#' activation states into broader categories.
+#' @param seuratObj The Seurat Object containing T cell activation predictions
+#' @param modelName The name of the model whose predictions should be combined. Default is "General".
+#' @param modelVersion The version of the model. Default is "v3" for the General model.
+#' @param classMapping A named list where names are the new combined class labels and values are 
+#' character vectors of the original classes to combine. For example:
+#' list("Activated" = c("Early_Activated", "Late_Activated"), "Resting" = c("Naive", "Memory"))
+#' @param outputFieldName The name of the metadata column to store the combined classifications. 
+#' If NULL, will use "{modelName}_Combined_Class_{modelVersion}".
+#' @param probabilityAggregation How to aggregate probabilities for combined classes. Options are:
+#' "sum" (default) - sum probabilities of constituent classes,
+#' "max" - take maximum probability among constituent classes,
+#' "mean" - take mean of probabilities of constituent classes.
+#' @return A Seurat object with the combined class assignments added to metadata
+#' @export
+#' @examples
+#' \dontrun{
+#' # Combine activation states into broader categories
+#' seuratObj <- CombineTcellActivationClasses(
+#'   seuratObj,
+#'   classMapping = list(
+#'     "Activated" = c("Early_Activated", "Late_Activated"),
+#'     "Resting" = c("Naive", "Resting")
+#'   )
+#' )
+#' }
+
+CombineTcellActivationClasses <- function(seuratObj, 
+                                          modelName = "General", 
+                                          modelVersion = "v3",
+                                          classMapping,
+                                          outputFieldName = NULL,
+                                          probabilityAggregation = "sum") {
+  #################
+  ### Sanitize  ###
+  #################
+  if (missing(classMapping) || is.null(classMapping)) {
+    stop("classMapping must be provided. It should be a named list mapping new class names to vectors of original class names.")
+  }
+  
+  if (!is.list(classMapping) || is.null(names(classMapping))) {
+    stop("classMapping must be a named list.")
+  }
+  
+  #validate that all names in classMapping are non-empty strings
+  if (any(names(classMapping) == "" | is.na(names(classMapping)))) {
+    stop("All elements in classMapping must have non-empty names.")
+  }
+  
+  #validate that all values in classMapping are character vectors
+  for (newClassName in names(classMapping)) {
+    if (!is.character(classMapping[[newClassName]])) {
+      stop(paste0("Value for '", newClassName, "' must be a character vector of original class names."))
+    }
+    if (length(classMapping[[newClassName]]) == 0) {
+      stop(paste0("Value for '", newClassName, "' cannot be an empty vector. Please provide at least one original class name."))
+    }
+    if (any(is.na(classMapping[[newClassName]]) | classMapping[[newClassName]] == "")) {
+      stop(paste0("Value for '", newClassName, "' contains empty or NA class names. All class names must be valid strings."))
+    }
+  }
+  
+  #check for duplicate classes across different mappings
+  allMappedClasses <- unlist(classMapping, use.names = FALSE)
+  duplicateClasses <- allMappedClasses[duplicated(allMappedClasses)]
+  if (length(duplicateClasses) > 0) {
+    stop(paste0("The following classes appear in multiple mappings: ", 
+                paste0(unique(duplicateClasses), collapse = ", "), 
+                ". Each original class can only be mapped to one combined class."))
+  }
+  
+  if (!probabilityAggregation %in% c("sum", "max", "mean")) {
+    stop("probabilityAggregation must be one of: 'sum', 'max', 'mean'")
+  }
+  
+  #check if the model predictions exist in the metadata
+  classFieldName <- paste0(modelName, "_sPLS_class_", modelVersion)
+  if (!classFieldName %in% colnames(seuratObj@meta.data)) {
+    stop(paste0("Class predictions '", classFieldName, "' not found in metadata. Please run PredictTcellActivation() first."))
+  }
+  
+  #get all original classes from the model
+  originalClasses <- unique(seuratObj@meta.data[[classFieldName]])
+  
+  #check that all classes in classMapping exist in the original predictions
+  mappedClasses <- allMappedClasses
+  missingClasses <- setdiff(mappedClasses, originalClasses)
+  if (length(missingClasses) > 0) {
+    stop(paste0("The following classes in classMapping were not found in the original predictions: ", 
+                paste0(missingClasses, collapse = ", ")))
+  }
+  
+  #warn if some original classes are not mapped
+  unmappedClasses <- setdiff(originalClasses, mappedClasses)
+  if (length(unmappedClasses) > 0) {
+    warning(paste0("The following classes are not included in classMapping and will be labeled as 'Unmapped': ",
+                   paste0(unmappedClasses, collapse = ", ")))
+  }
+  
+  #set output field name
+  if (is.null(outputFieldName)) {
+    outputFieldName <- paste0(modelName, "_Combined_Class_", modelVersion)
+  }
+  
+  ########################
+  ### Combine Classes  ###
+  ########################
+  #initialize combined class vector
+  combinedClasses <- character(ncol(seuratObj))
+  names(combinedClasses) <- colnames(seuratObj)
+  
+  #initialize combined probability matrix
+  combinedProbs <- matrix(0, nrow = ncol(seuratObj), ncol = length(classMapping))
+  colnames(combinedProbs) <- names(classMapping)
+  rownames(combinedProbs) <- colnames(seuratObj)
+  
+  #get all probability columns for this model
+  probPattern <- paste0("^", modelName, "_sPLS_prob_.*_", modelVersion, "$")
+  probCols <- grep(probPattern, colnames(seuratObj@meta.data), value = TRUE)
+  
+  if (length(probCols) == 0) {
+    warning(paste0("No probability columns found for model '", modelName, "' version '", modelVersion, 
+                   "'. Combined probabilities will not be calculated."))
+  }
+  
+  #map each cell to its combined class
+  for (cellIdx in seq_len(ncol(seuratObj))) {
+    originalClass <- seuratObj@meta.data[cellIdx, classFieldName]
+    
+    #find which combined class this original class belongs to
+    combinedClass <- "Unmapped"
+    for (newClassName in names(classMapping)) {
+      if (originalClass %in% classMapping[[newClassName]]) {
+        combinedClass <- newClassName
+        break
+      }
+    }
+    
+    combinedClasses[cellIdx] <- combinedClass
+  }
+  
+  #aggregate probabilities for combined classes
+  if (length(probCols) > 0) {
+    for (newClassName in names(classMapping)) {
+      constituentClasses <- classMapping[[newClassName]]
+      
+      #find probability columns for constituent classes
+      constituentProbCols <- c()
+      for (constituent in constituentClasses) {
+        probCol <- paste0(modelName, "_sPLS_prob_", constituent, "_", modelVersion)
+        if (probCol %in% probCols) {
+          constituentProbCols <- c(constituentProbCols, probCol)
+        }
+      }
+      
+      if (length(constituentProbCols) > 0) {
+        #aggregate probabilities based on specified method
+        if (probabilityAggregation == "sum") {
+          combinedProbs[, newClassName] <- rowSums(seuratObj@meta.data[, constituentProbCols, drop = FALSE])
+        } else if (probabilityAggregation == "max") {
+          combinedProbs[, newClassName] <- apply(seuratObj@meta.data[, constituentProbCols, drop = FALSE], 1, max)
+        } else if (probabilityAggregation == "mean") {
+          combinedProbs[, newClassName] <- rowMeans(seuratObj@meta.data[, constituentProbCols, drop = FALSE])
+        }
+      }
+    }
+    
+    #add combined probabilities to metadata
+    combinedProbsDf <- as.data.frame(combinedProbs)
+    colnames(combinedProbsDf) <- paste0(modelName, "_Combined_prob_", colnames(combinedProbsDf), "_", modelVersion)
+    seuratObj <- Seurat::AddMetaData(seuratObj, metadata = combinedProbsDf)
+  }
+  
+  #add combined classes to metadata
+  combinedClassDf <- data.frame(
+    CombinedClass = combinedClasses,
+    row.names = colnames(seuratObj),
+    stringsAsFactors = FALSE
+  )
+  colnames(combinedClassDf) <- outputFieldName
+  seuratObj <- Seurat::AddMetaData(seuratObj, metadata = combinedClassDf)
+  
+  #print summary
+  print(paste0("Combined ", length(unique(seuratObj@meta.data[[classFieldName]])), 
+               " original classes into ", length(classMapping), " combined classes"))
+  print(table(seuratObj@meta.data[[outputFieldName]]))
+  
+  #plot if reductions are available
+  if (length(names(seuratObj@reductions)) > 0) {
+    print(Seurat::DimPlot(seuratObj, group.by = outputFieldName))
+  }
+  
+  return(seuratObj)
+}
