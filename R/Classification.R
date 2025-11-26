@@ -688,7 +688,7 @@ PredictTcellActivation <- function(seuratObj, model = NULL, modelList = NULL) {
     modelCoefs <- colnames(stats::coef(modelObj))
     if (!'nnet' %in% class(modelObj) || is.null(modelCoefs) || !any(grepl("^comp", modelCoefs))) {
       if ('nnet' %in% class(modelObj)) {
-        modelCoefs <- colnames(nnet:::coef.multinom(modelObj))
+        modelCoefs <- colnames(stats::coef(modelObj))
       }
     }
     
