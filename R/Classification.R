@@ -766,9 +766,9 @@ PredictTcellActivation <- function(seuratObj, model = NULL, modelList = NULL) {
   tryCatch({
     if (is.null(newdata)) {
       #naive predict call, no newdata provided
-      result <- predict(model)
+      result <- stats::predict(model)
     } else {
-      result <- predict(model, newdata = newdata)
+      result <- stats::predict(model, newdata = newdata)
     }
     return(TRUE)
   }, error = function(e) {
@@ -798,7 +798,7 @@ PredictTcellActivation <- function(seuratObj, model = NULL, modelList = NULL) {
 #' using GetActivationClassMapping(name). For example: GetActivationClassMapping('TcellActivation.Basic')
 #' or a manual list such as list("Activated" = c("Early_Activated", "Late_Activated"), "Resting" = c("Naive", "Memory")).
 #' @param outputFieldName The name of the metadata column to store the combined classifications. 
-#' If NULL, will use "{modelName}_Combined_Class_{modelVersion}".
+#' If NULL, will use "<modelName>_Combined_Class_<modelVersion>".
 #' @param probabilityAggregation How to aggregate probabilities for combined classes. Options are:
 #' "sum" (default) - sum probabilities of constituent classes,
 #' "max" - take maximum probability among constituent classes,

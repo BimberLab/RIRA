@@ -29,7 +29,7 @@ using GetActivationClassMapping(name). For example: GetActivationClassMapping('T
 or a manual list such as list("Activated" = c("Early_Activated", "Late_Activated"), "Resting" = c("Naive", "Memory")).}
 
 \item{outputFieldName}{The name of the metadata column to store the combined classifications. 
-If NULL, will use "{modelName}_Combined_Class_{modelVersion}".}
+If NULL, will use "<modelName>_Combined_Class_<modelVersion>".}
 
 \item{probabilityAggregation}{How to aggregate probabilities for combined classes. Options are:
 "sum" (default) - sum probabilities of constituent classes,
