@@ -10,7 +10,10 @@ CombineTcellActivationClasses(
   modelVersion = "v3",
   classMapping,
   outputFieldName = NULL,
-  probabilityAggregation = "sum"
+  probabilityAggregation = "sum",
+  relabelOrRecall = "recall",
+  recallMethod = "max",
+  recallProbabilityThreshold = 0.5
 )
 }
 \arguments{
@@ -32,6 +35,16 @@ If NULL, will use "{modelName}_Combined_Class_{modelVersion}".}
 "sum" (default) - sum probabilities of constituent classes,
 "max" - take maximum probability among constituent classes,
 "mean" - take mean of probabilities of constituent classes.}
+
+\item{relabelOrRecall}{Strategy to set the combined class column. Options:
+"relabel" (default) uses the original class-to-mapping lookup, labeling unmapped as "Unmapped".
+"recall" uses the newly aggregated combined probabilities to assign classes.}
+
+\item{recallMethod}{When relabelOrRecall = "recall", how to recall combined classes.
+Options: "max" (default) choose the highest combined probability, or "threshold" which
+assigns the first combined class with probability >= recallProbabilityThreshold, otherwise "Unknown".}
+
+\item{recallProbabilityThreshold}{Threshold used when recallMethod = "threshold". Default: 0.5.}
 }
 \value{
 A Seurat object with the combined class assignments added to metadata

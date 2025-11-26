@@ -803,6 +803,13 @@ PredictTcellActivation <- function(seuratObj, model = NULL, modelList = NULL) {
 #' "sum" (default) - sum probabilities of constituent classes,
 #' "max" - take maximum probability among constituent classes,
 #' "mean" - take mean of probabilities of constituent classes.
+#' @param relabelOrRecall Strategy to set the combined class column. Options:
+#' "relabel" (default) uses the original class-to-mapping lookup, labeling unmapped as "Unmapped".
+#' "recall" uses the newly aggregated combined probabilities to assign classes.
+#' @param recallMethod When relabelOrRecall = "recall", how to recall combined classes.
+#' Options: "max" (default) choose the highest combined probability, or "threshold" which
+#' assigns the first combined class with probability >= recallProbabilityThreshold, otherwise "Unknown".
+#' @param recallProbabilityThreshold Threshold used when recallMethod = "threshold". Default: 0.5.
 #' @return A Seurat object with the combined class assignments added to metadata
 #' @seealso GetActivationClassMapping, PredictTcellActivation
 #' @export
@@ -846,7 +853,10 @@ CombineTcellActivationClasses <- function(seuratObj,
                                           modelVersion = "v3",
                                           classMapping,
                                           outputFieldName = NULL,
-                                          probabilityAggregation = "sum") {
+                                          probabilityAggregation = "sum",
+                                          relabelOrRecall = "recall",
+                                          recallMethod = "max",
+                                          recallProbabilityThreshold = 0.5) {
   #################
   ### Sanitize  ###
   #################
@@ -858,9 +868,13 @@ CombineTcellActivationClasses <- function(seuratObj,
     stop("classMapping must be a named list.")
   }
   
-  #validate that all names in classMapping are non-empty strings
-  if (any(names(classMapping) == "" | is.na(names(classMapping)))) {
+  #validate that all names in classMapping are non-empty strings and not the literal 'NULL'
+  nameVec <- names(classMapping)
+  if (any(nameVec == "" | is.na(nameVec))) {
     stop("All elements in classMapping must have non-empty names.")
+  }
+  if (any(tolower(nameVec) == "null")) {
+    stop("classMapping names cannot be 'NULL'. Please provide meaningful combined class names.")
   }
   
   #validate that all values in classMapping are character vectors
@@ -887,6 +901,19 @@ CombineTcellActivationClasses <- function(seuratObj,
   
   if (!probabilityAggregation %in% c("sum", "max", "mean")) {
     stop("probabilityAggregation must be one of: 'sum', 'max', 'mean'")
+  }
+
+  if (!relabelOrRecall %in% c("relabel", "recall")) {
+    stop("relabelOrRecall must be one of: 'relabel', 'recall'")
+  }
+  if (!recallMethod %in% c("max", "threshold")) {
+    stop("recallMethod must be one of: 'max', 'threshold'")
+  }
+  if (!is.numeric(recallProbabilityThreshold) || length(recallProbabilityThreshold) != 1 || is.na(recallProbabilityThreshold)) {
+    stop("recallProbabilityThreshold must be a single numeric value")
+  }
+  if (recallProbabilityThreshold < 0 || recallProbabilityThreshold > 1) {
+    stop("recallProbabilityThreshold must be in [0, 1]")
   }
   
   #check if the model predictions exist in the metadata
@@ -939,20 +966,20 @@ CombineTcellActivationClasses <- function(seuratObj,
                    "'. Combined probabilities will not be calculated."))
   }
   
-  #map each cell to its combined class
-  for (cellIdx in seq_len(ncol(seuratObj))) {
-    originalClass <- seuratObj@meta.data[cellIdx, classFieldName]
-    
-    #find which combined class this original class belongs to
-    combinedClass <- "Unmapped"
-    for (newClassName in names(classMapping)) {
-      if (originalClass %in% classMapping[[newClassName]]) {
-        combinedClass <- newClassName
-        break
+  # if relabelOrRecall == "relabel", map each cell to its combined class using original predictions
+  if (relabelOrRecall == "relabel") {
+    for (cellIdx in seq_len(ncol(seuratObj))) {
+      originalClass <- seuratObj@meta.data[cellIdx, classFieldName]
+      #find which combined class this original class belongs to
+      combinedClass <- "Unmapped"
+      for (newClassName in names(classMapping)) {
+        if (originalClass %in% classMapping[[newClassName]]) {
+          combinedClass <- newClassName
+          break
+        }
       }
+      combinedClasses[cellIdx] <- combinedClass
     }
-    
-    combinedClasses[cellIdx] <- combinedClass
   }
   
   #aggregate probabilities for combined classes
@@ -985,6 +1012,24 @@ CombineTcellActivationClasses <- function(seuratObj,
     combinedProbsDf <- as.data.frame(combinedProbs)
     colnames(combinedProbsDf) <- paste0(modelName, "_Combined_prob_", colnames(combinedProbsDf), "_", modelVersion)
     seuratObj <- Seurat::AddMetaData(seuratObj, metadata = combinedProbsDf)
+    
+    #if relabelOrRecall == "recall", assign classes using combined probabilities
+    if (relabelOrRecall == "recall") {
+      probMat <- as.matrix(combinedProbsDf)
+      if (recallMethod == "max") {
+        maxIdx <- apply(probMat, 1, which.max)
+        combinedClasses <- colnames(probMat)[maxIdx]
+      } else if (recallMethod == "threshold") {
+        # Assign the first class that exceeds threshold; if none, label Unknown
+        combinedClasses <- rep("Unknown", nrow(probMat))
+        for (i in seq_len(nrow(probMat))) {
+          exceeds <- which(probMat[i, ] >= recallProbabilityThreshold)
+          if (length(exceeds) > 0) {
+            combinedClasses[i] <- colnames(probMat)[exceeds[1]]
+          }
+        }
+      }
+    }
   }
   
   #add combined classes to metadata

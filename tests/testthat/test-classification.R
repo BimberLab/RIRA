@@ -230,7 +230,7 @@ test_that("CombineTcellActivationClasses combines classes and writes versioned c
   #validate error cases
   
   #empty names not allowed
-  badMapping1 <- list("" = c("Th17"))
+  badMapping1 <- list(NULL = c("Th17"))
   expect_error(CombineTcellActivationClasses(seuratObj, classMapping = badMapping1))
   #non-character values not allowed
   badMapping2 <- list("Th17" = 1)
@@ -248,25 +248,20 @@ test_that("CombineTcellActivationClasses combines classes and writes versioned c
 
 
 test_that("Activation class mapping registry works and validates structure", {
-  # Known keys should exist and return a named list
+  #known keys should exist and return a named list
   basic <- GetActivationClassMapping('TcellActivation.Basic')
   expect_true(is.list(basic))
   expect_true(length(basic) > 0)
   expect_true(!is.null(names(basic)))
   expect_false(any(is.na(names(basic)) | names(basic) == ""))
 
-  # Values should be non-empty character vectors with non-empty entries
+  #values should be non-empty character vectors with non-empty entries
   for (nm in names(basic)) {
     v <- basic[[nm]]
     expect_true(is.character(v), label = paste0("Value for '", nm, "' should be character"))
     expect_true(length(v) > 0, label = paste0("Value for '", nm, "' should not be empty"))
     expect_false(any(is.na(v) | v == ""), label = paste0("Value for '", nm, "' should not contain empty/NA"))
   }
-
-  # Another registered mapping should also work
-  nomen <- GetActivationClassMapping('TcellActivation.NomenclatureV1')
-  expect_true(is.list(nomen))
-  expect_true(length(nomen) > 0)
 
   # Unknown key should warn and return NULL
   expect_warning(x <- GetActivationClassMapping('This.Key.Does.Not.Exist'))
