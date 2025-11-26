@@ -794,8 +794,9 @@ PredictTcellActivation <- function(seuratObj, model = NULL, modelList = NULL) {
 #' @param modelName The name of the model whose predictions should be combined. Default is "General".
 #' @param modelVersion The version of the model. Default is "v3" for the General model.
 #' @param classMapping A named list where names are the new combined class labels and values are 
-#' character vectors of the original classes to combine. For example:
-#' list("Activated" = c("Early_Activated", "Late_Activated"), "Resting" = c("Naive", "Memory"))
+#' character vectors of the original classes to combine. You can also fetch predefined mappings
+#' using GetActivationClassMapping(name). For example: GetActivationClassMapping('TcellActivation.Basic')
+#' or a manual list such as list("Activated" = c("Early_Activated", "Late_Activated"), "Resting" = c("Naive", "Memory")).
 #' @param outputFieldName The name of the metadata column to store the combined classifications. 
 #' If NULL, will use "{modelName}_Combined_Class_{modelVersion}".
 #' @param probabilityAggregation How to aggregate probabilities for combined classes. Options are:
@@ -803,9 +804,17 @@ PredictTcellActivation <- function(seuratObj, model = NULL, modelList = NULL) {
 #' "max" - take maximum probability among constituent classes,
 #' "mean" - take mean of probabilities of constituent classes.
 #' @return A Seurat object with the combined class assignments added to metadata
+#' @seealso GetActivationClassMapping, PredictTcellActivation
 #' @export
 #' @examples
 #' \dontrun{
+#' # Using a pre-registered mapping
+#' mapping <- GetActivationClassMapping('TcellActivation.Basic')
+#' seuratObj <- CombineTcellActivationClasses(
+#'   seuratObj,
+#'   classMapping = mapping
+#' )
+#'
 #' # Combine activation states into broader categories
 #' seuratObj <- CombineTcellActivationClasses(
 #'   seuratObj,
@@ -893,14 +902,14 @@ CombineTcellActivationClasses <- function(seuratObj,
   mappedClasses <- allMappedClasses
   missingClasses <- setdiff(mappedClasses, originalClasses)
   if (length(missingClasses) > 0) {
-    stop(paste0("The following classes in classMapping were not found in the original predictions: ", 
-                paste0(missingClasses, collapse = ", ")))
+    warning(paste0("The following classes in classMapping were not found in the original predictions and will be ignored for probability aggregation: ", 
+                   paste0(missingClasses, collapse = ", ")))
   }
   
   #warn if some original classes are not mapped
   unmappedClasses <- setdiff(originalClasses, mappedClasses)
   if (length(unmappedClasses) > 0) {
-    warning(paste0("The following classes are not included in classMapping and will be labeled as 'Unmapped': ",
+    warning(paste0("The following classes were present in predictions but not accounted for in classMapping and will be labeled as 'Unmapped': ",
                    paste0(unmappedClasses, collapse = ", ")))
   }
   
@@ -979,8 +988,9 @@ CombineTcellActivationClasses <- function(seuratObj,
   }
   
   #add combined classes to metadata
+  #ensure the column name is tied to the model and version
   combinedClassDf <- data.frame(
-    CombinedClass = combinedClasses,
+    combinedClasses,
     row.names = colnames(seuratObj),
     stringsAsFactors = FALSE
   )
@@ -999,3 +1009,91 @@ CombineTcellActivationClasses <- function(seuratObj,
   
   return(seuratObj)
 }
+
+
+# ----------------------------------------------------------------------------
+# Activation Class Mapping Registry
+# ----------------------------------------------------------------------------
+
+# initialize registry in package environment
+if (is.null(pkg.env$ACTIVATION_CLASS_MAPPINGS)) {
+  pkg.env$ACTIVATION_CLASS_MAPPINGS <- list()
+}
+
+.RegisterActivationClassMapping <- function(name, classMapping) {
+  if (missing(name) || is.null(name) || nchar(name) == 0) {
+    stop('Name must be a non-empty string')
+  }
+  if (name %in% names(pkg.env$ACTIVATION_CLASS_MAPPINGS)) {
+    stop(paste0('Activation class mapping already registered: ', name))
+  }
+
+  # basic validation similar to CombineTcellActivationClasses
+  if (!is.list(classMapping) || is.null(names(classMapping))) {
+    stop('classMapping must be a named list')
+  }
+  if (any(names(classMapping) == '' | is.na(names(classMapping)))) {
+    stop('All elements in classMapping must have non-empty names')
+  }
+  for (newClassName in names(classMapping)) {
+    vals <- classMapping[[newClassName]]
+    if (!is.character(vals)) {
+      stop(paste0("Value for '", newClassName, "' must be a character vector"))
+    }
+    if (length(vals) == 0) {
+      stop(paste0("Value for '", newClassName, "' cannot be an empty vector"))
+    }
+    if (any(is.na(vals) | vals == '')) {
+      stop(paste0("Value for '", newClassName, "' contains empty or NA class names"))
+    }
+  }
+
+  # duplicates across mappings are ambiguous
+  allMapped <- unlist(classMapping, use.names = FALSE)
+  dups <- allMapped[duplicated(allMapped)]
+  if (length(dups) > 0) {
+    stop(paste0('The following original classes are duplicated across mappings: ', paste0(unique(dups), collapse = ', ')))
+  }
+
+  pkg.env$ACTIVATION_CLASS_MAPPINGS[[name]] <- classMapping
+}
+
+#' @title GetActivationClassMapping
+#'
+#' @description Fetch a predefined T cell activation class mapping by key. These mappings
+#' collapse model-specific fine-grained classes into broader categories and are suitable
+#' inputs for CombineTcellActivationClasses().
+#' @param name The key of the registered class mapping
+#' @return A named list mapping new combined classes to character vectors of original classes.
+#' Returns NULL and warns if the key is unknown.
+#' @export
+GetActivationClassMapping <- function(name) {
+  if (!(name %in% names(pkg.env$ACTIVATION_CLASS_MAPPINGS))) {
+    warning(paste0('Unknown activation class mapping: ', name))
+    return(NULL)
+  }
+  return(pkg.env$ACTIVATION_CLASS_MAPPINGS[[name]])
+}
+
+# pre-register common mappings
+.RegisterActivationClassMapping(
+  'TcellActivation.Basic',
+  list(
+    'Th1' = c('Th1_MIP1B.neg_CD137.neg', 'Th1_MIP1B.neg_CD137.pos', 'Th1_MIP1B.pos'),
+    'Th17' = c('Th17'),
+    'Bystander Activated' = c('NonSpecificActivated_L1', 'NonSpecificActivated_L2'),
+    'Bulk Tissue T cell' = c('Uncultured'),
+    'Naive T cell' = c('Cultured_Bystander_NoBFA', 'Cultured_Bystander_BFA')
+  )
+)
+
+.RegisterActivationClassMapping(
+  'TcellActivation.NomenclatureV1',
+  list(
+    'CD4posOrCD8pos_Th1_U_B_A_t_star' = c('Th1_MIP1B.neg_CD137.neg', 'Th1_MIP1B.neg_CD137.pos', 'Th1_MIP1B.pos'),
+    'CD4pos_Th17_U_B_A_t_star' = c('Th17'),
+    'CD4posOrCD8pos_Th1_U_B_A_t_O' = c('NonSpecificActivated_L1', 'NonSpecificActivated_L2'),
+    'CD4posOrCD8pos_T_U_R_N_t_O' = c('Uncultured'),
+    'CD4posOrCD8pos_T_U_B_N_t_O' = c('Cultured_Bystander_NoBFA', 'Cultured_Bystander_BFA')
+  )
+)

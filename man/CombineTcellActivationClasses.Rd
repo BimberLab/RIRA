@@ -21,8 +21,9 @@ CombineTcellActivationClasses(
 \item{modelVersion}{The version of the model. Default is "v3" for the General model.}
 
 \item{classMapping}{A named list where names are the new combined class labels and values are 
-character vectors of the original classes to combine. For example:
-list("Activated" = c("Early_Activated", "Late_Activated"), "Resting" = c("Naive", "Memory"))}
+character vectors of the original classes to combine. You can also fetch predefined mappings
+using GetActivationClassMapping(name). For example: GetActivationClassMapping('TcellActivation.Basic')
+or a manual list such as list("Activated" = c("Early_Activated", "Late_Activated"), "Resting" = c("Naive", "Memory")).}
 
 \item{outputFieldName}{The name of the metadata column to store the combined classifications. 
 If NULL, will use "{modelName}_Combined_Class_{modelVersion}".}
@@ -42,6 +43,13 @@ activation states into broader categories.
 }
 \examples{
 \dontrun{
+# Using a pre-registered mapping
+mapping <- GetActivationClassMapping('TcellActivation.Basic')
+seuratObj <- CombineTcellActivationClasses(
+  seuratObj,
+  classMapping = mapping
+)
+
 # Combine activation states into broader categories
 seuratObj <- CombineTcellActivationClasses(
   seuratObj,
@@ -67,4 +75,7 @@ seuratObj <- CombineTcellActivationClasses(
   )
 )
 }
+}
+\seealso{
+GetActivationClassMapping, PredictTcellActivation
 }
