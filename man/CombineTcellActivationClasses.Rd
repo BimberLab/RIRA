@@ -42,7 +42,7 @@ If NULL, will use "{modelName}_Combined_Class_{modelVersion}".}
 
 \item{recallMethod}{When relabelOrRecall = "recall", how to recall combined classes.
 Options: "max" (default) choose the highest combined probability, or "threshold" which
-assigns the first combined class with probability >= recallProbabilityThreshold, otherwise "Unknown".}
+assigns the first combined class with probability >= recallProbabilityThreshold, otherwise "Uncalled".}
 
 \item{recallProbabilityThreshold}{Threshold used when recallMethod = "threshold". Default: 0.5.}
 }

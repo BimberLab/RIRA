@@ -808,7 +808,7 @@ PredictTcellActivation <- function(seuratObj, model = NULL, modelList = NULL) {
 #' "recall" uses the newly aggregated combined probabilities to assign classes.
 #' @param recallMethod When relabelOrRecall = "recall", how to recall combined classes.
 #' Options: "max" (default) choose the highest combined probability, or "threshold" which
-#' assigns the first combined class with probability >= recallProbabilityThreshold, otherwise "Unknown".
+#' assigns the first combined class with probability >= recallProbabilityThreshold, otherwise "Uncalled".
 #' @param recallProbabilityThreshold Threshold used when recallMethod = "threshold". Default: 0.5.
 #' @return A Seurat object with the combined class assignments added to metadata
 #' @seealso GetActivationClassMapping, PredictTcellActivation
@@ -1020,8 +1020,8 @@ CombineTcellActivationClasses <- function(seuratObj,
         maxIdx <- apply(probMat, 1, which.max)
         combinedClasses <- colnames(probMat)[maxIdx]
       } else if (recallMethod == "threshold") {
-        # Assign the first class that exceeds threshold; if none, label Unknown
-        combinedClasses <- rep("Unknown", nrow(probMat))
+        # Assign the first class that exceeds threshold; if none, label Uncalled
+        combinedClasses <- rep("Uncalled", nrow(probMat))
         for (i in seq_len(nrow(probMat))) {
           exceeds <- which(probMat[i, ] >= recallProbabilityThreshold)
           if (length(exceeds) > 0) {
