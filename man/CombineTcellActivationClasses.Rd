@@ -37,8 +37,8 @@ If NULL, will use "{modelName}_Combined_Class_{modelVersion}".}
 "mean" - take mean of probabilities of constituent classes.}
 
 \item{relabelOrRecall}{Strategy to set the combined class column. Options:
-"relabel" (default) uses the original class-to-mapping lookup, labeling unmapped as "Unmapped".
-"recall" uses the newly aggregated combined probabilities to assign classes.}
+"relabel" uses the original class-to-mapping lookup, labeling unmapped as "Unmapped".
+"recall" (default) uses the newly aggregated combined probabilities to assign classes.}
 
 \item{recallMethod}{When relabelOrRecall = "recall", how to recall combined classes.
 Options: "max" (default) choose the highest combined probability, or "threshold" which

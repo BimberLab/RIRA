@@ -804,8 +804,8 @@ PredictTcellActivation <- function(seuratObj, model = NULL, modelList = NULL) {
 #' "max" - take maximum probability among constituent classes,
 #' "mean" - take mean of probabilities of constituent classes.
 #' @param relabelOrRecall Strategy to set the combined class column. Options:
-#' "relabel" (default) uses the original class-to-mapping lookup, labeling unmapped as "Unmapped".
-#' "recall" uses the newly aggregated combined probabilities to assign classes.
+#' "relabel" uses the original class-to-mapping lookup, labeling unmapped as "Unmapped".
+#' "recall" (default) uses the newly aggregated combined probabilities to assign classes.
 #' @param recallMethod When relabelOrRecall = "recall", how to recall combined classes.
 #' Options: "max" (default) choose the highest combined probability, or "threshold" which
 #' assigns the first combined class with probability >= recallProbabilityThreshold, otherwise "Uncalled".
