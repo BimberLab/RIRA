@@ -815,6 +815,20 @@ PredictTcellActivation <- function(seuratObj, model = NULL, modelList = NULL) {
 #' @export
 #' @examples
 #' \dontrun{
+#' # Default usage with all parameters explicit
+#' mapping <- GetActivationClassMapping('TcellActivation.Basic')
+#' seuratObj <- CombineTcellActivationClasses(
+#'   seuratObj,
+#'   modelName = "General",
+#'   modelVersion = "v3",
+#'   classMapping = mapping,
+#'   outputFieldName = NULL,
+#'   probabilityAggregation = "sum",
+#'   relabelOrRecall = "recall",
+#'   recallMethod = "max",
+#'   recallProbabilityThreshold = 0.5
+#' )
+#'
 #' # Using a pre-registered mapping
 #' mapping <- GetActivationClassMapping('TcellActivation.Basic')
 #' seuratObj <- CombineTcellActivationClasses(
