@@ -738,7 +738,9 @@ PredictTcellActivation <- function(seuratObj, model = NULL, modelList = NULL) {
       print(Seurat::DimPlot(seuratObj, group.by = paste0(modelName, "_sPLS_class_", modelVersion)))
     }
   }
-  
+
+  seuratObj <- CombineTcellActivationClasses(seuratObj, classMapping = GetActivationClassMapping('TcellActivation.Basic'), outputFieldName = 'sPLS_TCR_General_v3')
+
   return(seuratObj)
 }
 
