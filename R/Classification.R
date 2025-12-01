@@ -459,7 +459,7 @@ PredictCellTypeProbability <- function(seuratObj, models, fieldName = 'RIRA_Cons
   }
 
   seuratObj <- AssignCellType(seuratObj, probabilityColumns = fieldNames, fieldName = fieldName, minimum_probability = minimum_probability, minimum_delta = minimum_delta)
-  seuratObj <- CombineTcellActivationClasses(seuratObj, classMapping = GetActivationClassMapping('TcellActivation.Basic'))
+  seuratObj <- CombineTcellActivationClasses(seuratObj, classMapping = GetActivationClassMapping('TcellActivation.Basic'), outputFieldName = 'sPLS_TCR_General_v3')
 
   return(seuratObj)
 }
