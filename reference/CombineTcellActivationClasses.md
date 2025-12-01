@@ -1,0 +1,136 @@
+# Combine T cell activation classes using custom logic
+
+Takes a Seurat object with T cell activation predictions (from
+PredictTcellActivation) and combines classes based on user-defined
+logic. This is useful for collapsing fine-grained activation states into
+broader categories.
+
+## Usage
+
+``` r
+CombineTcellActivationClasses(
+  seuratObj,
+  modelName = "General",
+  modelVersion = "v3",
+  classMapping,
+  outputFieldName = NULL,
+  probabilityAggregation = "sum",
+  relabelOrRecall = "recall",
+  recallMethod = "max",
+  recallProbabilityThreshold = 0.5
+)
+```
+
+## Arguments
+
+- seuratObj:
+
+  The Seurat Object containing T cell activation predictions
+
+- modelName:
+
+  The name of the model whose predictions should be combined. Default is
+  "General".
+
+- modelVersion:
+
+  The version of the model. Default is "v3" for the General model.
+
+- classMapping:
+
+  A named list where names are the new combined class labels and values
+  are character vectors of the original classes to combine. You can also
+  fetch predefined mappings using GetActivationClassMapping(name). For
+  example: GetActivationClassMapping('TcellActivation.Basic') or a
+  manual list such as list("Activated" = c("Early_Activated",
+  "Late_Activated"), "Resting" = c("Naive", "Memory")).
+
+- outputFieldName:
+
+  The name of the metadata column to store the combined classifications.
+  If NULL, will use "\<modelName\>\_Combined_Class\_\<modelVersion\>".
+
+- probabilityAggregation:
+
+  How to aggregate probabilities for combined classes. Options are:
+  "sum" (default) - sum probabilities of constituent classes, "max" -
+  take maximum probability among constituent classes, "mean" - take mean
+  of probabilities of constituent classes.
+
+- relabelOrRecall:
+
+  Strategy to set the combined class column. Options: "relabel" uses the
+  original class-to-mapping lookup, labeling unmapped as "Unmapped".
+  "recall" (default) uses the newly aggregated combined probabilities to
+  assign classes.
+
+- recallMethod:
+
+  When relabelOrRecall = "recall", how to recall combined classes.
+  Options: "max" (default) choose the highest combined probability, or
+  "threshold" which assigns the first combined class with probability
+  \>= recallProbabilityThreshold, otherwise "Uncalled".
+
+- recallProbabilityThreshold:
+
+  Threshold used when recallMethod = "threshold". Default: 0.5.
+
+## Value
+
+A Seurat object with the combined class assignments added to metadata
+
+## See also
+
+GetActivationClassMapping, PredictTcellActivation
+
+## Examples
+
+``` r
+if (FALSE) { # \dontrun{
+# Default usage with all parameters explicit
+mapping <- GetActivationClassMapping('TcellActivation.Basic')
+seuratObj <- CombineTcellActivationClasses(
+  seuratObj,
+  modelName = "General",
+  modelVersion = "v3",
+  classMapping = mapping,
+  outputFieldName = NULL,
+  probabilityAggregation = "sum",
+  relabelOrRecall = "recall",
+  recallMethod = "max",
+  recallProbabilityThreshold = 0.5
+)
+
+# Using a pre-registered mapping
+mapping <- GetActivationClassMapping('TcellActivation.Basic')
+seuratObj <- CombineTcellActivationClasses(
+  seuratObj,
+  classMapping = mapping
+)
+
+# Combine activation states into broader categories
+seuratObj <- CombineTcellActivationClasses(
+  seuratObj,
+  classMapping = list(
+    "Th1" = c("Th1_MIP1B.neg_CD137.neg", "Th1_MIP1B.neg_CD137.pos", "Th1_MIP1B.pos"),
+    "Th17" = c("Th17"), 
+    "Bystander Activated" = c("NonSpecificActivated_L1", "NonSpecificActivated_L2"), 
+    "Bulk Tissue T cell" = c("Uncultured"), 
+    "Naive T cell" = c("Cultured_Bystander_NoBFA", "Cultured_Bystander_BFA")
+  )
+)
+
+# Using Guidelines for T cell nomenclature (https://www.nature.com/articles/s41577-025-01238-2)
+# with a slight augmentation that antigen specific T cells are "star" for antigens, rather than plus or zero.
+seuratObj <- CombineTcellActivationClasses(
+  seuratObj,
+  classMapping = list(
+    "CD4posOrCD8pos_Th1_U_B_A_t_star" = c("Th1_MIP1B.neg_CD137.neg", "Th1_MIP1B.neg_CD137.pos", "Th1_MIP1B.pos"),
+    "CD4pos_Th17_U_B_A_t_star" = c("Th17"), 
+    "CD4posOrCD8pos_Th1_U_B_A_t_O" = c("NonSpecificActivated_L1", "NonSpecificActivated_L2"), 
+    "CD4posOrCD8pos_T_U_R_N_t_O" = c("Uncultured"), 
+    "CD4posOrCD8pos_T_U_B_N_t_O" = c("Cultured_Bystander_NoBFA", "Cultured_Bystander_BFA")
+  )
+)
+} # }
+```

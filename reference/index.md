@@ -12,6 +12,8 @@
   : Classify T/NK
 - [`Classify_TNK()`](https://bimberlab.github.io/RIRA/reference/Classify_TNK.md)
   : Classify T/NK
+- [`CombineTcellActivationClasses()`](https://bimberlab.github.io/RIRA/reference/CombineTcellActivationClasses.md)
+  : Combine T cell activation classes using custom logic
 - [`DownloadFromGEO()`](https://bimberlab.github.io/RIRA/reference/DownloadFromGEO.md)
   : Download RIRA data from GEO
 - [`ExpandGeneList()`](https://bimberlab.github.io/RIRA/reference/ExpandGeneList.md)
@@ -20,6 +22,8 @@
   : ExtractGeneWeights
 - [`FilterDisallowedClasses()`](https://bimberlab.github.io/RIRA/reference/FilterDisallowedClasses.md)
   : Filter Disallowed Classes
+- [`GetActivationClassMapping()`](https://bimberlab.github.io/RIRA/reference/GetActivationClassMapping.md)
+  : GetActivationClassMapping
 - [`GetAvailableScGates()`](https://bimberlab.github.io/RIRA/reference/GetAvailableScGates.md)
   : GetAvailableScGates
 - [`GetGeneSet()`](https://bimberlab.github.io/RIRA/reference/GetGeneSet.md)

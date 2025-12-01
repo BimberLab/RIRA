@@ -11,10 +11,12 @@
 <url><loc>https://bimberlab.github.io/RIRA/reference/Classify_ImmuneCells.html</loc></url>
 <url><loc>https://bimberlab.github.io/RIRA/reference/Classify_Myeloid.html</loc></url>
 <url><loc>https://bimberlab.github.io/RIRA/reference/Classify_TNK.html</loc></url>
+<url><loc>https://bimberlab.github.io/RIRA/reference/CombineTcellActivationClasses.html</loc></url>
 <url><loc>https://bimberlab.github.io/RIRA/reference/DownloadFromGEO.html</loc></url>
 <url><loc>https://bimberlab.github.io/RIRA/reference/ExpandGeneList.html</loc></url>
 <url><loc>https://bimberlab.github.io/RIRA/reference/ExtractGeneWeights.html</loc></url>
 <url><loc>https://bimberlab.github.io/RIRA/reference/FilterDisallowedClasses.html</loc></url>
+<url><loc>https://bimberlab.github.io/RIRA/reference/GetActivationClassMapping.html</loc></url>
 <url><loc>https://bimberlab.github.io/RIRA/reference/GetAvailableScGates.html</loc></url>
 <url><loc>https://bimberlab.github.io/RIRA/reference/GetGeneSet.html</loc></url>
 <url><loc>https://bimberlab.github.io/RIRA/reference/GetMMul10IgGenes.html</loc></url>
