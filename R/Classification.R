@@ -688,7 +688,7 @@ PredictTcellActivation <- function(seuratObj, model = NULL, modelList = NULL) {
     modelCoefs <- colnames(stats::coef(modelObj))
     if (!'nnet' %in% class(modelObj) || is.null(modelCoefs) || !any(grepl("^comp", modelCoefs))) {
       if ('nnet' %in% class(modelObj)) {
-        modelCoefs <- colnames(nnet:::coef.multinom(modelObj))
+        modelCoefs <- colnames(stats::coef(modelObj))
       }
     }
     
@@ -766,9 +766,9 @@ PredictTcellActivation <- function(seuratObj, model = NULL, modelList = NULL) {
   tryCatch({
     if (is.null(newdata)) {
       #naive predict call, no newdata provided
-      result <- predict(model)
+      result <- stats::predict(model)
     } else {
-      result <- predict(model, newdata = newdata)
+      result <- stats::predict(model, newdata = newdata)
     }
     return(TRUE)
   }, error = function(e) {
@@ -785,3 +785,374 @@ PredictTcellActivation <- function(seuratObj, model = NULL, modelList = NULL) {
     return(TRUE)
   })
 }
+
+#' @title Combine T cell activation classes using custom logic
+#' @description Takes a Seurat object with T cell activation predictions (from PredictTcellActivation) 
+#' and combines classes based on user-defined logic. This is useful for collapsing fine-grained 
+#' activation states into broader categories.
+#' @param seuratObj The Seurat Object containing T cell activation predictions
+#' @param modelName The name of the model whose predictions should be combined. Default is "General".
+#' @param modelVersion The version of the model. Default is "v3" for the General model.
+#' @param classMapping A named list where names are the new combined class labels and values are 
+#' character vectors of the original classes to combine. You can also fetch predefined mappings
+#' using GetActivationClassMapping(name). For example: GetActivationClassMapping('TcellActivation.Basic')
+#' or a manual list such as list("Activated" = c("Early_Activated", "Late_Activated"), "Resting" = c("Naive", "Memory")).
+#' @param outputFieldName The name of the metadata column to store the combined classifications. 
+#' If NULL, will use "<modelName>_Combined_Class_<modelVersion>".
+#' @param probabilityAggregation How to aggregate probabilities for combined classes. Options are:
+#' "sum" (default) - sum probabilities of constituent classes,
+#' "max" - take maximum probability among constituent classes,
+#' "mean" - take mean of probabilities of constituent classes.
+#' @param relabelOrRecall Strategy to set the combined class column. Options:
+#' "relabel" uses the original class-to-mapping lookup, labeling unmapped as "Unmapped".
+#' "recall" (default) uses the newly aggregated combined probabilities to assign classes.
+#' @param recallMethod When relabelOrRecall = "recall", how to recall combined classes.
+#' Options: "max" (default) choose the highest combined probability, or "threshold" which
+#' assigns the first combined class with probability >= recallProbabilityThreshold, otherwise "Uncalled".
+#' @param recallProbabilityThreshold Threshold used when recallMethod = "threshold". Default: 0.5.
+#' @return A Seurat object with the combined class assignments added to metadata
+#' @seealso GetActivationClassMapping, PredictTcellActivation
+#' @export
+#' @examples
+#' \dontrun{
+#' # Default usage with all parameters explicit
+#' mapping <- GetActivationClassMapping('TcellActivation.Basic')
+#' seuratObj <- CombineTcellActivationClasses(
+#'   seuratObj,
+#'   modelName = "General",
+#'   modelVersion = "v3",
+#'   classMapping = mapping,
+#'   outputFieldName = NULL,
+#'   probabilityAggregation = "sum",
+#'   relabelOrRecall = "recall",
+#'   recallMethod = "max",
+#'   recallProbabilityThreshold = 0.5
+#' )
+#'
+#' # Using a pre-registered mapping
+#' mapping <- GetActivationClassMapping('TcellActivation.Basic')
+#' seuratObj <- CombineTcellActivationClasses(
+#'   seuratObj,
+#'   classMapping = mapping
+#' )
+#'
+#' # Combine activation states into broader categories
+#' seuratObj <- CombineTcellActivationClasses(
+#'   seuratObj,
+#'   classMapping = list(
+#'     "Th1" = c("Th1_MIP1B.neg_CD137.neg", "Th1_MIP1B.neg_CD137.pos", "Th1_MIP1B.pos"),
+#'     "Th17" = c("Th17"), 
+#'     "Bystander Activated" = c("NonSpecificActivated_L1", "NonSpecificActivated_L2"), 
+#'     "Bulk Tissue T cell" = c("Uncultured"), 
+#'     "Naive T cell" = c("Cultured_Bystander_NoBFA", "Cultured_Bystander_BFA")
+#'   )
+#' )
+#' 
+#' # Using Guidelines for T cell nomenclature (https://www.nature.com/articles/s41577-025-01238-2)
+#' # with a slight augmentation that antigen specific T cells are "star" for antigens, rather than plus or zero.
+#' seuratObj <- CombineTcellActivationClasses(
+#'   seuratObj,
+#'   classMapping = list(
+#'     "CD4posOrCD8pos_Th1_U_B_A_t_star" = c("Th1_MIP1B.neg_CD137.neg", "Th1_MIP1B.neg_CD137.pos", "Th1_MIP1B.pos"),
+#'     "CD4pos_Th17_U_B_A_t_star" = c("Th17"), 
+#'     "CD4posOrCD8pos_Th1_U_B_A_t_O" = c("NonSpecificActivated_L1", "NonSpecificActivated_L2"), 
+#'     "CD4posOrCD8pos_T_U_R_N_t_O" = c("Uncultured"), 
+#'     "CD4posOrCD8pos_T_U_B_N_t_O" = c("Cultured_Bystander_NoBFA", "Cultured_Bystander_BFA")
+#'   )
+#' )
+#' }
+
+CombineTcellActivationClasses <- function(seuratObj, 
+                                          modelName = "General", 
+                                          modelVersion = "v3",
+                                          classMapping,
+                                          outputFieldName = NULL,
+                                          probabilityAggregation = "sum",
+                                          relabelOrRecall = "recall",
+                                          recallMethod = "max",
+                                          recallProbabilityThreshold = 0.5) {
+  #################
+  ### Sanitize  ###
+  #################
+  if (missing(classMapping) || is.null(classMapping)) {
+    stop("classMapping must be provided. It should be a named list mapping new class names to vectors of original class names.")
+  }
+  
+  if (!is.list(classMapping) || is.null(names(classMapping))) {
+    stop("classMapping must be a named list.")
+  }
+  
+  #validate that all names in classMapping are non-empty strings and not the literal 'NULL'
+  nameVec <- names(classMapping)
+  if (any(nameVec == "" | is.na(nameVec))) {
+    stop("All elements in classMapping must have non-empty names.")
+  }
+  if (any(tolower(nameVec) == "null")) {
+    stop("classMapping names cannot be 'NULL'. Please provide meaningful combined class names.")
+  }
+  
+  #validate that all values in classMapping are character vectors
+  for (newClassName in names(classMapping)) {
+    if (!is.character(classMapping[[newClassName]])) {
+      stop(paste0("Value for '", newClassName, "' must be a character vector of original class names."))
+    }
+    if (length(classMapping[[newClassName]]) == 0) {
+      stop(paste0("Value for '", newClassName, "' cannot be an empty vector. Please provide at least one original class name."))
+    }
+    if (any(is.na(classMapping[[newClassName]]) | classMapping[[newClassName]] == "")) {
+      stop(paste0("Value for '", newClassName, "' contains empty or NA class names. All class names must be valid strings."))
+    }
+  }
+  
+  #check for duplicate classes across different mappings
+  allMappedClasses <- unlist(classMapping, use.names = FALSE)
+  duplicateClasses <- allMappedClasses[duplicated(allMappedClasses)]
+  if (length(duplicateClasses) > 0) {
+    stop(paste0("The following classes appear in multiple mappings: ", 
+                paste0(unique(duplicateClasses), collapse = ", "), 
+                ". Each original class can only be mapped to one combined class."))
+  }
+  
+  if (!probabilityAggregation %in% c("sum", "max", "mean")) {
+    stop("probabilityAggregation must be one of: 'sum', 'max', 'mean'")
+  }
+
+  if (!relabelOrRecall %in% c("relabel", "recall")) {
+    stop("relabelOrRecall must be one of: 'relabel', 'recall'")
+  }
+  if (!recallMethod %in% c("max", "threshold")) {
+    stop("recallMethod must be one of: 'max', 'threshold'")
+  }
+  if (!is.numeric(recallProbabilityThreshold) || length(recallProbabilityThreshold) != 1 || is.na(recallProbabilityThreshold)) {
+    stop("recallProbabilityThreshold must be a single numeric value")
+  }
+  if (recallProbabilityThreshold < 0 || recallProbabilityThreshold > 1) {
+    stop("recallProbabilityThreshold must be in [0, 1]")
+  }
+  
+  #check if the model predictions exist in the metadata
+  classFieldName <- paste0(modelName, "_sPLS_class_", modelVersion)
+  if (!classFieldName %in% colnames(seuratObj@meta.data)) {
+    stop(paste0("Class predictions '", classFieldName, "' not found in metadata. Please run PredictTcellActivation() first."))
+  }
+  
+  #get all original classes from the model
+  originalClasses <- unique(seuratObj@meta.data[[classFieldName]])
+  
+  #check that all classes in classMapping exist in the original predictions
+  mappedClasses <- allMappedClasses
+  missingClasses <- setdiff(mappedClasses, originalClasses)
+  if (length(missingClasses) > 0) {
+    warning(paste0("The following classes in classMapping were not found in the original predictions and will be ignored for probability aggregation: ", 
+                   paste0(missingClasses, collapse = ", ")))
+  }
+  
+  #warn if some original classes are not mapped
+  unmappedClasses <- setdiff(originalClasses, mappedClasses)
+  if (length(unmappedClasses) > 0) {
+    warning(paste0("The following classes were present in predictions but not accounted for in classMapping and will be labeled as 'Unmapped': ",
+                   paste0(unmappedClasses, collapse = ", ")))
+  }
+  
+  #set output field name
+  if (is.null(outputFieldName)) {
+    outputFieldName <- paste0(modelName, "_Combined_Class_", modelVersion)
+  }
+  
+  ########################
+  ### Combine Classes  ###
+  ########################
+  #initialize combined class vector
+  combinedClasses <- character(ncol(seuratObj))
+  names(combinedClasses) <- colnames(seuratObj)
+  
+  #initialize combined probability matrix
+  combinedProbs <- matrix(0, nrow = ncol(seuratObj), ncol = length(classMapping))
+  colnames(combinedProbs) <- names(classMapping)
+  rownames(combinedProbs) <- colnames(seuratObj)
+  
+  #get all probability columns for this model
+  probPattern <- paste0("^", modelName, "_sPLS_prob_.*_", modelVersion, "$")
+  probCols <- grep(probPattern, colnames(seuratObj@meta.data), value = TRUE)
+  
+  if (length(probCols) == 0) {
+    warning(paste0("No probability columns found for model '", modelName, "' version '", modelVersion, 
+                   "'. Combined probabilities will not be calculated."))
+  }
+  
+  # if relabelOrRecall == "relabel", map each cell to its combined class using original predictions
+  if (relabelOrRecall == "relabel") {
+    for (cellIdx in seq_len(ncol(seuratObj))) {
+      originalClass <- seuratObj@meta.data[cellIdx, classFieldName]
+      #find which combined class this original class belongs to
+      combinedClass <- "Unmapped"
+      for (newClassName in names(classMapping)) {
+        if (originalClass %in% classMapping[[newClassName]]) {
+          combinedClass <- newClassName
+          break
+        }
+      }
+      combinedClasses[cellIdx] <- combinedClass
+    }
+  }
+  
+  #aggregate probabilities for combined classes
+  if (length(probCols) > 0) {
+    for (newClassName in names(classMapping)) {
+      constituentClasses <- classMapping[[newClassName]]
+      
+      #find probability columns for constituent classes
+      constituentProbCols <- c()
+      for (constituent in constituentClasses) {
+        probCol <- paste0(modelName, "_sPLS_prob_", constituent, "_", modelVersion)
+        if (probCol %in% probCols) {
+          constituentProbCols <- c(constituentProbCols, probCol)
+        }
+      }
+      
+      if (length(constituentProbCols) > 0) {
+        #aggregate probabilities based on specified method
+        if (probabilityAggregation == "sum") {
+          combinedProbs[, newClassName] <- rowSums(seuratObj@meta.data[, constituentProbCols, drop = FALSE])
+        } else if (probabilityAggregation == "max") {
+          combinedProbs[, newClassName] <- apply(seuratObj@meta.data[, constituentProbCols, drop = FALSE], 1, max)
+        } else if (probabilityAggregation == "mean") {
+          combinedProbs[, newClassName] <- rowMeans(seuratObj@meta.data[, constituentProbCols, drop = FALSE])
+        }
+      }
+    }
+    
+    #add combined probabilities to metadata
+    combinedProbsDf <- as.data.frame(combinedProbs)
+    colnames(combinedProbsDf) <- paste0(modelName, "_Combined_prob_", colnames(combinedProbsDf), "_", modelVersion)
+    seuratObj <- Seurat::AddMetaData(seuratObj, metadata = combinedProbsDf)
+    
+    #if relabelOrRecall == "recall", assign classes using combined probabilities
+    if (relabelOrRecall == "recall") {
+      probMat <- as.matrix(combinedProbsDf)
+      if (recallMethod == "max") {
+        maxIdx <- apply(probMat, 1, which.max)
+        combinedClasses <- colnames(probMat)[maxIdx]
+      } else if (recallMethod == "threshold") {
+        # Assign the first class that exceeds threshold; if none, label Uncalled
+        combinedClasses <- rep("Uncalled", nrow(probMat))
+        for (i in seq_len(nrow(probMat))) {
+          exceeds <- which(probMat[i, ] >= recallProbabilityThreshold)
+          if (length(exceeds) > 0) {
+            combinedClasses[i] <- colnames(probMat)[exceeds[1]]
+          }
+        }
+      }
+    }
+  }
+  
+  #add combined classes to metadata
+  #ensure the column name is tied to the model and version
+  combinedClassDf <- data.frame(
+    combinedClasses,
+    row.names = colnames(seuratObj),
+    stringsAsFactors = FALSE
+  )
+  colnames(combinedClassDf) <- outputFieldName
+  seuratObj <- Seurat::AddMetaData(seuratObj, metadata = combinedClassDf)
+  
+  #print summary
+  print(paste0("Combined ", length(unique(seuratObj@meta.data[[classFieldName]])), 
+               " original classes into ", length(classMapping), " combined classes"))
+  print(table(seuratObj@meta.data[[outputFieldName]]))
+  
+  #plot if reductions are available
+  if (length(names(seuratObj@reductions)) > 0) {
+    print(Seurat::DimPlot(seuratObj, group.by = outputFieldName))
+  }
+  
+  return(seuratObj)
+}
+
+
+# ----------------------------------------------------------------------------
+# Activation Class Mapping Registry
+# ----------------------------------------------------------------------------
+
+# initialize registry in package environment
+if (is.null(pkg.env$ACTIVATION_CLASS_MAPPINGS)) {
+  pkg.env$ACTIVATION_CLASS_MAPPINGS <- list()
+}
+
+.RegisterActivationClassMapping <- function(name, classMapping) {
+  if (missing(name) || is.null(name) || nchar(name) == 0) {
+    stop('Name must be a non-empty string')
+  }
+  if (name %in% names(pkg.env$ACTIVATION_CLASS_MAPPINGS)) {
+    stop(paste0('Activation class mapping already registered: ', name))
+  }
+
+  # basic validation similar to CombineTcellActivationClasses
+  if (!is.list(classMapping) || is.null(names(classMapping))) {
+    stop('classMapping must be a named list')
+  }
+  if (any(names(classMapping) == '' | is.na(names(classMapping)))) {
+    stop('All elements in classMapping must have non-empty names')
+  }
+  for (newClassName in names(classMapping)) {
+    vals <- classMapping[[newClassName]]
+    if (!is.character(vals)) {
+      stop(paste0("Value for '", newClassName, "' must be a character vector"))
+    }
+    if (length(vals) == 0) {
+      stop(paste0("Value for '", newClassName, "' cannot be an empty vector"))
+    }
+    if (any(is.na(vals) | vals == '')) {
+      stop(paste0("Value for '", newClassName, "' contains empty or NA class names"))
+    }
+  }
+
+  # duplicates across mappings are ambiguous
+  allMapped <- unlist(classMapping, use.names = FALSE)
+  dups <- allMapped[duplicated(allMapped)]
+  if (length(dups) > 0) {
+    stop(paste0('The following original classes are duplicated across mappings: ', paste0(unique(dups), collapse = ', ')))
+  }
+
+  pkg.env$ACTIVATION_CLASS_MAPPINGS[[name]] <- classMapping
+}
+
+#' @title GetActivationClassMapping
+#'
+#' @description Fetch a predefined T cell activation class mapping by key. These mappings
+#' collapse model-specific fine-grained classes into broader categories and are suitable
+#' inputs for CombineTcellActivationClasses().
+#' @param name The key of the registered class mapping
+#' @return A named list mapping new combined classes to character vectors of original classes.
+#' Returns NULL and warns if the key is unknown.
+#' @export
+GetActivationClassMapping <- function(name) {
+  if (!(name %in% names(pkg.env$ACTIVATION_CLASS_MAPPINGS))) {
+    warning(paste0('Unknown activation class mapping: ', name))
+    return(NULL)
+  }
+  return(pkg.env$ACTIVATION_CLASS_MAPPINGS[[name]])
+}
+
+# pre-register common mappings
+.RegisterActivationClassMapping(
+  'TcellActivation.Basic',
+  list(
+    'Th1' = c('Th1_MIP1B.neg_CD137.neg', 'Th1_MIP1B.neg_CD137.pos', 'Th1_MIP1B.pos'),
+    'Th17' = c('Th17'),
+    'Bystander Activated' = c('NonSpecificActivated_L1', 'NonSpecificActivated_L2'),
+    'Bulk Tissue T cell' = c('Uncultured'),
+    'Naive T cell' = c('Cultured_Bystander_NoBFA', 'Cultured_Bystander_BFA')
+  )
+)
+
+.RegisterActivationClassMapping(
+  'TcellActivation.NomenclatureV1',
+  list(
+    'CD4posOrCD8pos_Th1_U_B_A_t_star' = c('Th1_MIP1B.neg_CD137.neg', 'Th1_MIP1B.neg_CD137.pos', 'Th1_MIP1B.pos'),
+    'CD4pos_Th17_U_B_A_t_star' = c('Th17'),
+    'CD4posOrCD8pos_Th1_U_B_A_t_O' = c('NonSpecificActivated_L1', 'NonSpecificActivated_L2'),
+    'CD4posOrCD8pos_T_U_R_N_t_O' = c('Uncultured'),
+    'CD4posOrCD8pos_T_U_B_N_t_O' = c('Cultured_Bystander_NoBFA', 'Cultured_Bystander_BFA')
+  )
+)
