@@ -23,7 +23,6 @@ CalculateUCellScores <- function(seuratObj, forceRecalculate = FALSE, seed = Get
     Cytotoxicity.GzmKM = GetGeneSet('Cytotoxicity.GzmKM'),
     Glycolysis = GetGeneSet('Glycolysis'),
     Interferon_Response = GetGeneSet('Interferon_Response'),
-    Interferon_Response_IFI6 = GetGeneSet('Interferon_Response_IFI6_correlated'),
     Mitochondrial = GetGeneSet('MMul10_Mitochondrial'),
     EffectorCytokines = GetGeneSet('EffectorCytokines'),
     MAIT_Markers = GetGeneSet('MAIT_Markers'),
@@ -32,8 +31,7 @@ CalculateUCellScores <- function(seuratObj, forceRecalculate = FALSE, seed = Get
     IEGs = GetGeneSet('IEGs'),
     MHCII = GetGeneSet('MHC-II'),
     TCellMemory = GetGeneSet('TCellMemoryS100'),
-    InflMyeloid = GetGeneSet('InflMyeloid'),
-    TNK_MaybeExhaustion = GetGeneSet('TNK_MaybeExhaustion')
+    InflMyeloid = GetGeneSet('InflMyeloid')
   )
 
   needsRecalc <- forceRecalculate || any(!paste0(names(toCalculate), '_UCell') %in% names(seuratObj@meta.data))
