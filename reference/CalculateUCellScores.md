@@ -13,7 +13,8 @@ CalculateUCellScores(
   ncores = 1,
   assayName = "RNA",
   storeRanks = TRUE,
-  plotCor = TRUE
+  plotCor = TRUE,
+  dropAllExistingUcells = FALSE
 )
 ```
 
@@ -49,3 +50,7 @@ CalculateUCellScores(
 
   If true, a plot of correlations between the UCell score and each
   component gene will be shown
+
+- dropAllExistingUcells:
+
+  If true, any existing column ending in UCell will be removed
