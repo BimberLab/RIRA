@@ -745,7 +745,9 @@ PredictTcellActivation <- function(seuratObj, model = NULL, modelList = NULL) {
   }
 
   seuratObj$Is_TCR_Stimulated <- seuratObj$sPLS_TCR_General_v3 %in% c('Th1-like', 'Th2-Th17-like')
-  print(DimPlot(seuratObj, group.by = 'Is_TCR_Stimulated'))
+  if (length(names(seuratObj@reductions)) > 0) {
+    print(DimPlot(seuratObj, group.by = 'Is_TCR_Stimulated'))
+  }
 
   return(seuratObj)
 }
