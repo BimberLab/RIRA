@@ -143,9 +143,6 @@ test_that("Predict TCell Activation works ", {
 
   SimulateSeuratObj <- SimulateSeuratData()
   SimulateSeuratObj <- PredictTcellActivation(SimulateSeuratObj)
-  print('Is_TCR_Stimulated 2')
-  print(sum(SimulateSeuratObj$Is_TCR_Stimulated))
-  #expect_that::expect_equal(sum(SimulateSeuratObj$Is_TCR_Stimulated), 100)
 
   #exhaustive check on component scores, since all are necessary for the default parameterization of the function
   for (i in 1:6) {
@@ -205,9 +202,6 @@ test_that("Predict TCell Activation works ", {
 test_that("CombineTcellActivationClasses combines classes and writes versioned columns", {
   seuratObj <- SimulateSeuratData()
   seuratObj <- PredictTcellActivation(seuratObj)
-  print('Is_TCR_Stimulated 1')
-  print(sum(seuratObj$Is_TCR_Stimulated))
-  #expect_that::expect_equal(sum(SimulateSeuratObj$Is_TCR_Stimulated), 100)
 
   #use the example mapping from roxygen docs
   classMapping <- list(
