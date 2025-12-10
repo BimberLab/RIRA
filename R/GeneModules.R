@@ -11,8 +11,9 @@
 #' @param assayName The assay from which to calculate UCell scores.
 #' @param storeRanks Passed directly to UCell::AddModuleScore_UCell. Increases object size but makes future calculations quicker.
 #' @param plotCor If true, a plot of correlations between the UCell score and each component gene will be shown
+#' @param dropAllExistingUcells If true, any existing column ending in UCell will be removed
 #' @export
-CalculateUCellScores <- function(seuratObj, forceRecalculate = FALSE, seed = GetSeed(), ncores = 1, assayName = 'RNA', storeRanks = TRUE, plotCor = TRUE) {
+CalculateUCellScores <- function(seuratObj, forceRecalculate = FALSE, seed = GetSeed(), ncores = 1, assayName = 'RNA', storeRanks = TRUE, plotCor = TRUE, dropAllExistingUcells = FALSE) {
   toCalculate <- list(
     TandNK_Activation = GetGeneSet('TandNK_Activation.1'),
     TandNK_Activation2 = GetGeneSet('TandNK_Activation.2'),
@@ -33,6 +34,13 @@ CalculateUCellScores <- function(seuratObj, forceRecalculate = FALSE, seed = Get
     TCellMemory = GetGeneSet('TCellMemoryS100'),
     InflMyeloid = GetGeneSet('InflMyeloid')
   )
+
+  if (dropAllExistingUcells) {
+    print('Dropping all existing UCell columns:')
+    for (cn in grep(names(seuratObj@meta.data), pattern = '_UCell$', value = TRUE)) {
+      seuratObj[[cn]] <- NULL
+    }
+  }
 
   needsRecalc <- forceRecalculate || any(!paste0(names(toCalculate), '_UCell') %in% names(seuratObj@meta.data))
 

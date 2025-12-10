@@ -11,7 +11,8 @@ CalculateUCellScores(
   ncores = 1,
   assayName = "RNA",
   storeRanks = TRUE,
-  plotCor = TRUE
+  plotCor = TRUE,
+  dropAllExistingUcells = FALSE
 )
 }
 \arguments{
@@ -28,6 +29,8 @@ CalculateUCellScores(
 \item{storeRanks}{Passed directly to UCell::AddModuleScore_UCell. Increases object size but makes future calculations quicker.}
 
 \item{plotCor}{If true, a plot of correlations between the UCell score and each component gene will be shown}
+
+\item{dropAllExistingUcells}{If true, any existing column ending in UCell will be removed}
 }
 \description{
 This will calculate a handful of standardized UCell scores for a seurat object
