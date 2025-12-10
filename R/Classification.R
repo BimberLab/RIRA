@@ -740,6 +740,12 @@ PredictTcellActivation <- function(seuratObj, model = NULL, modelList = NULL) {
   }
 
   seuratObj <- CombineTcellActivationClasses(seuratObj, classMapping = GetActivationClassMapping('TcellActivation.Basic'), outputFieldName = 'sPLS_TCR_General_v3')
+  if (any(is.na(seuratObj$sPLS_TCR_General_v3))) {
+    stop('There were NA values for seuratObj$sPLS_TCR_General_v3')
+  }
+
+  seuratObj$Is_TCR_Stimulated <- seuratObj$sPLS_TCR_General_v3 %in% c('Th1-like', 'Th2-Th17-like')
+  print(DimPlot(seuratObj, group.by = 'Is_TCR_Stimulated'))
 
   return(seuratObj)
 }
@@ -1140,11 +1146,11 @@ GetActivationClassMapping <- function(name) {
 .RegisterActivationClassMapping(
   'TcellActivation.Basic',
   list(
-    'Th1' = c('Th1_MIP1B.neg_CD137.neg', 'Th1_MIP1B.neg_CD137.pos', 'Th1_MIP1B.pos'),
-    'Th17' = c('Th17'),
-    'Bystander Activated' = c('NonSpecificActivated_L1', 'NonSpecificActivated_L2'),
+    'Th1-like' = c('Th1_MIP1B.neg_CD137.neg', 'Th1_MIP1B.neg_CD137.pos', 'Th1_MIP1B.pos'),
+    'Th2-Th17-like' = c('Th17'),
+    'Bystander' = c('NonSpecificActivated_L1', 'NonSpecificActivated_L2'),
     'Bulk Tissue T cell' = c('Uncultured'),
-    'Naive T cell' = c('Cultured_Bystander_NoBFA', 'Cultured_Bystander_BFA')
+    'Cultured T cell' = c('Cultured_Bystander_NoBFA', 'Cultured_Bystander_BFA')
   )
 )
 
