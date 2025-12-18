@@ -8,7 +8,7 @@ TrainModelsFromSeurat(
   seuratObj,
   celltype_column,
   assay = "RNA",
-  slot = "data",
+  layer = "data",
   output_dir = "./classifiers",
   hyperparameter_tuning = F,
   learner = "classif.ranger",
@@ -33,7 +33,7 @@ TrainModelsFromSeurat(
 
 \item{assay}{SeuratObj assay containing the desired count matrix/metadata}
 
-\item{slot}{Slot containing the count data. Should be restricted to counts, data, or scale.data.}
+\item{layer}{Layer containing the count data. Should be restricted to counts, data, or scale.data.}
 
 \item{output_dir}{The directory in which models, metrics, and training data will be saved.}
 
