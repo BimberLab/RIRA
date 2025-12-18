@@ -22,12 +22,12 @@ GetSeed <- function() {
   return(pkg.env$RANDOM_SEED)
 }
 
-SeuratToMatrix <- function(seuratObj, outDir, assayName, slot = 'counts'){
+SeuratToMatrix <- function(seuratObj, outDir, assayName, layer = 'counts'){
   if (endsWith(outDir, "/")){
     outDir <- gsub(outDir, pattern = "/$", replacement = "")
   }
 
-  DropletUtils::write10xCounts(x = Seurat::GetAssayData(seuratObj, assay = assayName, slot = slot), path = outDir, overwrite = TRUE, type = 'sparse')
+  DropletUtils::write10xCounts(x = Seurat::GetAssayData(seuratObj, assay = assayName, layer = layer), path = outDir, overwrite = TRUE, type = 'sparse')
 
   return(paste0(outDir, '/matrix.mtx'))
 }
@@ -57,7 +57,7 @@ SeuratToMatrix <- function(seuratObj, outDir, assayName, slot = 'counts'){
 
   assayObj <- Seurat::GetAssay(seuratObj, assay = assayName)
   if (class(assayObj)[1] == 'Assay') {
-    return(!identical(Seurat::GetAssayData(seuratObj, assay = assayName, slot = 'counts'), Seurat::GetAssayData(seuratObj, assay = assayName, slot = 'data')))
+    return(!identical(Seurat::GetAssayData(seuratObj, assay = assayName, layer = 'counts'), Seurat::GetAssayData(seuratObj, assay = assayName, layer = 'data')))
   } else if (class(assayObj)[1] == 'Assay5') {
     return('data' %in% names(assayObj@layers))
   } else {

@@ -20,7 +20,7 @@ TrainModel(
 )
 }
 \arguments{
-\item{training_matrix}{A counts or data slot provided by TrainModelsFromSeurat}
+\item{training_matrix}{A matrix (counts or data layer) provided by TrainModelsFromSeurat}
 
 \item{celltype}{The celltype (provided by TrainModelsFromSeurat) used as classifier's positive prediction}
 

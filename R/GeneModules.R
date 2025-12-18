@@ -111,7 +111,7 @@ PlotUcellCorrelation <- function(seuratObj, toCalculate, assayName = 'RNA') {
     # Drop any genes with all zeros
     genesToSkip <- NULL
     for (gene in geneList) {
-      if (sum(Seurat::GetAssayData(seuratObj, assay = assayName, slot = 'data')[gene,] > 0) == 0) {
+      if (sum(Seurat::GetAssayData(seuratObj, assay = assayName, layer = 'data')[gene,] > 0) == 0) {
         genesToSkip <- c(genesToSkip, gene)
       }
     }
@@ -126,7 +126,7 @@ PlotUcellCorrelation <- function(seuratObj, toCalculate, assayName = 'RNA') {
       next
     }
 
-    geneData <- as.data.frame(t(as.matrix(Seurat::GetAssayData(seuratObj, assay = assayName, slot = 'data')[geneList,, drop = FALSE])))
+    geneData <- as.data.frame(t(as.matrix(Seurat::GetAssayData(seuratObj, assay = assayName, layer = 'data')[geneList,, drop = FALSE])))
     if (! paste0(moduleName, '_UCell') %in% names(seuratObj@meta.data)) {
       stop(paste0('Missing column: ', paste0(moduleName, '_UCell')))
     }
