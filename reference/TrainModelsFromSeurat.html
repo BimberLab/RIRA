@@ -47,7 +47,7 @@
 <span>  <span class="va">seuratObj</span>,</span>
 <span>  <span class="va">celltype_column</span>,</span>
 <span>  assay <span class="op">=</span> <span class="st">"RNA"</span>,</span>
-<span>  slot <span class="op">=</span> <span class="st">"data"</span>,</span>
+<span>  layer <span class="op">=</span> <span class="st">"data"</span>,</span>
 <span>  output_dir <span class="op">=</span> <span class="st">"./classifiers"</span>,</span>
 <span>  hyperparameter_tuning <span class="op">=</span> <span class="cn">F</span>,</span>
 <span>  learner <span class="op">=</span> <span class="st">"classif.ranger"</span>,</span>
@@ -82,8 +82,8 @@
 <dd><p>SeuratObj assay containing the desired count matrix/metadata</p></dd>
 
 
-<dt id="arg-slot">slot<a class="anchor" aria-label="anchor" href="#arg-slot"></a></dt>
-<dd><p>Slot containing the count data. Should be restricted to counts, data, or scale.data.</p></dd>
+<dt id="arg-layer">layer<a class="anchor" aria-label="anchor" href="#arg-layer"></a></dt>
+<dd><p>Layer containing the count data. Should be restricted to counts, data, or scale.data.</p></dd>
 
 
 <dt id="arg-output-dir">output_dir<a class="anchor" aria-label="anchor" href="#arg-output-dir"></a></dt>

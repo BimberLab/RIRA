@@ -5,7 +5,12 @@ Predicts T cell activation using a trained model
 ## Usage
 
 ``` r
-PredictTcellActivation(seuratObj, model = NULL, modelList = NULL)
+PredictTcellActivation(
+  seuratObj,
+  model = NULL,
+  modelList = NULL,
+  removePreexistingColumns = TRUE
+)
 ```
 
 ## Arguments
@@ -23,6 +28,10 @@ PredictTcellActivation(seuratObj, model = NULL, modelList = NULL)
 
   A list of trained sPLSDA models to use for prediction. This can be a
   list of file paths to RDS files, or built-in model names.
+
+- removePreexistingColumns:
+
+  If true, any columns
 
 ## Value
 

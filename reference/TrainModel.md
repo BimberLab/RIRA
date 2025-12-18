@@ -25,7 +25,7 @@ TrainModel(
 
 - training_matrix:
 
-  A counts or data slot provided by TrainModelsFromSeurat
+  A matrix (counts or data layer) provided by TrainModelsFromSeurat
 
 - celltype:
 

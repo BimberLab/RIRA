@@ -10,7 +10,7 @@ TrainModelsFromSeurat(
   seuratObj,
   celltype_column,
   assay = "RNA",
-  slot = "data",
+  layer = "data",
   output_dir = "./classifiers",
   hyperparameter_tuning = F,
   learner = "classif.ranger",
@@ -44,9 +44,9 @@ TrainModelsFromSeurat(
 
   SeuratObj assay containing the desired count matrix/metadata
 
-- slot:
+- layer:
 
-  Slot containing the count data. Should be restricted to counts, data,
+  Layer containing the count data. Should be restricted to counts, data,
   or scale.data.
 
 - output_dir:
