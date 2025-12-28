@@ -196,7 +196,7 @@ test_that("CombineTcellActivationClasses combines classes and writes versioned c
     "Naive T cell" = c("Cultured_Bystander_NoBFA", "Cultured_Bystander_BFA")
   )
 
-  seuratObj <- CombineTcellActivationClasses(seuratObj, classMapping = classMapping, sourceFieldPrefix = 'GeneralizedTCR_sPLSDA', outputFieldPrefix = 'CustomizedClasses')
+  seuratObj <- .CombineTcellActivationClasses(seuratObj, classMapping = classMapping, sourceFieldPrefix = 'GeneralizedTCR_sPLSDA', outputFieldPrefix = 'CustomizedClasses')
 
   #confirm combined class column exists with model/version naming
   combinedClassCol <- grep("^CustomizedClasses_ConsensusClass$", colnames(seuratObj@meta.data), value = TRUE)
