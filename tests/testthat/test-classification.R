@@ -143,56 +143,58 @@ test_that("Predict TCell Activation works ", {
 
   SimulateSeuratObj <- SimulateSeuratData()
   SimulateSeuratObj <- PredictTcellActivation(SimulateSeuratObj)
+  SimulateSeuratObj <- PredictTcellActivation(SimulateSeuratObj, modelName = 'CD4')
+  SimulateSeuratObj <- PredictTcellActivation(SimulateSeuratObj, modelName = 'CD8')
 
   #exhaustive check on component scores, since all are necessary for the default parameterization of the function
   for (i in 1:6) {
-    pattern <- paste0("^CD8_Activation_sPLSDA_Score_", i, "_v\\d+$")
+    pattern <- paste0("^CD8_sPLSDA_Score_", i, "$")
     matchingCols <- grep(pattern, colnames(SimulateSeuratObj@meta.data), value = TRUE)
     testthat::expect_true(length(matchingCols) > 0,
-                          label = paste0("CD8_Activation_sPLSDA_Score_", i, " (with version) should be present"))
+                          label = paste0("CD8_sPLSDA_Score_", i, " should be present"))
   }
   
   for (i in 1:6) {
-    pattern <- paste0("^CD4_Activation_sPLSDA_Score_", i, "_v\\d+$")
+    pattern <- paste0("^CD4_sPLSDA_Score_", i, "$")
     matchingCols <- grep(pattern, colnames(SimulateSeuratObj@meta.data), value = TRUE)
     testthat::expect_true(length(matchingCols) > 0,
-                          label = paste0("CD4_Activation_sPLSDA_Score_", i, " (with version) should be present"))
+                          label = paste0("CD4_sPLSDA_Score_", i, " (with version) should be present"))
   }
   
   for (i in 1:9) {
-    pattern <- paste0("^General_Activation_sPLSDA_Score_", i, "_v\\d+$")
+    pattern <- paste0("^GeneralizedTCR_sPLSDA_Score_", i, "$")
     matchingCols <- grep(pattern, colnames(SimulateSeuratObj@meta.data), value = TRUE)
     testthat::expect_true(length(matchingCols) > 0,
-                          label = paste0("General_Activation_sPLSDA_Score_", i, " (with version) should be present"))
+                          label = paste0("GeneralizedTCR_sPLSDA_Score_", i, " (with version) should be present"))
   }
   
   #check that the scores are numeric
-  cd8_score_2 <- grep("^CD8_Activation_sPLSDA_Score_2_v\\d+$", colnames(SimulateSeuratObj@meta.data), value = TRUE)[1]
-  cd4_score_3 <- grep("^CD4_Activation_sPLSDA_Score_3_v\\d+$", colnames(SimulateSeuratObj@meta.data), value = TRUE)[1]
-  general_score_7 <- grep("^General_Activation_sPLSDA_Score_7_v\\d+$", colnames(SimulateSeuratObj@meta.data), value = TRUE)[1]
+  cd8_score_2 <- grep("^CD8_sPLSDA_Score_2$", colnames(SimulateSeuratObj@meta.data), value = TRUE)[1]
+  cd4_score_3 <- grep("^CD4_sPLSDA_Score_3$", colnames(SimulateSeuratObj@meta.data), value = TRUE)[1]
+  GeneralizedTCR_score_7 <- grep("^GeneralizedTCR_sPLSDA_Score_7$", colnames(SimulateSeuratObj@meta.data), value = TRUE)[1]
   
   testthat::expect_type(SimulateSeuratObj@meta.data[5, cd8_score_2], "double")
   testthat::expect_type(SimulateSeuratObj@meta.data[5, cd4_score_3], "double")
-  testthat::expect_type(SimulateSeuratObj@meta.data[5, general_score_7], "double")
+  testthat::expect_type(SimulateSeuratObj@meta.data[5, GeneralizedTCR_score_7], "double")
 
   #check that prediction portion of the function worked
   #probabilities
-  testthat::expect_true(any(grepl("^CD8_sPLS_prob.*_v\\d+$", colnames(SimulateSeuratObj@meta.data))),
-                        label = "CD8 probability columns (with version) should be present")
-  testthat::expect_true(any(grepl("^CD4_sPLS_prob.*_v\\d+$", colnames(SimulateSeuratObj@meta.data))),
-                        label = "CD4 probability columns (with version) should be present")
-  testthat::expect_true(any(grepl("^General_sPLS_prob.*_v\\d+$", colnames(SimulateSeuratObj@meta.data))),
-                        label = "General probability columns (with version) should be present")
+  testthat::expect_true(any(grepl("^CD8_sPLSDA_prob.*$", colnames(SimulateSeuratObj@meta.data))),
+                        label = "CD8 probability columns should be present")
+  testthat::expect_true(any(grepl("^CD4_sPLSDA_prob.*$", colnames(SimulateSeuratObj@meta.data))),
+                        label = "CD4 probability columns should be present")
+  testthat::expect_true(any(grepl("^GeneralizedTCR_sPLSDA_prob.*$", colnames(SimulateSeuratObj@meta.data))),
+                        label = "GeneralizedTCR probability columns should be present")
   #classes
-  testthat::expect_true(any(grepl("^CD8_sPLS_class_v\\d+$", colnames(SimulateSeuratObj@meta.data))),
-                        label = "CD8 class column (with version) should be present")
-  testthat::expect_true(any(grepl("^CD4_sPLS_class_v\\d+$", colnames(SimulateSeuratObj@meta.data))),
-                        label = "CD4 class column (with version) should be present")
-  testthat::expect_true(any(grepl("^General_sPLS_class_v\\d+$", colnames(SimulateSeuratObj@meta.data))),
-                        label = "General class column (with version) should be present")
+  testthat::expect_true(any(grepl("^CD8_sPLSDA_class$", colnames(SimulateSeuratObj@meta.data))),
+                        label = "CD8 class column should be present")
+  testthat::expect_true(any(grepl("^CD4_sPLSDA_class$", colnames(SimulateSeuratObj@meta.data))),
+                        label = "CD4 class column should be present")
+  testthat::expect_true(any(grepl("^GeneralizedTCR_sPLSDA_class$", colnames(SimulateSeuratObj@meta.data))),
+                        label = "GeneralizedTCR class column should be present")
   
   #verify specific probability value
-  cd4_prob_resting1 <- grep("^CD4_sPLS_prob_Resting1_v\\d+$", colnames(SimulateSeuratObj@meta.data), value = TRUE)[1]
+  cd4_prob_resting1 <- grep("^CD4_sPLSDA_prob_Resting1$", colnames(SimulateSeuratObj@meta.data), value = TRUE)[1]
   testthat::expect_equal(SimulateSeuratObj@meta.data[5, cd4_prob_resting1], 
                          expected = 0.0086, 
                          tolerance = 0.001)
@@ -201,9 +203,8 @@ test_that("Predict TCell Activation works ", {
 
 test_that("CombineTcellActivationClasses combines classes and writes versioned columns", {
   seuratObj <- SimulateSeuratData()
-  seuratObj <- PredictTcellActivation(seuratObj)
+  seuratObj <- PredictTcellActivation(seuratObj, combineClasses = FALSE)
 
-  #use the example mapping from roxygen docs
   classMapping <- list(
     "Th1" = c("Th1_MIP1B.neg_CD137.neg", "Th1_MIP1B.neg_CD137.pos", "Th1_MIP1B.pos"),
     "Th17" = c("Th17"), 
@@ -212,15 +213,15 @@ test_that("CombineTcellActivationClasses combines classes and writes versioned c
     "Naive T cell" = c("Cultured_Bystander_NoBFA", "Cultured_Bystander_BFA")
   )
 
-  seuratObj <- CombineTcellActivationClasses(seuratObj, classMapping = classMapping)
+  seuratObj <- ConsensusClass.CombineTcellActivationClasses(seuratObj, classMapping = classMapping, sourceFieldPrefix = 'GeneralizedTCR_sPLSDA', outputFieldPrefix = 'CustomizedClasses')
 
   #confirm combined class column exists with model/version naming
-  combinedClassCol <- grep("^General_Combined_Class_v\\d+$", colnames(seuratObj@meta.data), value = TRUE)
+  combinedClassCol <- grep("^CustomizedClasses_ConsensusClass$", colnames(seuratObj@meta.data), value = TRUE)
   testthat::expect_true(length(combinedClassCol) == 1)
 
   #confirm combined probability columns exist for each mapping
   for (newClassName in names(classMapping)) {
-    probCol <- grep(paste0("^General_Combined_prob_", newClassName, "_v\\d+$"), colnames(seuratObj@meta.data), value = TRUE)
+    probCol <- grep(paste0("^CustomizedClasses_prob_", newClassName, "$"), colnames(seuratObj@meta.data), value = TRUE)
     testthat::expect_true(length(probCol) == 1, label = paste0("Missing combined prob column for: ", newClassName))
   }
 
@@ -231,19 +232,19 @@ test_that("CombineTcellActivationClasses combines classes and writes versioned c
   
   #empty names not allowed
   badMapping1 <- list(NULL = c("Th17"))
-  expect_error(CombineTcellActivationClasses(seuratObj, classMapping = badMapping1))
+  expect_error(ConsensusClass.CombineTcellActivationClasses(seuratObj, classMapping = badMapping1, sourceFieldPrefix = 'GeneralizedTCR_sPLSDA', outputFieldPrefix = 'CustomizedClasses'))
   #non-character values not allowed
   badMapping2 <- list("Th17" = 1)
-  expect_error(CombineTcellActivationClasses(seuratObj, classMapping = badMapping2))
+  expect_error(ConsensusClass.CombineTcellActivationClasses(seuratObj, classMapping = badMapping2, sourceFieldPrefix = 'GeneralizedTCR_sPLSDA', outputFieldPrefix = 'CustomizedClasses'))
   #empty vector not allowed
   badMapping3 <- list("Th17" = character(0))
-  expect_error(CombineTcellActivationClasses(seuratObj, classMapping = badMapping3))
+  expect_error(ConsensusClass.CombineTcellActivationClasses(seuratObj, classMapping = badMapping3, sourceFieldPrefix = 'GeneralizedTCR_sPLSDA', outputFieldPrefix = 'CustomizedClasses'))
   #duplicate classes across mappings not allowed
   badMapping4 <- list("A" = c("Th17"), "B" = c("Th17"))
-  expect_error(CombineTcellActivationClasses(seuratObj, classMapping = badMapping4))
+  expect_error(ConsensusClass.CombineTcellActivationClasses(seuratObj, classMapping = badMapping4, sourceFieldPrefix = 'GeneralizedTCR_sPLSDA', outputFieldPrefix = 'CustomizedClasses'))
   #classes not present in predictions should error
   badMapping5 <- list("X" = c("NotAClass"))
-  expect_warning(CombineTcellActivationClasses(seuratObj, classMapping = badMapping5))
+  expect_warning(ConsensusClass.CombineTcellActivationClasses(seuratObj, classMapping = badMapping5, sourceFieldPrefix = 'GeneralizedTCR_sPLSDA', outputFieldPrefix = 'CustomizedClasses'))
 })
 
 
@@ -264,7 +265,6 @@ test_that("Activation class mapping registry works and validates structure", {
   }
 
   # Unknown key should warn and return NULL
-  expect_warning(x <- GetActivationClassMapping('This.Key.Does.Not.Exist'))
-  expect_null(x)
+  expect_error(x <- GetActivationClassMapping('This.Key.Does.Not.Exist'))
 })
 

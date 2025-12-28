@@ -567,196 +567,150 @@ InterpretModels <- function(output_dir= "./classifiers", plot_type = "ratio"){
 
   }
 }
+
 #' @title Predicts T cell activation using sPLS derived components and a trained logistic model on transformed variates
 #' @description Predicts T cell activation using a trained model
 #' @param seuratObj The Seurat Object to be updated
-#' @param model The trained sPLSDA model to use for prediction. This can be a file path to an RDS file, or a built-in model name.
-#' @param modelList A list of trained sPLSDA models to use for prediction. This can be a list of file paths to RDS files, or built-in model names.
-#' @param removePreexistingColumns If true, any columns
+#' @param modelName The model to use, either GeneralizedTCR, CD4, or CD8
+#' @param combineClasses Most models were trained using finer grained classes than is generally needed. The default (combinedClasses=TRUE), will merge some similar classes. Set this to false to turn off this behavior.
+#' @return A Seurat object with the sPLSDA scores and predicted probabilities added to the metadata
+#' @export
+PredictTcellActivation <- function(seuratObj, modelName = 'GeneralizedTCR', combineClasses = TRUE) {
+  modelFiles <- list(
+    CD8 = "models/ActivatedCD8TCell4ClassModel_v1.rds",
+    CD4 = "models/ActivatedCD4TCell4ClassModel_v1.rds",
+    GeneralizedTCR = "models/GeneralActivatedTCellModel_v3.rds"
+  )
+
+  modelFile <- system.file(modelFiles[[modelName]], package = "RIRA")
+
+  # check if component scores already exist in metadata and score if missing or contain NAs
+  nComponents <- .GetModelComponentCount(modelName)
+  needsScoring <- FALSE
+
+  for (i in seq_len(nComponents)){
+    fieldName <- paste0(modelName, "_sPLSDA_Score_", i)
+    if (!fieldName %in% colnames(seuratObj@meta.data)) {
+      needsScoring <- TRUE
+      break
+    } else if (any(is.na(seuratObj@meta.data[[fieldName]]))) {
+      needsScoring <- TRUE
+      print(paste0("Component score '", fieldName, "' contains NA values. Will recalculate."))
+      break
+    }
+  }
+
+  if (needsScoring) {
+    componentPrefix <- paste0(modelName, "_Activation_sPLSDA_component")
+    for (i in seq_len(nComponents)){
+      componentName <- paste0(componentPrefix, i)
+      fieldName <- paste0(modelName, "_sPLSDA_Score_", i)
+      seuratObj <- ScoreUsingSavedComponent(seuratObj, componentOrName = componentName, fieldName = fieldName, layer = "scale.data")
+    }
+  }
+
+  seuratObj <- PredictTcellActivationUsingCustomModel(seuratObj = seuratObj, modelFile = modelFile, modelName = modelName)
+
+  if (combineClasses) {
+    seuratObj <- .CombineTcellActivationClasses(seuratObj, sourceFieldPrefix = 'GeneralizedTCR_sPLSDA', classMapping = GetActivationClassMapping('TcellActivation.Basic'), outputFieldPrefix = 'GeneralizedTCR_sPLSDA')
+    if (any(is.na(seuratObj$GeneralizedTCR_sPLSDA_ConsensusClass))) {
+      stop('There were NA values for seuratObj$GeneralizedTCR_sPLSDA_ConsensusClass')
+    }
+  }
+
+  if (modelName == 'GeneralizedTCR' && combineClasses) {
+    seuratObj$Is_TCR_Stimulated <- seuratObj$GeneralizedTCR_sPLSDA_ConsensusClass %in% c('Th1-Tc1-like', 'Th2-Th17-like')
+    if (length(names(seuratObj@reductions)) > 0) {
+      print(DimPlot(seuratObj, group.by = 'Is_TCR_Stimulated'))
+    }
+  }
+
+  return(seuratObj)
+}
+
+
+#' @title Predicts T cell activation using sPLS derived components and a trained logistic model on transformed variates
+#' @description Predicts T cell activation using a trained model
+#' @param seuratObj The Seurat Object to be updated
+#' @param modelName A name to use for this model. This will be the prefix of output columns
+#' @param modelFile The path to an RDS with this model.
 #' @import nnet
 #' @return A Seurat object with the sPLSDA scores and predicted probabilities added to the metadata
 #' @export
+PredictTcellActivationUsingCustomModel <- function(seuratObj, modelName, modelFile) {
+  if (is.null(modelFile)) {
+    stop("modelFile must be a file path to an RDS file. Please ensure the saved object is compatible with stats::predict()")
+  }
+  else if (!file.exists(modelFile)) {
+    stop(paste0('Unable to find model file: ', modelFile))
+  }
 
-PredictTcellActivation <- function(seuratObj, model = NULL, modelList = NULL, removePreexistingColumns = TRUE) {
-  #################
-  ### Sanitize  ###
-  #################
-  #check & sanitize model
-  #track model paths and versions
-  modelPaths <- list()
-  modelVersions <- list()
-  defaults <- FALSE
-  
-  if (is.null(model) && is.null(modelList)) {
-    #default method
-    print("No model provided, using RIRA's built-in CD8 and CD4 T Cell Activation models.")
-    modelFiles <- list(
-      CD8 = "models/ActivatedCD8TCell4ClassModel_v1.rds",
-      CD4 = "models/ActivatedCD4TCell4ClassModel_v1.rds", 
-      General = "models/GeneralActivatedTCellModel_v3.rds"
-    )
-    
-    modelList <- list()
-    for (modelName in names(modelFiles)) {
-      modelPath <- system.file(modelFiles[[modelName]], package = "RIRA")
-      modelList[[modelName]] <- readRDS(modelPath)
-      modelPaths[[modelName]] <- modelFiles[[modelName]]
-      #extract version from filename (e.g., _v1.rds -> v1)
-      version <- gsub(".*_(v\\d+)\\.rds$", "\\1", modelFiles[[modelName]])
-      modelVersions[[modelName]] <- version
-    }
-    #flag that the defaults were used
-    defaults <- TRUE
-  } else if (!is.null(model) && grepl(pattern = "\\.rds$", x = model, fixed = TRUE) && file.exists(model)) {
-    #user provides .rds
-    print(paste0("Using model from file: ", model))
-    modelList <- list(Custom = readRDS(model))
-    modelPaths[["Custom"]] <- model
-    #try to extract version from filename, default to "custom" if no version found
-    version <- gsub(".*_(v\\d+)\\.rds$", "\\1", basename(model))
-    modelVersions[["Custom"]] <- ifelse(grepl("^v\\d+$", version), version, "custom")
-  } else if (!is.null(model)) {
-    stop("Model must be one of: NULL (built-ins), a file path to an RDS file. If you want to use a custom model, please ensure it is compatible with stats::predict().\nIf you want to use the built-in models, please provide NULL as the model argument.\n")
-  }
-  #check that models can predict
-  for (modelName in names(modelList)) {
-    modelObj <- modelList[[modelName]]
-    if (!.CanPredict(modelObj)) {
-      #user provides some other kind of model object, but it can't predict using stats::predict
-      if (length(modelList) == 1) { 
-        stop(paste0("Provided model does not have a detectable predict method. Please provide a valid model or file path to an RDS file containing a trained model."))
-      } else {
-        stop(paste0("Model '", modelName, "' does not have a detectable predict method. Please provide valid models or file paths to RDS files containing trained models."))
-      }
-    }
-  }
-  
-  #######################################
-  ### Default Model Component Scoring ###
-  #######################################
-  #if the defaults were used, we ensure the component scores are present and valid
-  if (defaults) {
-    #check if component scores already exist in metadata and score if missing or contain NAs
-    metadataNames <- colnames(seuratObj@meta.data)
-    for (modelName in names(modelList)) {
-      if (removePreexistingColumns) {
-        toDrop <- grep(names(seuratObj@meta.data), pattern = paste0(modelName, "_Activation_sPLSDA_Score_"), value = TRUE)
-        if (length(toDrop) > 0) {
-          print(paste0('Dropping pre-existing columns: ', paste0(toDrop, collapse = ',')))
-          for (colName in toDrop) {
-            seuratObj[[toDrop]] <- NULL
-          }
-        }
-      }
-      #determine number of components for this model
-      nComponents <- .GetModelComponentCount(modelName)
-      modelVersion <- modelVersions[[modelName]]
-      print(paste0("Model '", modelName, "' (", modelVersion, ") uses ", nComponents, " components"))
-      
-      needsScoring <- FALSE
-      #check if all component scores exist for this model
-      for (i in seq_len(nComponents)){
-        fieldName <- paste0(modelName, "_Activation_sPLSDA_Score_", i, "_", modelVersion)
-        if (!fieldName %in% metadataNames) {
-          needsScoring <- TRUE
-          print(paste0("Component score '", fieldName, "' not found in metadata. Will calculate."))
-          break
-        } else {
-          #check for NAs in existing column
-          if (any(is.na(seuratObj@meta.data[[fieldName]]))) {
-            needsScoring <- TRUE
-            print(paste0("Component score '", fieldName, "' contains NA values. Will recalculate."))
-            break
-          }
-        }
-      }
-      #score components if needed
-      if (needsScoring) {
-        print(paste0("Scoring sPLSDA components for ", modelName, " model (", modelVersion, ")..."))
-        componentPrefix <- paste0(modelName, "_Activation_sPLSDA_component")
-        for (i in seq_len(nComponents)){
-          componentName <- paste0(componentPrefix, i)
-          fieldName <- paste0(modelName, "_Activation_sPLSDA_Score_", i, "_", modelVersion)
-          seuratObj <- ScoreUsingSavedComponent(seuratObj, componentOrName = componentName, fieldName = fieldName, layer = "scale.data")
-        }
-      }
-    }
-  }
-  
-  ###############
-  ### Scoring ###
-  ###############
-  #iterate models
-  for (modelIdx in seq_along(modelList)) {
-    modelName <- names(modelList)[modelIdx]
-    modelObj <- modelList[[modelIdx]]
-    modelVersion <- modelVersions[[modelName]]
-    
-    print(paste0("Processing model: ", modelName, " (", modelVersion, ")"))
-    
-    #determine expected number of components from model coefficients
-    modelCoefs <- colnames(stats::coef(modelObj))
-    if (!'nnet' %in% class(modelObj) || is.null(modelCoefs) || !any(grepl("^comp", modelCoefs))) {
-      if ('nnet' %in% class(modelObj)) {
-        modelCoefs <- colnames(stats::coef(modelObj))
-      }
-    }
-    
-    #extract component numbers from coefficient names
-    compNames <- modelCoefs[grepl("^comp[0-9]+$", modelCoefs)]
-    if (length(compNames) == 0) {
-      stop("Model does not contain component features (comp1, comp2, etc.). Please ensure the model's features are conformant with this prediction method.\nFound coefficients: ", paste0(dplyr::coalesce(modelCoefs, 'NULL'), collapse = ','))
-    }
-    
-    #determine number of components from the highest numbered component
-    compNumbers <- as.numeric(gsub("comp", "", compNames))
-    nComponents <- max(compNumbers)
-    expectedComps <- paste0("comp", seq_len(nComponents))
-    
-    if (!all(expectedComps %in% modelCoefs)) {
-      stop("Model does not contain all expected components. Please ensure the model's features are conformant with this prediction method.\nExpected components: ", paste0(expectedComps, collapse = ', '), ". Found: ", paste0(compNames, collapse = ','))
-    }
-    
-    #construct prediction for the model, forcing conformance in component names
-    #look for component scores with version number
-    scoreVars <- paste0(modelName, "_Activation_sPLSDA_Score_", seq_len(nComponents), "_", modelVersion)
-    newdata <- Seurat::FetchData(seuratObj, vars = scoreVars)
-    colnames(newdata) <- paste0("comp", seq_len(nComponents))
-    
-    if (!all(rownames(newdata) == colnames(seuratObj))) {
-      stop("Internal Error: Cell names in FetchData() do not match Seurat cell names.")
-    }
-    
-    #predictions/scoring
-    prob_df <- stats::predict(modelObj, newdata, type = "prob")
-    class_vec <- stats::predict(modelObj, newdata, type = "class")
-    
-    #include version in column names
-    colnames(prob_df) <- paste0(modelName, "_sPLS_prob_", colnames(prob_df), "_", modelVersion)
-    class_df <- data.frame(
-      sPLS_class = as.character(class_vec),
-      row.names = rownames(prob_df),
-      stringsAsFactors = FALSE
-    )
-    colnames(class_df) <- paste0(modelName, "_sPLS_class_", modelVersion)
-    
-    #add predictions back to Seurat object
-    seuratObj <- Seurat::AddMetaData(seuratObj, metadata = prob_df)
-    seuratObj <- Seurat::AddMetaData(seuratObj, metadata = class_df)
-    
-    if (length(names(seuratObj@reductions)) > 0) {
-      print(Seurat::DimPlot(seuratObj, group.by = paste0(modelName, "_sPLS_class_", modelVersion)))
+  modelObj <- readRDS(modelFile)
+  if (!.CanPredict(modelObj)) {
+    #user provides some other kind of model object, but it can't predict using stats::predict
+    if (length(modelList) == 1) { 
+      stop(paste0("Provided model does not have a detectable predict method. Please provide a valid model or file path to an RDS file containing a trained model."))
+    } else {
+      stop(paste0("Model '", modelName, "' does not have a detectable predict method. Please provide valid models or file paths to RDS files containing trained models."))
     }
   }
 
-  seuratObj <- CombineTcellActivationClasses(seuratObj, classMapping = GetActivationClassMapping('TcellActivation.Basic'), outputFieldName = 'sPLS_TCR_General_v3')
-  if (any(is.na(seuratObj$sPLS_TCR_General_v3))) {
-    stop('There were NA values for seuratObj$sPLS_TCR_General_v3')
+  # Deetermine expected number of components from model coefficients
+  modelCoefs <- colnames(stats::coef(modelObj))
+  if (!'nnet' %in% class(modelObj) || is.null(modelCoefs) || !any(grepl("^comp", modelCoefs))) {
+    if ('nnet' %in% class(modelObj)) {
+      modelCoefs <- colnames(stats::coef(modelObj))
+    }
+  }
+    
+  # Extract component numbers from coefficient names
+  compNames <- modelCoefs[grepl("^comp[0-9]+$", modelCoefs)]
+  if (length(compNames) == 0) {
+    stop("Model does not contain component features (comp1, comp2, etc.). Please ensure the model's features are conformant with this prediction method.\nFound coefficients: ", paste0(dplyr::coalesce(modelCoefs, 'NULL'), collapse = ','))
+  }
+    
+  #determine number of components from the highest numbered component
+  compNumbers <- as.numeric(gsub("comp", "", compNames))
+  nComponents <- max(compNumbers)
+  expectedComps <- paste0("comp", seq_len(nComponents))
+    
+  if (!all(expectedComps %in% modelCoefs)) {
+    stop("Model does not contain all expected components. Please ensure the model's features are conformant with this prediction method.\nExpected components: ", paste0(expectedComps, collapse = ', '), ". Found: ", paste0(compNames, collapse = ','))
+  }
+    
+  #construct prediction for the model, forcing conformance in component names
+  #look for component scores with version number
+  scoreVars <- paste0(modelName, "_sPLSDA_Score_", seq_len(nComponents))
+  if (!all(scoreVars %in% names(seuratObj@meta.data))) {
+    missing <- scoreVars[! scoreVars %in% names(seuratObj@meta.data)]
+    stop(paste0('The following variables are missing from the seurat metadata: ', paste0(missing, collapse = ',')))
   }
 
-  seuratObj$Is_TCR_Stimulated <- seuratObj$sPLS_TCR_General_v3 %in% c('General_Combined_prob_Th1-Tc1-like_v3', 'General_Combined_prob_Th2-Th17-like_v3')
+  newdata <- Seurat::FetchData(seuratObj, vars = scoreVars)
+  colnames(newdata) <- paste0("comp", seq_len(nComponents))
+
+  if (!all(rownames(newdata) == colnames(seuratObj))) {
+    stop("Internal Error: Cell names in FetchData() do not match Seurat cell names.")
+  }
+
+  #predictions/scoring
+  prob_df <- stats::predict(modelObj, newdata, type = "prob")
+  class_vec <- stats::predict(modelObj, newdata, type = "class")
+
+  colnames(prob_df) <- paste0(modelName, "_sPLSDA_prob_", colnames(prob_df))
+  class_df <- data.frame(
+    sPLS_class = as.character(class_vec),
+    row.names = rownames(prob_df),
+    stringsAsFactors = FALSE
+  )
+  colnames(class_df) <- paste0(modelName, "_sPLSDA_class")
+    
+  #add predictions back to Seurat object
+  seuratObj <- Seurat::AddMetaData(seuratObj, metadata = prob_df)
+  seuratObj <- Seurat::AddMetaData(seuratObj, metadata = class_df)
+    
   if (length(names(seuratObj@reductions)) > 0) {
-    print(DimPlot(seuratObj, group.by = 'Is_TCR_Stimulated'))
+    print(Seurat::DimPlot(seuratObj, group.by = paste0(modelName, "_sPLSDA_class")))
   }
 
   return(seuratObj)
@@ -806,87 +760,10 @@ PredictTcellActivation <- function(seuratObj, model = NULL, modelList = NULL, re
   })
 }
 
-#' @title Combine T cell activation classes using custom logic
-#' @description Takes a Seurat object with T cell activation predictions (from PredictTcellActivation) 
-#' and combines classes based on user-defined logic. This is useful for collapsing fine-grained 
-#' activation states into broader categories.
-#' @param seuratObj The Seurat Object containing T cell activation predictions
-#' @param modelName The name of the model whose predictions should be combined. Default is "General".
-#' @param modelVersion The version of the model. Default is "v3" for the General model.
-#' @param classMapping A named list where names are the new combined class labels and values are 
-#' character vectors of the original classes to combine. You can also fetch predefined mappings
-#' using GetActivationClassMapping(name). For example: GetActivationClassMapping('TcellActivation.Basic')
-#' or a manual list such as list("Activated" = c("Early_Activated", "Late_Activated"), "Resting" = c("Naive", "Memory")).
-#' @param outputFieldName The name of the metadata column to store the combined classifications. 
-#' If NULL, will use "<modelName>_Combined_Class_<modelVersion>".
-#' @param probabilityAggregation How to aggregate probabilities for combined classes. Options are:
-#' "sum" (default) - sum probabilities of constituent classes,
-#' "max" - take maximum probability among constituent classes,
-#' "mean" - take mean of probabilities of constituent classes.
-#' @param relabelOrRecall Strategy to set the combined class column. Options:
-#' "relabel" uses the original class-to-mapping lookup, labeling unmapped as "Unmapped".
-#' "recall" (default) uses the newly aggregated combined probabilities to assign classes.
-#' @param recallMethod When relabelOrRecall = "recall", how to recall combined classes.
-#' Options: "max" (default) choose the highest combined probability, or "threshold" which
-#' assigns the first combined class with probability >= recallProbabilityThreshold, otherwise "Uncalled".
-#' @param recallProbabilityThreshold Threshold used when recallMethod = "threshold". Default: 0.5.
-#' @return A Seurat object with the combined class assignments added to metadata
-#' @seealso GetActivationClassMapping, PredictTcellActivation
-#' @export
-#' @examples
-#' \dontrun{
-#' # Default usage with all parameters explicit
-#' mapping <- GetActivationClassMapping('TcellActivation.Basic')
-#' seuratObj <- CombineTcellActivationClasses(
-#'   seuratObj,
-#'   modelName = "General",
-#'   modelVersion = "v3",
-#'   classMapping = mapping,
-#'   outputFieldName = NULL,
-#'   probabilityAggregation = "sum",
-#'   relabelOrRecall = "recall",
-#'   recallMethod = "max",
-#'   recallProbabilityThreshold = 0.5
-#' )
-#'
-#' # Using a pre-registered mapping
-#' mapping <- GetActivationClassMapping('TcellActivation.Basic')
-#' seuratObj <- CombineTcellActivationClasses(
-#'   seuratObj,
-#'   classMapping = mapping
-#' )
-#'
-#' # Combine activation states into broader categories
-#' seuratObj <- CombineTcellActivationClasses(
-#'   seuratObj,
-#'   classMapping = list(
-#'     "Th1" = c("Th1_MIP1B.neg_CD137.neg", "Th1_MIP1B.neg_CD137.pos", "Th1_MIP1B.pos"),
-#'     "Th17" = c("Th17"), 
-#'     "Bystander Activated" = c("NonSpecificActivated_L1", "NonSpecificActivated_L2"), 
-#'     "Bulk Tissue T cell" = c("Uncultured"), 
-#'     "Naive T cell" = c("Cultured_Bystander_NoBFA", "Cultured_Bystander_BFA")
-#'   )
-#' )
-#' 
-#' # Using Guidelines for T cell nomenclature (https://www.nature.com/articles/s41577-025-01238-2)
-#' # with a slight augmentation that antigen specific T cells are "star" for antigens, rather than plus or zero.
-#' seuratObj <- CombineTcellActivationClasses(
-#'   seuratObj,
-#'   classMapping = list(
-#'     "CD4posOrCD8pos_Th1_U_B_A_t_star" = c("Th1_MIP1B.neg_CD137.neg", "Th1_MIP1B.neg_CD137.pos", "Th1_MIP1B.pos"),
-#'     "CD4pos_Th17_U_B_A_t_star" = c("Th17"), 
-#'     "CD4posOrCD8pos_Th1_U_B_A_t_O" = c("NonSpecificActivated_L1", "NonSpecificActivated_L2"), 
-#'     "CD4posOrCD8pos_T_U_R_N_t_O" = c("Uncultured"), 
-#'     "CD4posOrCD8pos_T_U_B_N_t_O" = c("Cultured_Bystander_NoBFA", "Cultured_Bystander_BFA")
-#'   )
-#' )
-#' }
-
-CombineTcellActivationClasses <- function(seuratObj, 
-                                          modelName = "General", 
-                                          modelVersion = "v3",
+.CombineTcellActivationClasses <- function(seuratObj,
+                                          sourceFieldPrefix,
                                           classMapping,
-                                          outputFieldName = NULL,
+                                          outputFieldPrefix,
                                           probabilityAggregation = "sum",
                                           relabelOrRecall = "recall",
                                           recallMethod = "max",
@@ -940,30 +817,33 @@ CombineTcellActivationClasses <- function(seuratObj,
   if (!relabelOrRecall %in% c("relabel", "recall")) {
     stop("relabelOrRecall must be one of: 'relabel', 'recall'")
   }
+
   if (!recallMethod %in% c("max", "threshold")) {
     stop("recallMethod must be one of: 'max', 'threshold'")
   }
+
   if (!is.numeric(recallProbabilityThreshold) || length(recallProbabilityThreshold) != 1 || is.na(recallProbabilityThreshold)) {
     stop("recallProbabilityThreshold must be a single numeric value")
   }
+
   if (recallProbabilityThreshold < 0 || recallProbabilityThreshold > 1) {
     stop("recallProbabilityThreshold must be in [0, 1]")
   }
   
   #check if the model predictions exist in the metadata
-  classFieldName <- paste0(modelName, "_sPLS_class_", modelVersion)
-  if (!classFieldName %in% colnames(seuratObj@meta.data)) {
-    stop(paste0("Class predictions '", classFieldName, "' not found in metadata. Please run PredictTcellActivation() first."))
+  sourceFieldName <- paste0(sourceFieldPrefix, '_class')
+  if (!sourceFieldName %in% colnames(seuratObj@meta.data)) {
+    stop(paste0("Class predictions '", sourceFieldName, "' not found in metadata. Please run PredictTcellActivation() first."))
   }
   
   #get all original classes from the model
-  originalClasses <- unique(seuratObj@meta.data[[classFieldName]])
+  originalClasses <- unique(seuratObj@meta.data[[sourceFieldName]])
   
   #check that all classes in classMapping exist in the original predictions
   mappedClasses <- allMappedClasses
   missingClasses <- setdiff(mappedClasses, originalClasses)
   if (length(missingClasses) > 0) {
-    warning(paste0("The following classes in classMapping were not found in the original predictions and will be ignored for probability aggregation: ", 
+    print(paste0("The following classes in classMapping were not found in the original predictions and will be ignored for probability aggregation: ",
                    paste0(missingClasses, collapse = ", ")))
   }
   
@@ -975,10 +855,8 @@ CombineTcellActivationClasses <- function(seuratObj,
   }
   
   #set output field name
-  if (is.null(outputFieldName)) {
-    outputFieldName <- paste0(modelName, "_Combined_Class_", modelVersion)
-  }
-  
+  outputFieldName <- paste0(outputFieldPrefix, "_ConsensusClass")
+
   ########################
   ### Combine Classes  ###
   ########################
@@ -992,27 +870,24 @@ CombineTcellActivationClasses <- function(seuratObj,
   rownames(combinedProbs) <- colnames(seuratObj)
   
   #get all probability columns for this model
-  probPattern <- paste0("^", modelName, "_sPLS_prob_.*_", modelVersion, "$")
-  probCols <- grep(probPattern, colnames(seuratObj@meta.data), value = TRUE)
-  
+  probCols <- grep(pattern = paste0("^", sourceFieldPrefix, "_prob_"), colnames(seuratObj@meta.data), value = TRUE)
   if (length(probCols) == 0) {
-    warning(paste0("No probability columns found for model '", modelName, "' version '", modelVersion, 
-                   "'. Combined probabilities will not be calculated."))
+    stop(paste0("No probability columns found for sourceFieldPrefix '", sourceFieldPrefix, "'"))
   }
   
   # if relabelOrRecall == "relabel", map each cell to its combined class using original predictions
   if (relabelOrRecall == "relabel") {
     for (cellIdx in seq_len(ncol(seuratObj))) {
-      originalClass <- seuratObj@meta.data[cellIdx, classFieldName]
+      originalClass <- seuratObj@meta.data[cellIdx, sourceFieldName]
       #find which combined class this original class belongs to
-      combinedClass <- "Unmapped"
+      combinedClass <- NA
       for (newClassName in names(classMapping)) {
         if (originalClass %in% classMapping[[newClassName]]) {
           combinedClass <- newClassName
           break
         }
       }
-      combinedClasses[cellIdx] <- combinedClass
+      combinedClasses[cellIdx] <- dplyr::coalesce(combinedClass, originalClass)
     }
   }
   
@@ -1024,7 +899,7 @@ CombineTcellActivationClasses <- function(seuratObj,
       #find probability columns for constituent classes
       constituentProbCols <- c()
       for (constituent in constituentClasses) {
-        probCol <- paste0(modelName, "_sPLS_prob_", constituent, "_", modelVersion)
+        probCol <- paste0(sourceFieldPrefix, "_prob_", constituent)
         if (probCol %in% probCols) {
           constituentProbCols <- c(constituentProbCols, probCol)
         }
@@ -1044,12 +919,12 @@ CombineTcellActivationClasses <- function(seuratObj,
     
     #add combined probabilities to metadata
     combinedProbsDf <- as.data.frame(combinedProbs)
-    colnames(combinedProbsDf) <- paste0(modelName, "_Combined_prob_", colnames(combinedProbsDf), "_", modelVersion)
+    colnames(combinedProbsDf) <- paste0(outputFieldPrefix, "_prob_", colnames(combinedProbsDf))
     seuratObj <- Seurat::AddMetaData(seuratObj, metadata = combinedProbsDf)
-    
+
     #if relabelOrRecall == "recall", assign classes using combined probabilities
     if (relabelOrRecall == "recall") {
-      probMat <- as.matrix(combinedProbsDf)
+      probMat <- combinedProbs
       if (recallMethod == "max") {
         maxIdx <- apply(probMat, 1, which.max)
         combinedClasses <- colnames(probMat)[maxIdx]
@@ -1077,7 +952,7 @@ CombineTcellActivationClasses <- function(seuratObj,
   seuratObj <- Seurat::AddMetaData(seuratObj, metadata = combinedClassDf)
   
   #print summary
-  print(paste0("Combined ", length(unique(seuratObj@meta.data[[classFieldName]])), 
+  print(paste0("Combined ", length(unique(seuratObj@meta.data[[outputFieldName]])),
                " original classes into ", length(classMapping), " combined classes"))
   print(table(seuratObj@meta.data[[outputFieldName]]))
   
@@ -1148,8 +1023,7 @@ if (is.null(pkg.env$ACTIVATION_CLASS_MAPPINGS)) {
 #' @export
 GetActivationClassMapping <- function(name) {
   if (!(name %in% names(pkg.env$ACTIVATION_CLASS_MAPPINGS))) {
-    warning(paste0('Unknown activation class mapping: ', name))
-    return(NULL)
+    stop(paste0('Unknown activation class mapping: ', name))
   }
   return(pkg.env$ACTIVATION_CLASS_MAPPINGS[[name]])
 }
