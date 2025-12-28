@@ -7,9 +7,8 @@ Predicts T cell activation using a trained model
 ``` r
 PredictTcellActivation(
   seuratObj,
-  model = NULL,
-  modelList = NULL,
-  removePreexistingColumns = TRUE
+  modelName = "GeneralizedTCR",
+  combineClasses = TRUE
 )
 ```
 
@@ -19,19 +18,15 @@ PredictTcellActivation(
 
   The Seurat Object to be updated
 
-- model:
+- modelName:
 
-  The trained sPLSDA model to use for prediction. This can be a file
-  path to an RDS file, or a built-in model name.
+  The model to use, either GeneralizedTCR, CD4, or CD8
 
-- modelList:
+- combineClasses:
 
-  A list of trained sPLSDA models to use for prediction. This can be a
-  list of file paths to RDS files, or built-in model names.
-
-- removePreexistingColumns:
-
-  If true, any columns
+  Most models were trained using finer grained classes than is generally
+  needed. The default (combinedClasses=TRUE), will merge some similar
+  classes. Set this to false to turn off this behavior.
 
 ## Value
 

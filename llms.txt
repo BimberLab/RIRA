@@ -52,8 +52,6 @@ page](https://github.com/orgs/bimberlab/RIRA/pkgs/container/rira):
   : Classify T/NK
 - [`Classify_TNK()`](https://bimberlab.github.io/RIRA/reference/Classify_TNK.md)
   : Classify T/NK
-- [`CombineTcellActivationClasses()`](https://bimberlab.github.io/RIRA/reference/CombineTcellActivationClasses.md)
-  : Combine T cell activation classes using custom logic
 - [`DownloadFromGEO()`](https://bimberlab.github.io/RIRA/reference/DownloadFromGEO.md)
   : Download RIRA data from GEO
 - [`ExpandGeneList()`](https://bimberlab.github.io/RIRA/reference/ExpandGeneList.md)
@@ -91,6 +89,9 @@ page](https://github.com/orgs/bimberlab/RIRA/pkgs/container/rira):
 - [`PredictCellTypeProbability()`](https://bimberlab.github.io/RIRA/reference/PredictCellTypeProbability.md)
   : Applies trained models to get celltype probabilities
 - [`PredictTcellActivation()`](https://bimberlab.github.io/RIRA/reference/PredictTcellActivation.md)
+  : Predicts T cell activation using sPLS derived components and a
+  trained logistic model on transformed variates
+- [`PredictTcellActivationUsingCustomModel()`](https://bimberlab.github.io/RIRA/reference/PredictTcellActivationUsingCustomModel.md)
   : Predicts T cell activation using sPLS derived components and a
   trained logistic model on transformed variates
 - [`RunCellTypist()`](https://bimberlab.github.io/RIRA/reference/RunCellTypist.md)

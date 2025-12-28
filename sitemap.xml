@@ -11,7 +11,6 @@
 <url><loc>https://bimberlab.github.io/RIRA/reference/Classify_ImmuneCells.html</loc></url>
 <url><loc>https://bimberlab.github.io/RIRA/reference/Classify_Myeloid.html</loc></url>
 <url><loc>https://bimberlab.github.io/RIRA/reference/Classify_TNK.html</loc></url>
-<url><loc>https://bimberlab.github.io/RIRA/reference/CombineTcellActivationClasses.html</loc></url>
 <url><loc>https://bimberlab.github.io/RIRA/reference/DownloadFromGEO.html</loc></url>
 <url><loc>https://bimberlab.github.io/RIRA/reference/ExpandGeneList.html</loc></url>
 <url><loc>https://bimberlab.github.io/RIRA/reference/ExtractGeneWeights.html</loc></url>
@@ -31,6 +30,7 @@
 <url><loc>https://bimberlab.github.io/RIRA/reference/PlotUcellCorrelation.html</loc></url>
 <url><loc>https://bimberlab.github.io/RIRA/reference/PredictCellTypeProbability.html</loc></url>
 <url><loc>https://bimberlab.github.io/RIRA/reference/PredictTcellActivation.html</loc></url>
+<url><loc>https://bimberlab.github.io/RIRA/reference/PredictTcellActivationUsingCustomModel.html</loc></url>
 <url><loc>https://bimberlab.github.io/RIRA/reference/RunCellTypist.html</loc></url>
 <url><loc>https://bimberlab.github.io/RIRA/reference/RunScGate.html</loc></url>
 <url><loc>https://bimberlab.github.io/RIRA/reference/RunScGateForModels.html</loc></url>
