@@ -181,6 +181,11 @@ test_that("Predict TCell Activation works ", {
 
   #verify specific probability value
   testthat::expect_equal(SimulateSeuratObj@meta.data[5, 'CD4_sPLSDA_prob_Resting1'], expected = 0.0086, tolerance = 0.001)
+  
+  table(SimulateSeuratObj$GeneralizedTCR_sPLSDA_ConsensusClass, SimulateSeuratObj$GeneralizedTCR_sPLSDA_class)
+  testthat::expect_equal(198, sum(SimulateSeuratObj$GeneralizedTCR_sPLSDA_ConsensusClass == 'Cultured T cell'))
+  testthat::expect_equal(2, sum(SimulateSeuratObj$GeneralizedTCR_sPLSDA_ConsensusClass == 'Bulk Tissue T cell'))
+  testthat::expect_equal(73, sum(SimulateSeuratObj$GeneralizedTCR_sPLSDA_class == 'Cultured_Bystander_BFA'))
 })
 
 
@@ -199,13 +204,11 @@ test_that("CombineTcellActivationClasses combines classes and writes versioned c
   seuratObj <- .CombineTcellActivationClasses(seuratObj, classMapping = classMapping, sourceFieldPrefix = 'GeneralizedTCR_sPLSDA', outputFieldPrefix = 'CustomizedClasses')
 
   #confirm combined class column exists with model/version naming
-  combinedClassCol <- grep("^CustomizedClasses_ConsensusClass$", colnames(seuratObj@meta.data), value = TRUE)
-  testthat::expect_true(length(combinedClassCol) == 1)
+  testthat::expect_true("CustomizedClasses_ConsensusClass" %in% colnames(seuratObj@meta.data))
 
   #confirm combined probability columns exist for each mapping
   for (newClassName in names(classMapping)) {
-    probCol <- grep(paste0("^CustomizedClasses_prob_", newClassName, "$"), colnames(seuratObj@meta.data), value = TRUE)
-    testthat::expect_true(length(probCol) == 1, label = paste0("Missing combined prob column for: ", newClassName))
+    testthat::expect_true(paste0("CustomizedClasses_prob_", newClassName) %in% colnames(seuratObj@meta.data))
   }
 
   #test numeric values
