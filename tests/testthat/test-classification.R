@@ -212,7 +212,7 @@ test_that("CombineTcellActivationClasses combines classes and writes versioned c
   }
 
   #test numeric values
-  testthat::expect_type(seuratObj@meta.data[1, combinedClassCol], "character")
+  testthat::expect_type(seuratObj@meta.data[1, "CustomizedClasses_ConsensusClass"], "character")
   
   #validate error cases
   
