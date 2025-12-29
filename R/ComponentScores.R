@@ -50,7 +50,7 @@ ScoreUsingSavedComponent <- function(seuratObj, componentOrName, fieldName, assa
       }
 
       ad <- rbind(ad, scaled)
-      seuratObj <- Seurat::SetAssayData(seuratObj, assay = assayName, layer = layer, new.data = ad)
+      seuratObj <- suppressWarnings(Seurat::SetAssayData(seuratObj, assay = assayName, layer = layer, new.data = ad))
     }
   }
 
@@ -71,8 +71,6 @@ ScoreUsingSavedComponent <- function(seuratObj, componentOrName, fieldName, assa
 
   if (length(names(seuratObj@reductions)) > 0) {
     suppressMessages(print(FeaturePlot(seuratObj, features = fieldName, order = T) & ggplot2::scale_colour_gradientn(colours = c("navy", "dodgerblue", "gold", "red"))))
-  } else {
-    print('No reductions present, cannot plot')
   }
 
   graphics::hist(seuratObj@meta.data[[fieldName]], breaks = 300, main = fieldName)
