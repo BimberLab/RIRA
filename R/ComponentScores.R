@@ -31,6 +31,30 @@ ScoreUsingSavedComponent <- function(seuratObj, componentOrName, fieldName, assa
 
   ad <- Seurat::GetAssayData(seuratObj, assay = assayName, layer = layer)
   toDrop <- names(geneWeights)[!names(geneWeights) %in% rownames(ad)]
+
+  # Perform the check first for scale.data, since we can add missing genes:
+  if (length(toDrop) > 0 && layer == 'scale.data') {
+    dataLayer <- Seurat::GetAssayData(seuratObj, assay = assayName, layer = 'data')
+    toScale <- toDrop[toDrop %in% rownames(dataLayer)]
+    if (length(toScale) > 0) {
+      print(paste0('The following ', length(toScale), ' genes are missing from scale.data and will be added now: ', paste0(toScale, collapse = ',')))
+      scaled <- Seurat::ScaleData(
+        dataLayer,
+        features = toScale,
+        do.scale = TRUE,
+        do.center = TRUE
+      )
+
+      if (nrow(scaled) != length(toScale)) {
+        stop('The number of rows after scaling did not match the expected number')
+      }
+
+      ad <- rbind(ad, scaled)
+      seuratObj <- suppressWarnings(Seurat::SetAssayData(seuratObj, assay = assayName, layer = layer, new.data = ad))
+    }
+  }
+
+  toDrop <- names(geneWeights)[!names(geneWeights) %in% rownames(ad)]
   if (length(toDrop) > 0) {
     print(paste0('The following ', length(toDrop), ' genes were in the component but not the assay, skipping: ', paste0(toDrop, collapse = ',')))
     geneWeights <- geneWeights[!names(geneWeights) %in% toDrop]
@@ -47,8 +71,6 @@ ScoreUsingSavedComponent <- function(seuratObj, componentOrName, fieldName, assa
 
   if (length(names(seuratObj@reductions)) > 0) {
     suppressMessages(print(FeaturePlot(seuratObj, features = fieldName, order = T) & ggplot2::scale_colour_gradientn(colours = c("navy", "dodgerblue", "gold", "red"))))
-  } else {
-    print('No reductions present, cannot plot')
   }
 
   graphics::hist(seuratObj@meta.data[[fieldName]], breaks = 300, main = fieldName)

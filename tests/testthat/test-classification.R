@@ -5,7 +5,7 @@ testthat::context("Classification")
 
 source('installSeuratData.R')
 
-SimulateSeuratData <- function() {
+SimulateSeuratDataForTcrPrediction <- function() {
   set.seed(GetSeed())
 
   #union features from all activation component files
@@ -52,7 +52,9 @@ SimulateSeuratData <- function() {
   ))
 
   seuratObj <- Seurat::NormalizeData(seuratObj, verbose = FALSE)
-  seuratObj <- Seurat::ScaleData(seuratObj, features = features, verbose = FALSE)
+
+  # NOTE: only scale a subset of genes, so we can test whether PredictTcrActivation automatically adds others:
+  seuratObj <- Seurat::ScaleData(seuratObj, features = features[1:10], verbose = FALSE)
   return(seuratObj)
 }
 
@@ -141,8 +143,15 @@ test_that("Cell type classification works", {
 
 test_that("Predict TCell Activation works ", {
 
-  SimulateSeuratObj <- SimulateSeuratData()
+  SimulateSeuratObj <- SimulateSeuratDataForTcrPrediction()
+  testthat::expect_equal(2995, nrow(Seurat::GetAssayData(SimulateSeuratObj, assay = 'RNA', layer = 'data')))
+  testthat::expect_equal(10, nrow(Seurat::GetAssayData(SimulateSeuratObj, assay = 'RNA', layer = 'scale.data')))
   SimulateSeuratObj <- PredictTcellActivation(SimulateSeuratObj)
+
+  # This tests whether features were added to scale.data:
+  testthat::expect_equal(2995, nrow(Seurat::GetAssayData(SimulateSeuratObj, assay = 'RNA', layer = 'data')))
+  testthat::expect_equal(2874, nrow(Seurat::GetAssayData(SimulateSeuratObj, assay = 'RNA', layer = 'scale.data')))
+
   SimulateSeuratObj <- PredictTcellActivation(SimulateSeuratObj, modelName = 'CD4')
   SimulateSeuratObj <- PredictTcellActivation(SimulateSeuratObj, modelName = 'CD8')
 
@@ -190,7 +199,7 @@ test_that("Predict TCell Activation works ", {
 
 
 test_that("CombineTcellActivationClasses combines classes and writes versioned columns", {
-  seuratObj <- SimulateSeuratData()
+  seuratObj <- SimulateSeuratDataForTcrPrediction()
   seuratObj <- PredictTcellActivation(seuratObj, combineClasses = FALSE)
 
   classMapping <- list(
