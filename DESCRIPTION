@@ -43,7 +43,7 @@ Imports:
     BiocParallel,
     ggcorrplot,
     magrittr,
-    httr,
+    httr2,
     mixOmics,
     nnet
 Suggests:
