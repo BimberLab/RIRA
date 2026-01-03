@@ -167,7 +167,10 @@ DownloadFromGEO <- function(outfile = NULL, subset = c('All', 'T_NK', 'Myeloid',
 
   url <- paste0('ftp.ncbi.nlm.nih.gov/geo/series/GSE277nnn/GSE277821/suppl/', fn)
   message(paste0('Downloading file: ', url))
-  httr::GET(url = url, httr::progress(), httr::write_disk(path = outfile, overwrite = TRUE))
+  req <- httr2::request(base_url = url) |>
+    httr2::req_progress()
+
+  resp <- httr2::req_perform(req = req, path = outfile)
 
   seuratObj <- readRDS(outfile)
   if (deleteDownloadedFile) {
