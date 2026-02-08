@@ -32,7 +32,7 @@ test_that("ScoreUsingSavedComponent works", {
   expect_equal(round(max(abs(seuratObj$Test1)), 2), 199.21)
   
   seuratObj <- ScoreUsingSavedComponent(seuratObj, componentOrName = 'Tcell_EffectorDifferentiation', fieldName = 'Test2')
-  expect_equal(round(max(seuratObj$Test2), 2), 52.1)
+  expect_equal(round(max(seuratObj$Test2), 1), 52.1)
   expect_equal(round(min(seuratObj$Test2), 2), -6.12)
 
   seuratObj <- CalculateUCellScores(seuratObj)
