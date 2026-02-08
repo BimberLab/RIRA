@@ -65,7 +65,7 @@ PlotImmuneMarkers <- function(seuratObj, reductions = c('tsne', 'umap')) {
 	# TNFRSF4 = OX40
 	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('CD4', 'SELL', 'LEF1', 'STAT1', 'CD40LG', 'GATA3', 'FOXP3', 'AQP3', 'GPR183', 'HOPX', 'ITGB2', 'AHNAK', 'ANXA1', 'TNFRSF4'), 'CD4 Phenotypic Markers')
 
-	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('PRF1', 'GNLY', 'NKG7', 'GZMA','GZMB','GZMH','GZMK','GZMM'), 'Cytotoxicity')
+	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('PRF1', 'GNLY', 'NKG7', 'GZMA','GZMB','GZMH','GZMK','GZMM', 'CTSW'), 'Cytotoxicity')
 
 	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('MS4A1', 'CD79A', 'CD74', 'DRA'), 'B-cell Markers')
 
@@ -346,7 +346,9 @@ GetGeneSet <- function(name) {
 # This is based on T-cell analysis from lung T/NK cells. This my not be precisely Memory/Naive.
 .RegisterGeneSet('MemoryAndNaive', c('SELL', 'IL7R', 'LTB', 'SPOCK2', 'COTL1', 'JUNB', 'GPR183', 'CCR7', 'FUOM', 'CD7', 'PECAM1'))
 
-.RegisterGeneSet('Cytotoxicity', c('PRF1', 'GNLY', 'NKG7', 'GZMA','GZMB','GZMH','GZMK','GZMM'))
+.RegisterGeneSet('Cytotoxicity.1', c('PRF1', 'GNLY', 'NKG7', 'GZMA', 'GZMB', 'GZMH', 'GZMK', 'GZMM'))
+.RegisterGeneSet('Cytotoxicity.2', c('PRF1', 'GNLY', 'GZMB', 'CTSW'))
+.RegisterGeneSet('Cytotoxicity.3', c('PRF1', 'GNLY', 'GZMA', 'GZMB', 'GZMH', 'GZMK', 'GZMM', 'CTSW'))
 
 .RegisterGeneSet('Cytotoxicity.GzmABH', c('GZMA','GZMB','GZMH'))
 .RegisterGeneSet('Cytotoxicity.GzmKM', c('GZMK','GZMM'))
@@ -607,7 +609,7 @@ ExpandGeneList <- function(genes, verbose = TRUE) {
 MakePhenotypingDotPlot <- function(seuratObj,
                                    yField = 'ClusterNames_0.2',
                                    scaled = T, 
-                                   gene_lists = c('Cytotoxicity', 'EffectorCytokines'), 
+                                   gene_lists = c('Cytotoxicity.1', 'EffectorCytokines'),
                                    assay = "RNA", 
                                    scale.by = "size"
 ){

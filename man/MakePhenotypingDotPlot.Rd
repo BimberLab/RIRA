@@ -8,7 +8,7 @@ MakePhenotypingDotPlot(
   seuratObj,
   yField = "ClusterNames_0.2",
   scaled = T,
-  gene_lists = c("Cytotoxicity", "EffectorCytokines"),
+  gene_lists = c("Cytotoxicity.1", "EffectorCytokines"),
   assay = "RNA",
   scale.by = "size"
 )
