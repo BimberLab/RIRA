@@ -113,7 +113,7 @@ PlotImmuneMarkers <- function(seuratObj, reductions = c('tsne', 'umap')) {
 
 	# ZNF683 = HOBIT
     # IKZF2 = Helios
-	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('TBX21', 'GATA3', 'RORC', 'FOXP3', 'BCL6', 'EOMES', 'TOX', 'GATA2', 'TCF7', 'KLF2', 'NR4A1', 'LEF1', 'PRDM1', 'ID2', 'ID3', 'ZNF683', 'BHLHE40', 'EGR1', 'EGR2', 'EGR3', 'BACH2', 'IKZF2'), 'Transcription Factors')
+	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('TBX21', 'GATA3', 'RORC', 'FOXP3', 'BCL6', 'EOMES', 'TOX', 'GATA2', 'TCF7', 'KLF2', 'NR4A1', 'LEF1', 'PRDM1', 'ID2', 'ID3', 'ZNF683', 'BHLHE40', 'EGR1', 'EGR2', 'EGR3', 'BACH2', 'IKZF2', 'ZEB2'), 'Transcription Factors')
 
 	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('TIGIT', 'CTLA4', 'BTLA', 'PDCD1', 'CD274'), 'Inhibitory Markers')
 
@@ -148,7 +148,7 @@ PlotImmuneMarkers <- function(seuratObj, reductions = c('tsne', 'umap')) {
 
 	PlotMarkerSeries(seuratObj, features = c('TGFB1', 'TGFB2', 'TGFB3'), title = 'TGFB')
 
-	PlotMarkerSeries(seuratObj, features = c('TGFBR1', 'TGFBR2', 'TGFBR3'), title = 'TGFB Receptor')
+	PlotMarkerSeries(seuratObj, features = c('TGFBR1', 'TGFBR2', 'TGFBR3', 'ZEB2'), title = 'TGFB Receptor')
 
 	# KLRC2 = ENSMMUG00000050862
 	klrs <- c('KLRB1', 'KLRC1', 'KLRD1', 'KLRF1', 'KLRF2', 'KLRG1', 'KLRG2', 'KLRC2', 'KLRC3', 'KLRK1', 'ENSMMUG00000050862')
