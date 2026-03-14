@@ -79,9 +79,12 @@ PlotImmuneMarkers <- function(seuratObj, reductions = c('tsne', 'umap')) {
 
 	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('PPBP', 'PF4'), 'Megakaryocytes')
 
-	PlotMarkerSeries(seuratObj, reductions = reductions, title = 'Stemness', features = c('CD34'))
+	PlotMarkerSeries(seuratObj, reductions = reductions, title = 'Stemness', features = c('CD34', 'TCF7'))
 
-	# MRC1 = CD206
+    PlotMarkerSeries(seuratObj, reductions = reductions, title = 'Phosphoantigen Presentation', features = c('BTN3A1', 'BTN2A1'))
+
+
+  # MRC1 = CD206
 	# ITGAM = CD11b, AM=CD11b-, Non-AM=CD11b+
 	# Non-AMs: CD16+/CD206-/HLA-DR+/CD11b+
 	# M1/M2: CCR7 (M1), CD163 (M2), https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7050058/
