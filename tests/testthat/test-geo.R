@@ -11,6 +11,7 @@ test_that("GEO Files Exist", {
     "GSE277821_RIRA.All.MergedClonotypes.txt.gz",
     "GSE277821_RIRA.All.Metadata.rds",
     "GSE277821_RIRA.All.RNA.counts.rds",
+    "GSE277821_RIRA.All.ADT.counts.int.rds",
     "GSE277821_RIRA.All.seurat.rds",
     "GSE277821_RIRA.Bcell.seurat.rds",
     "GSE277821_RIRA.Myeloid.seurat.rds",

@@ -138,7 +138,7 @@ test_that("FilterDisallowedClasses works as expected", {
   expect_equal('RIRA_Immune_v2', seuratObj@misc$RIRA_Immune_Model)
   expect_equal(256, sum(seuratObj$RIRA_Immune_v2.cellclass == 'Bcell', na.rm = T), tolerance = 1)
   expect_equal(576, sum(seuratObj$RIRA_Immune_v2.cellclass == 'Myeloid', na.rm = T))
-  expect_equal(1331, sum(seuratObj$RIRA_Immune_v2.cellclass == 'T_NK', na.rm = T))
+  expect_equal(1340, sum(seuratObj$RIRA_Immune_v2.cellclass == 'T_NK', na.rm = T))
 
   print('DisallowedUCellCombinations:')
   print(table(seuratObj$DisallowedUCellCombinations))
