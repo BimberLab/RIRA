@@ -165,6 +165,9 @@ PlotImmuneMarkers <- function(seuratObj, reductions = c('tsne', 'umap')) {
 	# ITGAE = CD103
 	PlotMarkerSeries(seuratObj, reductions = reductions, features = c('ITGAE', 'ITGB7', 'CD69', 'CXCR6', 'TYROBP'), 'Resident Memory')
 
+    # IL7R = CD127
+    PlotMarkerSeries(seuratObj, reductions = reductions, features = c('CD44', 'CXCR1', 'CD69', 'KLRG1', 'IL7R', 'CXCR3'), 'Resident Memory 2')
+
 	#chemokines
 	chemokines <- c('CCL1','CCL11','CCL13','CCL16','CCL17','CCL18','CCL19','CCL2','CCL20','CCL21','CCL22','CCL24','CCL25','CCL26','CCL27','CCL28','CCL5','CCL7','CCL8')
 	chemokines <- c(chemokines, c('CCR1','CCR2','CCR3','CCR4','CCR5','CCR6','CCR7','CCR8','CCR9','CCR10','CCRL2'))
