@@ -45,7 +45,8 @@ Imports:
     magrittr,
     httr2,
     mixOmics,
-    nnet
+    nnet,
+    ggrastr
 Suggests:
     devtools,
     testthat (>= 2.1.0),
