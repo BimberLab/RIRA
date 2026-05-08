@@ -5,6 +5,7 @@ type scoring models generated and provided by RIRA. RIRA’s data was
 generated and labeled using the following process
 
 ``` r
+
 library(RIRA)
 library(Seurat)
 library(ggplot2)
@@ -16,6 +17,7 @@ library(patchwork)
 First download the data as a Seurat object (or use your own input data):
 
 ``` r
+
 seuratObj <- DownloadFromGEO(subset = 'T_NK', outfile = 'RIRA_T_NK.rds')
 ```
 
@@ -23,6 +25,7 @@ These are the cell labels used in the RIRA manuscript, also provided in
 the seurat object:
 
 ``` r
+
 Seurat::DimPlot(seuratObj, group.by = 'TCellSubtype')
 ```
 
@@ -39,6 +42,7 @@ imputed into any seurat object, following the example below.
 A practical usage of this score could be to subset/gate a dataset
 
 ``` r
+
 seuratObj <- ScoreUsingSavedComponent(seuratObj, componentOrName = 'Tcell_EffectorDifferentiation', fieldName = 'EDS')
 
 UMAP_ED <- FeaturePlot(seuratObj, features = 'Tcell_EffectorDifferentiation', min.cutoff = 'q02', max.cutoff = 'q98') +
@@ -73,6 +77,7 @@ granzymes K/M, and T effector memory being skewed toward granzymes B/H.
 The code below demonstrate
 
 ``` r
+
 seuratObj <- UCell::AddModuleScore_UCell(seuratObj, features = list(
         TCellMemory = GetGeneSet('TCellMemoryS100'),
         Cytotoxicity.GzmABH = GetGeneSet('Cytotoxicity.GzmABH'),

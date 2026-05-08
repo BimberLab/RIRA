@@ -18,6 +18,7 @@ generated and labeled using the following process:
     dimensionality reduction on these more homogenous subsets.
 
 ``` r
+
 library(RIRA)
 library(Seurat)
 library(ggplot2)
@@ -27,6 +28,7 @@ library(patchwork)
 First download the data as a Seurat object (or use your own input data):
 
 ``` r
+
 seuratObj <- DownloadFromGEO(subset = 'All', outfile = 'RIRA_All.rds')
 ```
 
@@ -41,6 +43,7 @@ and Erythrocytes), which likely indicate doublets. See
 FilterDisallowedClasses() for more detail.
 
 ``` r
+
 seuratObj <- RIRA::Classify_ImmuneCells(seuratObj)
 Seurat::DimPlot(seuratObj, group.by = 'RIRA_Immune_v2.cellclass')
 ```
@@ -58,6 +61,7 @@ cell, or highly cytotoxic TEM-like CD4+ T cells and cytotoxic CD8+ T
 cells). These issues are explored in more detail in the RIRA manuscript.
 
 ``` r
+
 seuratObj <- DownloadFromGEO(subset = 'T_NK', outfile = 'RIRA_TNK.rds')
 seuratObj <- RIRA::Classify_TNK(seuratObj)
 Seurat::DimPlot(seuratObj, group.by = 'RIRA_TNK_v2.cellclass')
@@ -67,6 +71,7 @@ Seurat::DimPlot(seuratObj, group.by = 'RIRA_TNK_v2.cellclass')
 label](img/RIRA_UMAP_TNK.png)
 
 ``` r
+
 seuratObj <- DownloadFromGEO(subset = 'Myeloid', outfile = 'RIRA_Myeloid.rds')
 seuratObj <- RIRA::Classify_Myeloid(seuratObj)
 Seurat::DimPlot(seuratObj, group.by = 'RIRA_Myeloid_v3.cellclass')

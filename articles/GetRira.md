@@ -4,6 +4,7 @@ This vignette demonstrates how to download the RIRA Rhesus Macaque
 scRNA-seq Atlas as a Seurat object.
 
 ``` r
+
 library(RIRA)
 library(Seurat)
 ```
@@ -22,6 +23,7 @@ Due to the large size, in practice it might be more useful to download
 the ‘T_NK’, ‘Bcell’, or ‘Myeloid’ subsets.
 
 ``` r
+
 seuratObj <- DownloadFromGEO(subset = 'All', outfile = 'RIRA_All.rds')
 
 # or:
@@ -41,6 +43,7 @@ for more information on how this is calculated and could be used on
 other data):
 
 ``` r
+
 DimPlot(seuratObj, group.by = 'RIRA_Immune_v2.cellclass')
 ```
 
