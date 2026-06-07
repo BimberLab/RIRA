@@ -627,7 +627,7 @@ FilterDisallowedClasses <- function(seuratObj, sourceField = 'RIRA_Immune_v2.maj
       }
 
       toPlot <- seuratObj@meta.data %>%
-        select(all_of(ucell))
+        dplyr::select(dplyr::all_of(ucell))
 
       print(ggplot(toPlot, aes(x = !!rlang::sym(ucell))) +
         geom_histogram() +
