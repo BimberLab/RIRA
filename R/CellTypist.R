@@ -562,19 +562,21 @@ Classify_ImmuneCells <- function(seuratObj, assayName = Seurat::DefaultAssay(seu
   seuratObj@meta.data[[targetField]][!is.na(seuratObj@meta.data[[targetField]]) & grepl(seuratObj@meta.data[[targetField]], pattern = '\\|')] <- 'Ambiguous'
   if (filterDisallowedClasses) {
     seuratObj <- FilterDisallowedClasses(seuratObj, sourceField = targetField)
+
+    if (!is.null(maxAllowedUnknown)) {
+      toInclude <- !is.na(seuratObj@meta.data[[targetField]]) & seuratObj@meta.data[[targetField]] %in% c('T_NK', 'Myeloid', 'Bcell')
+      propUnknown <- sum(toInclude & !is.na(seuratObj@meta.data$DisallowedUCellCombinations)) / sum(toInclude)
+      if (propUnknown >= maxAllowedUnknown) {
+        stop(paste0('The fraction of cells assigned to unknown (', propUnknown, ') is greater than: ', maxAllowedUnknown, '. Total cells: ', sum(toInclude)))
+      }
+    }
+
     seuratObj@meta.data[[targetField]][!is.na(seuratObj@meta.data$DisallowedUCellCombinations)] <- 'Unknown'
   }
 
   seuratObj@meta.data[[targetField]][!is.na(seuratObj@meta.data[[targetField]]) & seuratObj@meta.data[[targetField]] %in% c('AvEp', 'Epithelial', 'Stromal', 'Mesothelial', 'ActiveAvEp', 'Myofibroblast', 'Fibroblast', 'Hepatocyte')] <- 'Non-Immune'
   seuratObj@meta.data[[targetField]][!is.na(seuratObj@meta.data[[targetField]]) & seuratObj@meta.data[[targetField]] %in% c('Unassigned', 'Contamination', 'Ambiguous', 'Heterogeneous', 'Unknown')] <- 'Unknown'
   seuratObj@meta.data[[targetField]] <- naturalsort::naturalfactor(seuratObj@meta.data[[targetField]])
-
-  if (!is.null(maxAllowedUnknown)) {
-    propUnknown <- sum(seuratObj@meta.data[[targetField]] == 'Unknown', na.rm = TRUE) / ncol(seuratObj)
-    if (propUnknown >= maxAllowedUnknown) {
-      stop(paste0('The fraction of cells assigned to unknown (', propUnknown, ') is greater than: ', maxAllowedUnknown))
-    }
-  }
 
   print(ggplot(seuratObj@meta.data, aes(x = !!rlang::sym(targetField), fill = !!rlang::sym(targetField))) +
       geom_bar(color = 'black') +
