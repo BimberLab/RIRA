@@ -55,7 +55,11 @@ jobs:
 
       - name: Deploy package
         if: github.ref == 'refs/heads/master' && matrix.config.pkgdown == 'true'
+        env:
+          GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config --local user.email "actions@github.com"
           git config --local user.name "GitHub Actions"
+          git config --local credential.helper store
+          echo "https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com" > ~/.git-credentials          
           Rscript -e 'pkgdown::deploy_to_branch(new_process = FALSE, clean = TRUE)'
