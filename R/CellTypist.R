@@ -629,14 +629,17 @@ FilterDisallowedClasses <- function(seuratObj, sourceField = 'RIRA_Immune_v2.maj
       }
 
       toPlot <- seuratObj@meta.data %>%
+        filter(!!rlang::sym(sourceField) == cls) %>%
         dplyr::select(dplyr::all_of(ucell))
+
+      x <- colnames(seuratObj)[seuratObj@meta.data[[sourceField]] == cls & seuratObj@meta.data[[ucell]] > ucellCutoff]
 
       print(ggplot(toPlot, aes(x = !!rlang::sym(ucell))) +
         geom_histogram() +
         geom_vline(xintercept = ucellCutoff) +
-        ggtitle(ucell))
+        ggtitle(paste0(cls, ': ', ucell, ' (', length(x), ' of ', sum(seuratObj@meta.data[[sourceField]] == cls), ' cells)'))
+      )
 
-      x <- colnames(seuratObj)[seuratObj@meta.data[[sourceField]] == cls & seuratObj@meta.data[[ucell]] > ucellCutoff]
       if (length(x) > 0) {
         toDrop <- rbind(toDrop, data.frame(cellbarcode = x, reason = ucell))
       }
