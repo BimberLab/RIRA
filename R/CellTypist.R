@@ -629,7 +629,7 @@ FilterDisallowedClasses <- function(seuratObj, sourceField = 'RIRA_Immune_v2.maj
       }
 
       toPlot <- seuratObj@meta.data %>%
-        filter(!!rlang::sym(sourceField) == cls) %>%
+        dplyr::filter(!!rlang::sym(sourceField) == cls) %>%
         dplyr::select(dplyr::all_of(ucell))
 
       x <- colnames(seuratObj)[seuratObj@meta.data[[sourceField]] == cls & seuratObj@meta.data[[ucell]] > ucellCutoff]
