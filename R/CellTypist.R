@@ -522,9 +522,10 @@ Classify_Myeloid <- function(seuratObj, assayName = Seurat::DefaultAssay(seuratO
 #' @param maxBatchSize If more than this many cells are in the object, it will be split into batches of this size and run in serial.
 #' @param retainProbabilityMatrix If true, the celltypist probability_matrix with per-class probabilities will be stored in meta.data
 #' @param filterDisallowedClasses If true, this will run FilterDisallowedClasses() on the output.
+#' @param maxAllowedUnknown If provided, this method will throw an error if the fraction of cells assigned to Unknown is above this value
 #'
 #' @export
-Classify_ImmuneCells <- function(seuratObj, assayName = Seurat::DefaultAssay(seuratObj), columnPrefix = 'RIRA_Immune_v2.', maxAllowableClasses = 6, minFractionToInclude = 0.01, minCellsToRun = 200, maxBatchSize = 600000, retainProbabilityMatrix = FALSE, filterDisallowedClasses = TRUE) {
+Classify_ImmuneCells <- function(seuratObj, assayName = Seurat::DefaultAssay(seuratObj), columnPrefix = 'RIRA_Immune_v2.', maxAllowableClasses = 6, minFractionToInclude = 0.01, minCellsToRun = 200, maxBatchSize = 600000, retainProbabilityMatrix = FALSE, filterDisallowedClasses = TRUE, maxAllowedUnknown = 0.2) {
   modelName <- 'RIRA_Immune_v2'
   if ('RIRA_Immune_v1.cellclass' %in% names(seuratObj@meta.data)) {
     print('Dropping legacy RIRA_Immune_v1 columns')
@@ -568,6 +569,13 @@ Classify_ImmuneCells <- function(seuratObj, assayName = Seurat::DefaultAssay(seu
   seuratObj@meta.data[[targetField]][!is.na(seuratObj@meta.data[[targetField]]) & seuratObj@meta.data[[targetField]] %in% c('Unassigned', 'Contamination', 'Ambiguous', 'Heterogeneous', 'Unknown')] <- 'Unknown'
   seuratObj@meta.data[[targetField]] <- naturalsort::naturalfactor(seuratObj@meta.data[[targetField]])
 
+  if (!is.null(maxAllowedUnknown)) {
+    propUnknown <- sum(seuratObj@meta.data[[targetField]] == 'Unknown', na.rm = TRUE) / ncol(seuratObj)
+    if (propUnknown >= maxAllowedUnknown) {
+      stop(paste0('The fraction of cells assigned to unknown (', propUnknown, ') is greater than: ', maxAllowedUnknown))
+    }
+  }
+
   print(ggplot(seuratObj@meta.data, aes(x = !!rlang::sym(targetField), fill = !!rlang::sym(targetField))) +
       geom_bar(color = 'black') +
       egg::theme_presentation(base_size = 12) +
@@ -599,6 +607,8 @@ FilterDisallowedClasses <- function(seuratObj, sourceField = 'RIRA_Immune_v2.maj
   Myeloid = c('Bcell.RM_UCell', 'Tcell.RM_UCell', 'NK.RM_UCell', 'Erythrocyte.RM_UCell', 'Platelet.RM_UCell'),
   Bcell = c('Tcell.RM_UCell', 'NK.RM_UCell', 'Myeloid.RM_UCell', 'Erythrocyte.RM_UCell', 'Platelet.RM_UCell', 'NeutrophilLineage.RM_UCell', 'Complement.RM_UCell')
 )) {
+  print('Filtering disallowed UCell Combinations')
+
   if (!sourceField %in% names(seuratObj@meta.data)) {
     stop(paste0('Missing source field: ', sourceField))
   }
@@ -615,6 +625,14 @@ FilterDisallowedClasses <- function(seuratObj, sourceField = 'RIRA_Immune_v2.maj
           stop(paste0('Missing UCell field: ', ucell))
         }
       }
+
+      toPlot <- seuratObj@meta.data %>%
+        dplyr::select(dplyr::all_of(ucell))
+
+      print(ggplot(toPlot, aes(x = !!rlang::sym(ucell))) +
+        geom_histogram() +
+        geom_vline(xintercept = ucellCutoff) +
+        ggtitle(ucell))
 
       x <- colnames(seuratObj)[seuratObj@meta.data[[sourceField]] == cls & seuratObj@meta.data[[ucell]] > ucellCutoff]
       if (length(x) > 0) {

@@ -13,7 +13,8 @@ Classify_ImmuneCells(
   minCellsToRun = 200,
   maxBatchSize = 6e+05,
   retainProbabilityMatrix = FALSE,
-  filterDisallowedClasses = TRUE
+  filterDisallowedClasses = TRUE,
+  maxAllowedUnknown = 0.2
 )
 }
 \arguments{
@@ -34,6 +35,8 @@ Classify_ImmuneCells(
 \item{retainProbabilityMatrix}{If true, the celltypist probability_matrix with per-class probabilities will be stored in meta.data}
 
 \item{filterDisallowedClasses}{If true, this will run FilterDisallowedClasses() on the output.}
+
+\item{maxAllowedUnknown}{If provided, this method will throw an error if the fraction of cells assigned to Unknown is above this value}
 }
 \description{
 Runs celltypist using the RIRA bulk immune model to score cells using CellTypist with optimized parameters.
