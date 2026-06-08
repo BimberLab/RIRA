@@ -15,7 +15,8 @@ Classify_ImmuneCells(
   minCellsToRun = 200,
   maxBatchSize = 6e+05,
   retainProbabilityMatrix = FALSE,
-  filterDisallowedClasses = TRUE
+  filterDisallowedClasses = TRUE,
+  maxAllowedUnknown = 0.2
 )
 ```
 
@@ -63,3 +64,8 @@ Classify_ImmuneCells(
 - filterDisallowedClasses:
 
   If true, this will run FilterDisallowedClasses() on the output.
+
+- maxAllowedUnknown:
+
+  If provided, this method will throw an error if the fraction of cells
+  assigned to Unknown is above this value
