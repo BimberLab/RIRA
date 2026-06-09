@@ -53,7 +53,8 @@
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Bcell.RM_UCell"</span>, <span class="st">"Tcell.RM_UCell"</span>, <span class="st">"NK.RM_UCell"</span>, <span class="st">"Erythrocyte.RM_UCell"</span>,</span>
 <span>    <span class="st">"Platelet.RM_UCell"</span><span class="op">)</span>, Bcell <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Tcell.RM_UCell"</span>, <span class="st">"NK.RM_UCell"</span>, <span class="st">"Myeloid.RM_UCell"</span>,</span>
 <span>    <span class="st">"Erythrocyte.RM_UCell"</span>, <span class="st">"Platelet.RM_UCell"</span>, <span class="st">"NeutrophilLineage.RM_UCell"</span>,</span>
-<span>    <span class="st">"Complement.RM_UCell"</span><span class="op">)</span><span class="op">)</span></span>
+<span>    <span class="st">"Complement.RM_UCell"</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  maxFractionToDrop <span class="op">=</span> <span class="fl">0.25</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -79,6 +80,10 @@
 
 <dt id="arg-disallowedclasses">disallowedClasses<a class="anchor" aria-label="anchor" href="#arg-disallowedclasses"></a></dt>
 <dd><p>This is a list where the names are the cell classes (which should match levels in sourceField), and values are a vector of UCell field names.</p></dd>
+
+
+<dt id="arg-maxfractiontodrop">maxFractionToDrop<a class="anchor" aria-label="anchor" href="#arg-maxfractiontodrop"></a></dt>
+<dd><p>If a given subset+UCell would result in more than this fraction of cells being discarded, that UCell will be skipped.</p></dd>
 
 </dl></div>
 
