@@ -14,7 +14,8 @@ FilterDisallowedClasses(
     c("Bcell.RM_UCell", "Tcell.RM_UCell", "NK.RM_UCell", "Erythrocyte.RM_UCell",
     "Platelet.RM_UCell"), Bcell = c("Tcell.RM_UCell", "NK.RM_UCell", "Myeloid.RM_UCell",
     "Erythrocyte.RM_UCell", "Platelet.RM_UCell", "NeutrophilLineage.RM_UCell",
-    "Complement.RM_UCell"))
+    "Complement.RM_UCell")),
+  maxFractionToDrop = 0.25
 )
 }
 \arguments{
@@ -27,6 +28,8 @@ FilterDisallowedClasses(
 \item{ucellCutoff}{Any cells expressing the disallowed UCell above this value will be flagged}
 
 \item{disallowedClasses}{This is a list where the names are the cell classes (which should match levels in sourceField), and values are a vector of UCell field names.}
+
+\item{maxFractionToDrop}{If a given subset+UCell would result in more than this fraction of cells being discarded, that UCell will be skipped.}
 }
 \description{
 This is used to flag cells with high UCell score combinations generally indiciative of contamination or doublets

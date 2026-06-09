@@ -602,13 +602,14 @@ Classify_ImmuneCells <- function(seuratObj, assayName = Seurat::DefaultAssay(seu
 #' @param outputFieldName The name of the field to store the results
 #' @param ucellCutoff Any cells expressing the disallowed UCell above this value will be flagged
 #' @param disallowedClasses This is a list where the names are the cell classes (which should match levels in sourceField), and values are a vector of UCell field names.
+#' @param maxFractionToDrop If a given subset+UCell would result in more than this fraction of cells being discarded, that UCell will be skipped.
 #'
 #' @export
 FilterDisallowedClasses <- function(seuratObj, sourceField = 'RIRA_Immune_v2.majority_voting', outputFieldName = 'DisallowedUCellCombinations', ucellCutoff = 0.2, disallowedClasses = list(
   T_NK = c('Bcell.RM_UCell', 'Myeloid.RM_UCell', 'Erythrocyte.RM_UCell', 'Platelet.RM_UCell', 'NeutrophilLineage.RM_UCell'),
   Myeloid = c('Bcell.RM_UCell', 'Tcell.RM_UCell', 'NK.RM_UCell', 'Erythrocyte.RM_UCell', 'Platelet.RM_UCell'),
   Bcell = c('Tcell.RM_UCell', 'NK.RM_UCell', 'Myeloid.RM_UCell', 'Erythrocyte.RM_UCell', 'Platelet.RM_UCell', 'NeutrophilLineage.RM_UCell', 'Complement.RM_UCell')
-)) {
+), maxFractionToDrop = 0.25) {
   print('Filtering disallowed UCell Combinations')
 
   if (!sourceField %in% names(seuratObj@meta.data)) {
@@ -633,15 +634,19 @@ FilterDisallowedClasses <- function(seuratObj, sourceField = 'RIRA_Immune_v2.maj
         dplyr::select(dplyr::all_of(ucell))
 
       x <- colnames(seuratObj)[seuratObj@meta.data[[sourceField]] == cls & seuratObj@meta.data[[ucell]] > ucellCutoff]
-
+      pct <- length(x) / sum(seuratObj@meta.data[[sourceField]] == cls)
       print(ggplot(toPlot, aes(x = !!rlang::sym(ucell))) +
         geom_histogram() +
         geom_vline(xintercept = ucellCutoff) +
-        ggtitle(paste0(cls, ': ', ucell, ' (', length(x), ' of ', sum(seuratObj@meta.data[[sourceField]] == cls), ' cells)'))
+        ggtitle(paste0(cls, ': ', ucell, ' (', length(x), ' of ', sum(seuratObj@meta.data[[sourceField]] == cls), ' cells / ', (round(pct*100, 2)),'%)'))
       )
 
       if (length(x) > 0) {
-        toDrop <- rbind(toDrop, data.frame(cellbarcode = x, reason = ucell))
+        if (!is.null(maxFractionToDrop) && pct > maxFractionToDrop) {
+          print(paste0('Percentage too great, skipping: ', cls, ': ', ucell, ' (', length(x), ' of ', sum(seuratObj@meta.data[[sourceField]] == cls), ' cells / ', (round(pct*100, 2)),'%)'))
+        } else {
+          toDrop <- rbind(toDrop, data.frame(cellbarcode = x, reason = ucell))
+        }
       }
     }
   }
