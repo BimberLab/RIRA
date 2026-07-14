@@ -398,30 +398,8 @@ GetGeneSet <- function(name) {
 .RegisterGeneSet("NaiveB",  c("TCL1A", "FCER2", "CXCR4")) 
 .RegisterGeneSet("MemoryB",  c("CR2", "PLAC8", "LY86", "CD44")) 
 .RegisterGeneSet("InnateB",  c("CD1C", "AHNAK", "SOX5")) 
-#these gene sets are registered here for the Quantify10xData() function in Rdiscvr. 
 # Cell-cycle / proliferation
 .RegisterGeneSet('Proliferation', c('MKI67', 'TOP2A'))
-# list of genes to quantify in a 'percentage positive' manner
-.RegisterGeneSet('Quantify.PctPositive', c(
-  'PDCD1',   # PD-1
-  'KLRK1',   # NKG2D
-  'KLRB1',   # CD161
-  'HAVCR2',  # TIM-3
-  'TIGIT',
-  'PRF1', 
-  'GZMB',    
-  'KLRC1',   # NKG2A
-  'FCGR3',   # CD16 (rhesus)
-  'FCGR3A',  # CD16 (human)
-  'FOXP3',
-  'IL2RA'    # CD25
-))
-# gene set 'themes' 
-.RegisterGeneSet('Quantify.PctPositive.Inhibitory', c('PDCD1', 'HAVCR2', 'TIGIT'))
-.RegisterGeneSet('Quantify.PctPositive.NK', c('KLRK1', 'KLRC1', 'FCGR3A', 'FCGR3', 'KLRB1'))
-.RegisterGeneSet('Quantify.PctPositive.Treg', c('FOXP3', 'IL2RA'))
-.RegisterGeneSet('Quantify.PctPositive.Effector', c('GZMB', 'KLRK1'))
-
 ### End Phenotyping Gene Sets
 
 # Sustaining CD4 survival?
