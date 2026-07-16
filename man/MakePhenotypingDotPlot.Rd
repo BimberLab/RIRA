@@ -20,7 +20,7 @@ MakePhenotypingDotPlot(
 
 \item{scaled}{A boolean defining whether to color dots by scaled expression or unscaled expression.}
 
-\item{gene_lists}{A vector of gene lists (defined by .RegisterGeneSet) to be queried and their genes be plotted.}
+\item{gene_lists}{A vector of gene lists (defined by RegisterGeneSet) to be queried and their genes be plotted.}
 
 \item{assay}{Which assay to use in the input seuratObj}
 
