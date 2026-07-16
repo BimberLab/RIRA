@@ -34,7 +34,7 @@ MakePhenotypingDotPlot(
 
 - gene_lists:
 
-  A vector of gene lists (defined by .RegisterGeneSet) to be queried and
+  A vector of gene lists (defined by RegisterGeneSet) to be queried and
   their genes be plotted.
 
 - assay:

@@ -54,6 +54,8 @@
 - [`PredictTcellActivationUsingCustomModel()`](https://bimberlab.github.io/RIRA/reference/PredictTcellActivationUsingCustomModel.md)
   : Predicts T cell activation using sPLS derived components and a
   trained logistic model on transformed variates
+- [`RegisterGeneSet()`](https://bimberlab.github.io/RIRA/reference/RegisterGeneSet.md)
+  : RegisterGeneSet
 - [`RunCellTypist()`](https://bimberlab.github.io/RIRA/reference/RunCellTypist.md)
   : Run Celltypist
 - [`RunScGate()`](https://bimberlab.github.io/RIRA/reference/RunScGate.md)
