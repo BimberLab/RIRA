@@ -641,7 +641,7 @@ FilterDisallowedClasses <- function(seuratObj, sourceField = 'RIRA_Immune_v2.maj
         ggtitle(paste0(cls, ': ', ucell, ' (', length(x), ' of ', sum(seuratObj@meta.data[[sourceField]] == cls), ' cells / ', (round(pct*100, 2)),'%)'))
       )
 
-      if (length(x) > 0) {
+      if (length(x) > 0 && is.finite(pct)) {
         if (!is.null(maxFractionToDrop) && pct > maxFractionToDrop) {
           print(paste0('Percentage too great, skipping: ', cls, ': ', ucell, ' (', length(x), ' of ', sum(seuratObj@meta.data[[sourceField]] == cls), ' cells / ', (round(pct*100, 2)),'%)'))
         } else {
