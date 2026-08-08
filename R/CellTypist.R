@@ -565,8 +565,8 @@ Classify_ImmuneCells <- function(seuratObj, assayName = Seurat::DefaultAssay(seu
 
     if (!is.null(maxAllowedUnknown)) {
       toInclude <- !is.na(seuratObj@meta.data[[targetField]]) & seuratObj@meta.data[[targetField]] %in% c('T_NK', 'Myeloid', 'Bcell')
-      propUnknown <- sum(toInclude & !is.na(seuratObj@meta.data$DisallowedUCellCombinations)) / sum(toInclude)
-      if (propUnknown >= maxAllowedUnknown) {
+      propUnknown <- sum(toInclude & !is.na(seuratObj@meta.data$DisallowedUCellCombinations), na.rm = TRUE) / sum(toInclude, na.rm = TRUE)
+      if (is.finite(propUnknown) && propUnknown >= maxAllowedUnknown) {
         stop(paste0('The fraction of cells assigned to unknown (', propUnknown, ') is greater than: ', maxAllowedUnknown, '. Total cells: ', sum(toInclude)))
       }
     }
