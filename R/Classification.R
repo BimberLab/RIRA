@@ -647,12 +647,7 @@ PredictTcellActivationUsingCustomModel <- function(seuratObj, modelName, modelFi
 
   modelObj <- readRDS(modelFile)
   if (!.CanPredict(modelObj)) {
-    #user provides some other kind of model object, but it can't predict using stats::predict
-    if (length(modelList) == 1) { 
-      stop(paste0("Provided model does not have a detectable predict method. Please provide a valid model or file path to an RDS file containing a trained model."))
-    } else {
-      stop(paste0("Model '", modelName, "' does not have a detectable predict method. Please provide valid models or file paths to RDS files containing trained models."))
-    }
+    stop(paste0("Model '", modelName, "' does not have a detectable predict method. Please provide valid models or file paths to RDS files containing trained models."))
   }
 
   # Deetermine expected number of components from model coefficients

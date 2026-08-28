@@ -1,7 +1,7 @@
 #' @include Utils.R
 
 utils::globalVariables(
-  names = c('majority_voting', 'Fraction', 'PropPerCluster', 'over_clustering', 'predicted_labels', 'totalPerCluster', 'totalPerLabel', 'propPerLabel', 'sortOrder', 'Category', 'reason', 'cellbarcode'),
+  names = c('majority_voting', 'Fraction', 'PropPerCluster', 'over_clustering', 'predicted_labels', 'totalPerCluster', 'totalPerLabel', 'propPerLabel', 'sortOrder', 'Category', 'reason', 'cellbarcode', 'Prop', 'TotalCells', 'TotalCellsForGroup'),
   package = 'RIRA',
   add = TRUE
 )
