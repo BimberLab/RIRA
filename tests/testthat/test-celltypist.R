@@ -152,7 +152,7 @@ test_that("FilterDisallowedClasses works as expected", {
   # Create fake clustering:
   print(table(seuratObj$RIRA_Immune_v2.cellclass, seuratObj$scGateConsensus))
   seuratObj <- RecoverUnassignedCells(seuratObj, groupField = 'scGateConsensus')
-  print(table(seuratObj$RIRA_TNK_v2.cellclass.recovered))
+  print(table(seuratObj$RIRA_Immune_v2.cellclass.recovered))
 
   # These should be unchanged from above:
   expect_equal(258, sum(seuratObj$RIRA_Immune_v2.cellclass == 'Bcell', na.rm = T))
