@@ -9,7 +9,7 @@ RecoverUnassignedCells(
   classField = "RIRA_Immune_v2.cellclass",
   groupField = "ClusterNames_0.2",
   targetField = "RIRA_Immune_v2.cellclass.recovered",
-  unassignedValue = "Unassigned",
+  unassignedValues = c("Unassigned", "Unknown"),
   minClusterProp = 0.6
 )
 }
@@ -22,7 +22,7 @@ RecoverUnassignedCells(
 
 \item{targetField}{The field that will store the result}
 
-\item{unassignedValue}{The string value that denotes Unassigned cells}
+\item{unassignedValues}{A list of string values that denote Unassigned/Unknown cells}
 
 \item{minClusterProp}{If at least this proportion of the group is one class, unassigned cells will be assigned as this class}
 }

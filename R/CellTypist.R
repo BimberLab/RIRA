@@ -679,29 +679,37 @@ FilterDisallowedClasses <- function(seuratObj, sourceField = 'RIRA_Immune_v2.maj
 #' @param classField The name of the field holding the cell type call
 #' @param groupField The field on which to group, such as the cluster ID
 #' @param targetField The field that will store the result
-#' @param unassignedValue The string value that denotes Unassigned cells
+#' @param unassignedValues A list of string values that denote Unassigned/Unknown cells
 #' @param minClusterProp If at least this proportion of the group is one class, unassigned cells will be assigned as this class
 #' @return The updated seurat object
 #' @export
-RecoverUnassignedCells <- function(seuratObj, classField = 'RIRA_Immune_v2.cellclass', groupField = 'ClusterNames_0.2', targetField = 'RIRA_Immune_v2.cellclass.recovered', unassignedValue = 'Unassigned', minClusterProp = 0.6) {
-  if (!classField %in% (seuratObj@meta.data)) {
-    stop(paste0('Missing field: ', classField, groupField))
+RecoverUnassignedCells <- function(seuratObj, classField = 'RIRA_Immune_v2.cellclass', groupField = 'ClusterNames_0.2', targetField = 'RIRA_Immune_v2.cellclass.recovered', unassignedValues = c('Unassigned', 'Unknown'), minClusterProp = 0.6) {
+  if (!classField %in% names(seuratObj@meta.data)) {
+    stop(paste0('Missing field: ', classField))
   }
 
   seuratObj[[targetField]] <- seuratObj[[classField]]
 
   x <- seuratObj@meta.data %>%
     dplyr::group_by(dplyr::across(dplyr::all_of(groupField))) %>%
-    dplyr::mutate(TotalCellsForGroup = n()) %>%
-    dplyr::group_by(dplyr::across(dplyr::all_of(groupField, classField))) %>%
+    dplyr::mutate(TotalCellsForGroup = dplyr::n()) %>%
+    dplyr::group_by(dplyr::across(dplyr::all_of(c(groupField, classField, 'TotalCellsForGroup')))) %>%
     dplyr::summarize(TotalCells = dplyr::n()) %>%
     as.data.frame() %>%
     dplyr::mutate(Prop = TotalCells / TotalCellsForGroup)
 
+  print('Before:')
+  print(table(seuratObj@meta.data[[classField]], seuratObj@meta.data[[targetField]]))
+  
   for (clusterName in unique(x[[groupField]])) {
+    if (is.na(clusterName)) {
+      next
+    }
+    print(paste0('Inspecting: ', clusterName))
+    
     y <- x %>%
       dplyr::filter(!!rlang::sym(groupField) == clusterName) %>%
-      dplyr::filter(!!rlang::sym(classField) != unassignedValue) %>%
+      dplyr::filter(!(!!rlang::sym(classField) %in% unassignedValues)) %>%
       dplyr::filter(Prop >= minClusterProp) %>%
       dplyr::arrange(-Prop)
 
@@ -711,15 +719,25 @@ RecoverUnassignedCells <- function(seuratObj, classField = 'RIRA_Immune_v2.cellc
 
     toUpdate <- x %>%
       dplyr::filter(!!rlang::sym(groupField) == clusterName) %>%
-      dplyr::filter(!!rlang::sym(classField) == unassignedValue)
+      dplyr::filter(!(!!rlang::sym(classField) %in% unassignedValues))
 
     if (nrow(toUpdate) == 0) {
       next
     }
 
-    maxValue <- y[[classField]][1]
-    print(paste0('Reassigning ', nrow(toUpdate)), ' cells from ', unassignedValue, ' to ', maxValue)
+    maxValue <- as.character(y[[classField]][1])
+    sel <- (!is.na(seuratObj@meta.data[[groupField]]) & seuratObj@meta.data[[groupField]] == clusterName) & (!is.na(seuratObj@meta.data[[classField]]) & seuratObj@meta.data[[classField]] %in% unassignedValues)
+    if (any(is.na(sel))) {
+      stop('NA values in the cell selector')
+    }
 
-    seuratObj@meta.data[[targetField]][seuratObj@meta.data[[groupField]] == clusterName & seuratObj@meta.data[[classField]] == unassignedValue] <- maxValue
+    print(paste0('Reassigning ', sum(sel), ' cells from [', paste0(unassignedValues, collapse = ','), '] to ', maxValue))
+    
+    seuratObj@meta.data[[targetField]][sel] <- maxValue
   }
+  
+  print('After:')
+  print(table(seuratObj@meta.data[[classField]], seuratObj@meta.data[[targetField]]))
+
+  return(seuratObj)
 }
