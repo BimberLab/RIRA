@@ -148,4 +148,15 @@ test_that("FilterDisallowedClasses works as expected", {
   expect_equal(21, sum(seuratObj$DisallowedUCellCombinations == 'Erythrocyte.RM_UCell', na.rm = T), tolerance = 1)
   expect_equal(55, sum(seuratObj$DisallowedUCellCombinations == 'NK.RM_UCell', na.rm = T), tolerance = 3)
   expect_equal(57, sum(seuratObj$DisallowedUCellCombinations == 'Platelet.RM_UCell', na.rm = T), tolerance = 1)
+
+  seuratObj <- RecoverUnassignedCells(seuratObj)
+  print(table(seuratObj$RIRA_TNK_v2.cellclass.recovered))
+
+  # These should be unchanged from above:
+  expect_equal(256, sum(seuratObj$RIRA_Immune_v2.cellclass == 'Bcell', na.rm = T), tolerance = 1)
+  expect_equal(577, sum(seuratObj$RIRA_Immune_v2.cellclass == 'Myeloid', na.rm = T))
+  expect_equal(1340, sum(seuratObj$RIRA_Immune_v2.cellclass == 'T_NK', na.rm = T))
+
+  # TODO: new classes
+
 })

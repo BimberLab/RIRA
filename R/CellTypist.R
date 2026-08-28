@@ -671,3 +671,55 @@ FilterDisallowedClasses <- function(seuratObj, sourceField = 'RIRA_Immune_v2.maj
 
   return(seuratObj)
 }
+
+#' @title RecoverUnassignedCells
+#'
+#' @description This step recovers unassigned cells by inspecting each cluster and assigning Unassigned cells to the match the cluster majority
+#' @param seuratObj The seurat object
+#' @param classField The name of the field holding the cell type call
+#' @param groupField The field on which to group, such as the cluster ID
+#' @param targetField The field that will store the result
+#' @param unassignedValue The string value that denotes Unassigned cells
+#' @param minClusterProp If at least this proportion of the group is one class, unassigned cells will be assigned as this class
+#' @return The updated seurat object
+#' @export
+RecoverUnassignedCells <- function(seuratObj, classField = 'RIRA_Immune_v2.cellclass', groupField = 'ClusterNames_0.2', targetField = 'RIRA_Immune_v2.cellclass.recovered', unassignedValue = 'Unassigned', minClusterProp = 0.6) {
+  if (!classField %in% (seuratObj@meta.data)) {
+    stop(paste0('Missing field: ', classField, groupField))
+  }
+
+  seuratObj[[targetField]] <- seuratObj[[classField]]
+
+  x <- seuratObj@meta.data %>%
+    dplyr::group_by(dplyr::across(dplyr::all_of(groupField))) %>%
+    dplyr::mutate(TotalCellsForGroup = n()) %>%
+    dplyr::group_by(dplyr::across(dplyr::all_of(groupField, classField))) %>%
+    dplyr::summarize(TotalCells = dplyr::n()) %>%
+    as.data.frame() %>%
+    dplyr::mutate(Prop = TotalCells / TotalCellsForGroup)
+
+  for (clusterName in unique(x[[groupField]])) {
+    y <- x %>%
+      dplyr::filter(!!rlang::sym(groupField) == clusterName) %>%
+      dplyr::filter(!!rlang::sym(classField) != unassignedValue) %>%
+      dplyr::filter(Prop >= minClusterProp) %>%
+      dplyr::arrange(-Prop)
+
+    if (nrow(y) == 0) {
+      next
+    }
+
+    toUpdate <- x %>%
+      dplyr::filter(!!rlang::sym(groupField) == clusterName) %>%
+      dplyr::filter(!!rlang::sym(classField) == unassignedValue)
+
+    if (nrow(toUpdate) == 0) {
+      next
+    }
+
+    maxValue <- y[[classField]][1]
+    print(paste0('Reassigning ', nrow(toUpdate)), ' cells from ', unassignedValue, ' to ', maxValue)
+
+    seuratObj@meta.data[[targetField]][seuratObj@meta.data[[groupField]] == clusterName & seuratObj@meta.data[[classField]] == unassignedValue] <- maxValue
+  }
+}
