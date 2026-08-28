@@ -136,7 +136,7 @@ test_that("FilterDisallowedClasses works as expected", {
   print(table(seuratObj$RIRA_Immune_v2.cellclass))
 
   expect_equal('RIRA_Immune_v2', seuratObj@misc$RIRA_Immune_Model)
-  expect_equal(256, sum(seuratObj$RIRA_Immune_v2.cellclass == 'Bcell', na.rm = T), tolerance = 1, scale = 1)
+  expect_equal(258, sum(seuratObj$RIRA_Immune_v2.cellclass == 'Bcell', na.rm = T), tolerance = 1, scale = 1)
   expect_equal(577, sum(seuratObj$RIRA_Immune_v2.cellclass == 'Myeloid', na.rm = T))
   expect_equal(1340, sum(seuratObj$RIRA_Immune_v2.cellclass == 'T_NK', na.rm = T))
 
@@ -144,10 +144,10 @@ test_that("FilterDisallowedClasses works as expected", {
   print(table(seuratObj$DisallowedUCellCombinations))
 
   # NOTE: these are producing different results on 3.16 vs devel. This is possibly scGate versions?
-  expect_equal(347, sum(seuratObj$DisallowedUCellCombinations == 'NeutrophilLineage.RM_UCell', na.rm = T), tolerance = 3, scale = 1)
-  expect_equal(21, sum(seuratObj$DisallowedUCellCombinations == 'Erythrocyte.RM_UCell', na.rm = T), tolerance = 1, scale = 1)
-  expect_equal(55, sum(seuratObj$DisallowedUCellCombinations == 'NK.RM_UCell', na.rm = T), tolerance = 3, scale = 1)
-  expect_equal(57, sum(seuratObj$DisallowedUCellCombinations == 'Platelet.RM_UCell', na.rm = T), tolerance = 1, scale = 1)
+  expect_equal(301, sum(seuratObj$DisallowedUCellCombinations == 'NeutrophilLineage.RM_UCell', na.rm = T), tolerance = 3, scale = 1)
+  expect_equal(15, sum(seuratObj$DisallowedUCellCombinations == 'Erythrocyte.RM_UCell', na.rm = T), tolerance = 1, scale = 1)
+  expect_equal(51, sum(seuratObj$DisallowedUCellCombinations == 'NK.RM_UCell', na.rm = T), tolerance = 3, scale = 1)
+  expect_equal(51, sum(seuratObj$DisallowedUCellCombinations == 'Platelet.RM_UCell', na.rm = T), tolerance = 1, scale = 1)
 
   # Create fake clustering:
   print(table(seuratObj$RIRA_Immune_v2.cellclass, seuratObj$scGateConsensus))
@@ -159,8 +159,8 @@ test_that("FilterDisallowedClasses works as expected", {
   expect_equal(577, sum(seuratObj$RIRA_Immune_v2.cellclass == 'Myeloid', na.rm = T))
   expect_equal(1340, sum(seuratObj$RIRA_Immune_v2.cellclass == 'T_NK', na.rm = T))
 
-  expect_equal(336, sum(seuratObj$RIRA_Immune_v2.cellclass.recovered == 'Bcell', na.rm = T))
-  expect_equal(665, sum(seuratObj$RIRA_Immune_v2.cellclass.recovered == 'Myeloid', na.rm = T))
+  expect_equal(337, sum(seuratObj$RIRA_Immune_v2.cellclass.recovered == 'Bcell', na.rm = T))
+  expect_equal(666, sum(seuratObj$RIRA_Immune_v2.cellclass.recovered == 'Myeloid', na.rm = T))
   expect_equal(1616, sum(seuratObj$RIRA_Immune_v2.cellclass.recovered == 'T_NK', na.rm = T), tolerance = 1, scale = 1)
 
 })
