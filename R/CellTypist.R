@@ -739,5 +739,13 @@ RecoverUnassignedCells <- function(seuratObj, classField = 'RIRA_Immune_v2.cellc
   print('After:')
   print(table(seuratObj@meta.data[[classField]], seuratObj@meta.data[[targetField]]))
 
+  # One more simple field:
+  seuratObj@meta.data[['RIRA_Immune_v2.cellclass.threeclass']] <- dplyr::case_when(
+    is.na(seuratObj@meta.data[[targetField]]) ~ 'NotTorB',
+    seuratObj@meta.data[[targetField]] == 'T_NK' ~ 'T_NK',
+    seuratObj@meta.data[[targetField]] == 'Bcell' ~ 'Bcell',
+    .default = 'NotTorB'
+  )
+
   return(seuratObj)
 }
