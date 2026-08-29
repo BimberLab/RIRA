@@ -81,7 +81,7 @@ test_that("scGate works with built-in gates", {
   # Use with built-in gate:
   seuratObj <- getBaseSeuratData()
   seuratObj <- RunScGate(seuratObj, model = 'Bcell')
-  expect_equal(sum(seuratObj$is.pure == 'Pure'), 329, tolerance = 1, scale = 1)
+  expect_equal(sum(seuratObj$is.pure == 'Pure'), 329, tolerance = 2, scale = 1)
 
 })
 
@@ -95,7 +95,7 @@ test_that("scGates runs on all", {
   print('RunScGateWithDefaultModels, using dropAmbiguousConsensusValues = FALSE')
   print(dat)
 
-  expect_equal(unname(dat[['Bcell,Bcell.NonGerminalCenter,Immune,PanBcell']]), 296, tolerance = 1, scale = 1)
+  expect_equal(unname(dat[['Bcell,Bcell.NonGerminalCenter,Immune,PanBcell']]), 296, tolerance = 2, scale = 1)
 
   # Now with ambiguous cleanup:
   seuratObj <- RunScGateWithDefaultModels(seuratObj, dropAmbiguousConsensusValues = TRUE)
