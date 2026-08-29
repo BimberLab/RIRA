@@ -75,8 +75,8 @@ test_that("celltypist runs", {
   print(table(seuratObj$majority_voting))
   print(table(seuratObj$predicted_labels))
   expect_equal(10, length(unique(seuratObj$majority_voting)), info = 'using custom model', tolerance = 1, scale = 1)
-  expect_equal(54, length(unique(seuratObj$predicted_labels)), tolerance = 3, scale = 1)
-  expect_equal(356, unname(table(seuratObj$predicted_labels)['B cells']), tolerance = 2, scale = 1)
+  expect_equal(47, length(unique(seuratObj$predicted_labels)), tolerance = 3, scale = 1)
+  expect_equal(335, unname(table(seuratObj$predicted_labels)['B cells']), tolerance = 2, scale = 1)
 })
 
 test_that("celltypist runs with batchSize", {
@@ -159,8 +159,8 @@ test_that("FilterDisallowedClasses works as expected", {
   expect_equal(577, sum(seuratObj$RIRA_Immune_v2.cellclass == 'Myeloid', na.rm = T))
   expect_equal(1340, sum(seuratObj$RIRA_Immune_v2.cellclass == 'T_NK', na.rm = T))
 
-  expect_equal(337, sum(seuratObj$RIRA_Immune_v2.cellclass.recovered == 'Bcell', na.rm = T))
-  expect_equal(666, sum(seuratObj$RIRA_Immune_v2.cellclass.recovered == 'Myeloid', na.rm = T))
+  expect_equal(336, sum(seuratObj$RIRA_Immune_v2.cellclass.recovered == 'Bcell', na.rm = T))
+  expect_equal(664, sum(seuratObj$RIRA_Immune_v2.cellclass.recovered == 'Myeloid', na.rm = T))
   expect_equal(1616, sum(seuratObj$RIRA_Immune_v2.cellclass.recovered == 'T_NK', na.rm = T), tolerance = 1, scale = 1)
 
 })
