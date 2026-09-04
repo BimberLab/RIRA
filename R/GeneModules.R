@@ -35,7 +35,8 @@ CalculateUCellScores <- function(seuratObj, forceRecalculate = FALSE, seed = Get
     MHCII = GetGeneSet('MHC-II'),
     TCellMemory = GetGeneSet('TCellMemoryS100'),
     InflMyeloid = GetGeneSet('InflMyeloid'),
-    Perforin = 'PRF1'
+    Perforin = 'PRF1',
+    EC_Ribosomal = GetGeneSet('EC_Ribosomal')
   )
 
   if (dropAllExistingUcells) {
