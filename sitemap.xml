@@ -31,6 +31,7 @@
 <url><loc>https://bimberlab.github.io/RIRA/reference/PredictCellTypeProbability.html</loc></url>
 <url><loc>https://bimberlab.github.io/RIRA/reference/PredictTcellActivation.html</loc></url>
 <url><loc>https://bimberlab.github.io/RIRA/reference/PredictTcellActivationUsingCustomModel.html</loc></url>
+<url><loc>https://bimberlab.github.io/RIRA/reference/RecoverUnassignedCells.html</loc></url>
 <url><loc>https://bimberlab.github.io/RIRA/reference/RegisterGeneSet.html</loc></url>
 <url><loc>https://bimberlab.github.io/RIRA/reference/RunCellTypist.html</loc></url>
 <url><loc>https://bimberlab.github.io/RIRA/reference/RunScGate.html</loc></url>
