@@ -402,7 +402,7 @@ TrainCellTypist <- function(seuratObj, labelField, modelFile, minCellsPerClass =
 
   typistCommand <- c(
     "import celltypist;",
-    paste0("new_model = celltypist.train('", trainDataMatrix, "', labels = '", labelFile, "', use_SGD = False, transpose_input = True, genes = '", geneFile, "', solver = 'saga', feature_selection = True, top_genes = 300);"),
+    paste0("new_model = celltypist.train('", trainDataMatrix, "', labels = '", labelFile, "', random_state = ", GetSeed(), ", use_SGD = False, transpose_input = True, genes = '", geneFile, "', solver = 'saga', feature_selection = True, top_genes = 300);"),
     paste0("new_model.write('", modelFile, "');")
   )
 
