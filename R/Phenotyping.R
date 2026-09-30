@@ -502,6 +502,8 @@ RegisterGeneSet('HumanVariableGenes_Exclusion', unique(c(
   GetGeneSet('HumanHLAGenes')
 )))
 
+RegisterGeneSet('BMT2_ADORA2B_ExclusionList', c('LOC114673210','RBPMS','BMT2','ADORA2B','LOC106998573','PDE8B','SCGB3A1','VMO1','SCGB1A1','LOC114672793','LYZ','CFD','MAMU-DRB5','G0S2','APOC1','SCGB3A2','CSGALNACT1','CST6'))
+
 RegisterGeneSet("Glycolysis", c("ALDOA", "BPGM", "ENO1", "ENO2", "GAPDH", "HK1", "HK2", "HKDC1", "PFKL", "PGAM1", "PGAM2", "PGK1", "PKLR", "PKM", "TPI1"))
 RegisterGeneSet('Interferon_Response', c('IFI6','IFI27','MX1','ISG15','STAT1','LOC114672189','MX2','IFIT3'))
 RegisterGeneSet('Interferon_Response_IFI6_correlated', c('IFI6', 'ISG15', 'MX1', 'RNF213', 'BST2', 'DDX60', 'MX2', 'LOC100427967', 'STAT1', 'OAS2', 'DHX58', 'LY6E-1', 'IFIT3', 'SP100', 'EPSTI1'))
