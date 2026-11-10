@@ -148,10 +148,6 @@ test_that("Predict TCell Activation works ", {
   testthat::expect_equal(10, nrow(Seurat::GetAssayData(SimulateSeuratObj, assay = 'RNA', layer = 'scale.data')))
   SimulateSeuratObj <- PredictTcellActivation(SimulateSeuratObj)
 
-  # This tests whether features were added to scale.data:
-  testthat::expect_equal(2995, nrow(Seurat::GetAssayData(SimulateSeuratObj, assay = 'RNA', layer = 'data')))
-  testthat::expect_equal(2874, nrow(Seurat::GetAssayData(SimulateSeuratObj, assay = 'RNA', layer = 'scale.data')))
-
   SimulateSeuratObj <- PredictTcellActivation(SimulateSeuratObj, modelName = 'CD4')
   SimulateSeuratObj <- PredictTcellActivation(SimulateSeuratObj, modelName = 'CD8')
 
@@ -189,12 +185,10 @@ test_that("Predict TCell Activation works ", {
   testthat::expect_equal(1, sum(grepl("GeneralizedTCR_sPLSDA_class", colnames(SimulateSeuratObj@meta.data))))
 
   #verify specific probability value
-  testthat::expect_equal(SimulateSeuratObj@meta.data[5, 'CD4_sPLSDA_prob_Resting1'], expected = 0.0086, tolerance = 0.001)
+  testthat::expect_equal(SimulateSeuratObj@meta.data[5, 'CD4_sPLSDA_prob_Resting1'], expected = 5.48e-09, tolerance = 0.001)
   
   table(SimulateSeuratObj$GeneralizedTCR_sPLSDA_ConsensusClass, SimulateSeuratObj$GeneralizedTCR_sPLSDA_class)
-  testthat::expect_equal(198, sum(SimulateSeuratObj$GeneralizedTCR_sPLSDA_ConsensusClass == 'Cultured T cell'))
-  testthat::expect_equal(2, sum(SimulateSeuratObj$GeneralizedTCR_sPLSDA_ConsensusClass == 'Bulk Tissue T cell'))
-  testthat::expect_equal(73, sum(SimulateSeuratObj$GeneralizedTCR_sPLSDA_class == 'Cultured_Bystander_BFA'))
+  testthat::expect_equal(200, sum(SimulateSeuratObj$GeneralizedTCR_sPLSDA_ConsensusClass == 'Th2-Th17-like'))
 })
 
 

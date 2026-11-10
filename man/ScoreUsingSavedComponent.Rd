@@ -9,7 +9,8 @@ ScoreUsingSavedComponent(
   componentOrName,
   fieldName,
   assayName = "RNA",
-  layer = "data"
+  layer = "data",
+  referenceForScaling = NULL
 )
 }
 \arguments{
@@ -22,6 +23,8 @@ ScoreUsingSavedComponent(
 \item{assayName}{The assay to use}
 
 \item{layer}{The layer to use}
+
+\item{referenceForScaling}{An optional dataframe to use for scaling. This must contain the columns row.means and row.sd, and the rownames must match any required genes}
 }
 \description{
 Scores a seurat object using the gene weights from a saved component

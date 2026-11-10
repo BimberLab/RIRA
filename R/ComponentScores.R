@@ -17,9 +17,10 @@
 #' @param fieldName The name of the field in which to save the resulting scores
 #' @param assayName The assay to use
 #' @param layer The layer to use
+#' @param referenceForScaling An optional dataframe to use for scaling. This must contain the columns row.means and row.sd, and the rownames must match any required genes
 #'
 #' @export
-ScoreUsingSavedComponent <- function(seuratObj, componentOrName, fieldName, assayName = 'RNA', layer = 'data') {
+ScoreUsingSavedComponent <- function(seuratObj, componentOrName, fieldName, assayName = 'RNA', layer = 'data', referenceForScaling = NULL) {
   if (is.data.frame(componentOrName)) {
     savedComponent <- componentOrName
   } else {
@@ -30,12 +31,29 @@ ScoreUsingSavedComponent <- function(seuratObj, componentOrName, fieldName, assa
   names(geneWeights) <- savedComponent$feature
 
   ad <- Seurat::GetAssayData(seuratObj, assay = assayName, layer = layer)
-  toDrop <- names(geneWeights)[!names(geneWeights) %in% rownames(ad)]
+  if (!is.null(referenceForScaling)) {
+    if (!all(names(geneWeights) %in% rownames(referenceForScaling))) {
+      missingGenes <- names(geneWeights)[!names(geneWeights) %in% rownames(referenceForScaling)]
+      stop(paste0('The following genes are missing from referenceForScaling: ', paste0(missingGenes, collapse = ',')))
+    }
+
+    ref_means <- referenceForScaling[names(geneWeights), 'row.means']
+    ref_sds <- referenceForScaling[names(geneWeights), 'row.sd']
+
+    # 4. Manually scale the QUERY data matrix using the reference metrics
+    # Formula: (Query - Ref_Mean) / Ref_SD
+    print('Scaling data using custom values')
+    scaled_query_matrix <- t(apply(as.matrix(ad[names(geneWeights), ]), 2, function(x) (x - ref_means) / ref_sds))
+    scaled_query_matrix <- t(scaled_query_matrix) # Keep genes as rows, cells as columns
+    scaled_query_matrix[is.nan(scaled_query_matrix) | is.infinite(scaled_query_matrix)] <- 0
+    ad <- Seurat::as.sparse(scaled_query_matrix)
+  }
 
   # Perform the check first for scale.data, since we can add missing genes:
-  if (length(toDrop) > 0 && layer == 'scale.data') {
+  missingGenes <- names(geneWeights)[!names(geneWeights) %in% rownames(ad)]
+  if (length(missingGenes) > 0 && layer == 'scale.data') {
     dataLayer <- Seurat::GetAssayData(seuratObj, assay = assayName, layer = 'data')
-    toScale <- toDrop[toDrop %in% rownames(dataLayer)]
+    toScale <- missingGenes[missingGenes %in% rownames(dataLayer)]
     if (length(toScale) > 0) {
       print(paste0('The following ', length(toScale), ' genes are missing from scale.data and will be added now: ', paste0(toScale, collapse = ',')))
       scaled <- Seurat::ScaleData(
