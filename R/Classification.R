@@ -573,9 +573,10 @@ InterpretModels <- function(output_dir= "./classifiers", plot_type = "ratio"){
 #' @param seuratObj The Seurat Object to be updated
 #' @param modelName The model to use, either GeneralizedTCR, CD4, or CD8
 #' @param combineClasses Most models were trained using finer grained classes than is generally needed. The default (combinedClasses=TRUE), will merge some similar classes. Set this to false to turn off this behavior.
+#' @param scaleUsingReferenceData If true, the incoming data will be scaled using the published reference data fro mthe TAR-seq paper.
 #' @return A Seurat object with the sPLSDA scores and predicted probabilities added to the metadata
 #' @export
-PredictTcellActivation <- function(seuratObj, modelName = 'GeneralizedTCR', combineClasses = TRUE) {
+PredictTcellActivation <- function(seuratObj, modelName = 'GeneralizedTCR', combineClasses = TRUE, scaleUsingReferenceData = TRUE) {
   modelFiles <- list(
     CD8 = "models/ActivatedCD8TCell4ClassModel_v1.rds",
     CD4 = "models/ActivatedCD4TCell4ClassModel_v1.rds",
@@ -600,12 +601,18 @@ PredictTcellActivation <- function(seuratObj, modelName = 'GeneralizedTCR', comb
     }
   }
 
-  if (needsScoring) {
+  if (scaleUsingReferenceData || needsScoring) {
     componentPrefix <- paste0(modelName, "_Activation_sPLSDA_component")
     for (i in seq_len(nComponents)){
       componentName <- paste0(componentPrefix, i)
       fieldName <- paste0(modelName, "_sPLSDA_Score_", i)
-      seuratObj <- ScoreUsingSavedComponent(seuratObj, componentOrName = componentName, fieldName = fieldName, layer = "scale.data")
+
+      ref_df <- NULL
+      if (scaleUsingReferenceData) {
+        ref_df <- read.readRDS(system.file("extdata/TAR-seq-ScalingData.rds"))
+      }
+
+      seuratObj <- ScoreUsingSavedComponent(seuratObj, componentOrName = componentName, fieldName = fieldName, layer = "data", referenceForScaling = ref_df)
     }
   }
 

@@ -58,7 +58,6 @@ Remotes:
     carmonalab/UCell,
     carmonalab/scGate,
     mixOmicsTeam/mixOmics
-RoxygenNote: 7.3.3
 Collate: 
     'Utils.R'
     'CellTypist.R'
@@ -68,3 +67,4 @@ Collate:
     'GeneModules.R'
     'scGate.R'
 VignetteBuilder: knitr
+Config/roxygen2/version: 8.1.0

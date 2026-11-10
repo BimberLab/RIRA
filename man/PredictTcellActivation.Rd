@@ -7,7 +7,8 @@
 PredictTcellActivation(
   seuratObj,
   modelName = "GeneralizedTCR",
-  combineClasses = TRUE
+  combineClasses = TRUE,
+  scaleUsingReferenceData = TRUE
 )
 }
 \arguments{
@@ -16,6 +17,8 @@ PredictTcellActivation(
 \item{modelName}{The model to use, either GeneralizedTCR, CD4, or CD8}
 
 \item{combineClasses}{Most models were trained using finer grained classes than is generally needed. The default (combinedClasses=TRUE), will merge some similar classes. Set this to false to turn off this behavior.}
+
+\item{scaleUsingReferenceData}{If true, the incoming data will be scaled using the published reference data fro mthe TAR-seq paper.}
 }
 \value{
 A Seurat object with the sPLSDA scores and predicted probabilities added to the metadata
