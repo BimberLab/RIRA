@@ -37,11 +37,12 @@ ScoreUsingSavedComponent <- function(seuratObj, componentOrName, fieldName, assa
       stop(paste0('The following genes are missing from referenceForScaling: ', paste0(missingGenes, collapse = ',')))
     }
 
-    ref_means <- referenceForScaling$row.means[names(geneWeights)]
-    ref_sds <- referenceForScaling$row.sd[names(geneWeights)]
+    ref_means <- referenceForScaling[names(geneWeights), 'row.means']
+    ref_sds <- referenceForScaling[names(geneWeights), 'row.sd']
 
     # 4. Manually scale the QUERY data matrix using the reference metrics
     # Formula: (Query - Ref_Mean) / Ref_SD
+    print('Scaling data using custom values')
     scaled_query_matrix <- t(apply(as.matrix(ad[names(geneWeights), ]), 2, function(x) (x - ref_means) / ref_sds))
     scaled_query_matrix <- t(scaled_query_matrix) # Keep genes as rows, cells as columns
     scaled_query_matrix[is.nan(scaled_query_matrix) | is.infinite(scaled_query_matrix)] <- 0

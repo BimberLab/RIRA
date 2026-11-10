@@ -609,7 +609,7 @@ PredictTcellActivation <- function(seuratObj, modelName = 'GeneralizedTCR', comb
 
       ref_df <- NULL
       if (scaleUsingReferenceData) {
-        ref_df <- readRDS(system.file("extdata/TAR-seq-ScalingData.rds"))
+        ref_df <- readRDS(system.file("extdata/TAR-seq-ScalingData.rds", package = "RIRA"))
       }
 
       seuratObj <- ScoreUsingSavedComponent(seuratObj, componentOrName = componentName, fieldName = fieldName, layer = "data", referenceForScaling = ref_df)
