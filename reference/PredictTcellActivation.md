@@ -8,7 +8,8 @@ Predicts T cell activation using a trained model
 PredictTcellActivation(
   seuratObj,
   modelName = "GeneralizedTCR",
-  combineClasses = TRUE
+  combineClasses = TRUE,
+  scaleUsingReferenceData = TRUE
 )
 ```
 
@@ -27,6 +28,11 @@ PredictTcellActivation(
   Most models were trained using finer grained classes than is generally
   needed. The default (combinedClasses=TRUE), will merge some similar
   classes. Set this to false to turn off this behavior.
+
+- scaleUsingReferenceData:
+
+  If true, the incoming data will be scaled using the published
+  reference data fro mthe TAR-seq paper.
 
 ## Value
 

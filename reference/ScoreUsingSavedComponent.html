@@ -48,7 +48,8 @@
 <span>  <span class="va">componentOrName</span>,</span>
 <span>  <span class="va">fieldName</span>,</span>
 <span>  assayName <span class="op">=</span> <span class="st">"RNA"</span>,</span>
-<span>  layer <span class="op">=</span> <span class="st">"data"</span></span>
+<span>  layer <span class="op">=</span> <span class="st">"data"</span>,</span>
+<span>  referenceForScaling <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -74,6 +75,10 @@
 
 <dt id="arg-layer">layer<a class="anchor" aria-label="anchor" href="#arg-layer"></a></dt>
 <dd><p>The layer to use</p></dd>
+
+
+<dt id="arg-referenceforscaling">referenceForScaling<a class="anchor" aria-label="anchor" href="#arg-referenceforscaling"></a></dt>
+<dd><p>An optional dataframe to use for scaling. This must contain the columns row.means and row.sd, and the rownames must match any required genes</p></dd>
 
 </dl></div>
 

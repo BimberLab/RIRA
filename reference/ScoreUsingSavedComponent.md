@@ -10,7 +10,8 @@ ScoreUsingSavedComponent(
   componentOrName,
   fieldName,
   assayName = "RNA",
-  layer = "data"
+  layer = "data",
+  referenceForScaling = NULL
 )
 ```
 
@@ -36,3 +37,9 @@ ScoreUsingSavedComponent(
 - layer:
 
   The layer to use
+
+- referenceForScaling:
+
+  An optional dataframe to use for scaling. This must contain the
+  columns row.means and row.sd, and the rownames must match any required
+  genes

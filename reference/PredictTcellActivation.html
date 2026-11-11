@@ -46,7 +46,8 @@
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">PredictTcellActivation</span><span class="op">(</span></span>
 <span>  <span class="va">seuratObj</span>,</span>
 <span>  modelName <span class="op">=</span> <span class="st">"GeneralizedTCR"</span>,</span>
-<span>  combineClasses <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  combineClasses <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  scaleUsingReferenceData <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -64,6 +65,10 @@
 
 <dt id="arg-combineclasses">combineClasses<a class="anchor" aria-label="anchor" href="#arg-combineclasses"></a></dt>
 <dd><p>Most models were trained using finer grained classes than is generally needed. The default (combinedClasses=TRUE), will merge some similar classes. Set this to false to turn off this behavior.</p></dd>
+
+
+<dt id="arg-scaleusingreferencedata">scaleUsingReferenceData<a class="anchor" aria-label="anchor" href="#arg-scaleusingreferencedata"></a></dt>
+<dd><p>If true, the incoming data will be scaled using the published reference data fro mthe TAR-seq paper.</p></dd>
 
 </dl></div>
     <div class="section level2">
